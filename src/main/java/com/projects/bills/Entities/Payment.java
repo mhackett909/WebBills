@@ -8,7 +8,7 @@ import java.sql.Date;
 public class Payment {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer PaymentID;
+	private Integer paymentId;
 	private Date date;
 	private BigDecimal amount;
 	private String type;
@@ -16,9 +16,8 @@ public class Payment {
 	private String notes;
 	
 	@ManyToOne
-	@JoinColumn(name="id")
+	@JoinColumn(name="entryID")
 	private Entry entry;
-	
 	public Date getDate() { return date; }
 	public void setDate(Date date) { this.date = date; }
 	public BigDecimal getAmount() {	return amount; }
@@ -31,9 +30,10 @@ public class Payment {
 	public void setNotes(String notes) { this.notes = notes; }
 	public Entry getEntry() { return entry;	}
 	public void setEntry(Entry entry) {	this.entry = entry; }
+	public Integer getId() { return paymentId; }
 	
 	@Override
 	public String toString() {
-		return "Payment{" + "id=" + PaymentID + ", entryID=" + entry.getId() + ", date=" + date + ", amount=" + amount + ", type='" + type + '\'' + ", medium='" + medium + '\'' + ", notes='" + notes + '\'' + '}';
+		return "Payment{" + "id=" + paymentId + ", entryID=" + entry.getId() + ", date=" + date + ", amount=" + amount + ", type='" + type + '\'' + ", medium='" + medium + '\'' + ", notes='" + notes + '\'' + '}';
 	}
 }

@@ -1,9 +1,11 @@
 package com.projects.bills.Services;
 import com.projects.bills.Entities.Entry;
+import com.projects.bills.Entities.EntryDTO;
 import com.projects.bills.Repositories.EntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -14,6 +16,21 @@ public class EntryService {
 	public EntryService(EntryRepository entryRepository) {
 		this.entryRepository = entryRepository;
 	}
-	public List<Entry> getEntries() { return entryRepository.findAll(); }
+	//In reality, will be getting entries by some parameters (id, date range, bill name, isDue, isOverpaid, isPaid, amount range)
+	public List<EntryDTO> getEntries() {
+		List<Entry> entries = entryRepository.findAll();
+		ArrayList<EntryDTO> entryList = new ArrayList<>();
+		for (Entry entry : entries) {
+			EntryDTO entryDTO = new EntryDTO();
+			entryDTO.setId(entry.getId());
+			entryDTO.setName(entry.getBill().getName());
+			entryDTO.setDate(entry.getDate());
+			entryDTO.setAmount(entry.getAmount());
+			entryDTO.setStatus(entry.getStatus());
+			entryDTO.setServices(entry.getServices());
+			entryList.add(entryDTO);
+		}
+		return entryList;
+	}
 	public void saveEntry(Entry entry) { entryRepository.save(entry); }
 }

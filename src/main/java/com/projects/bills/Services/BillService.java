@@ -17,6 +17,7 @@ public class BillService {
 	public BillService(BillRepository billRepository) {
 		this.billRepository = billRepository;
 	}
+	//Need to take in a boolean for inactive billers
 	public List<BillDTO> getBills() {
 		List<Bill> bills = billRepository.findAll();
 		ArrayList<BillDTO> billList = new ArrayList<>();

@@ -10,7 +10,7 @@ import java.util.List;
 public class Entry {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer id;
+	private Integer entryId;
 	private Date date;
 	private BigDecimal amount;
 	private Integer status;
@@ -39,11 +39,11 @@ public class Entry {
 	public void setBill(Bill bill) { this.bill = bill; }
 
 	public Integer getId() {
-		return id;
+		return entryId;
 	}
 	
 	@Override
 	public String toString() {
-		return "Entry{" + "id=" + id + ", date=" + date + ", amount=" + amount + ", status=" + status + ", services='" + services + '\'' + '}';
+		return "Entry{" + "id=" + entryId + ", date=" + date + ", amount=" + amount + ", status=" + status + ", services='" + services + '\'' + '}';
 	}
 }

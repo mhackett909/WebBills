@@ -9,4 +9,5 @@ import org.springframework.test.context.ContextConfiguration;
 @WebMvcTest
 public class JUnitTestBillController {
 	//Test for new bill
+	//Test for del bill
 }

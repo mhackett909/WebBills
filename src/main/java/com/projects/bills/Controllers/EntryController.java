@@ -1,13 +1,17 @@
 package com.projects.bills.Controllers;
 
 import com.projects.bills.Entities.Entry;
+import com.projects.bills.Entities.EntryDTO;
 import com.projects.bills.Services.EntryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
+
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 public class EntryController {
 	private final EntryService entryService;
 	
@@ -15,9 +19,8 @@ public class EntryController {
 	public EntryController(EntryService entryService) {
 		this.entryService = entryService;
 	}
-	
 	@GetMapping("/api/v1/entries")
-	public List<Entry> getEntries() { return entryService.getEntries(); }
+	public List<EntryDTO> getEntries() { return entryService.getEntries(); }
 	/**
 	@GetMapping("api/v1/new")
 	public void add() {
