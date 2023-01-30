@@ -18,7 +18,8 @@ public class EntryService {
 	}
 	//In reality, will be getting entries by some parameters (id, date range, bill name, isDue, isOverpaid, isPaid, amount range)
 	public List<EntryDTO> getEntries() {
-		List<Entry> entries = entryRepository.findAll();
+		//List<Entry> entries = entryRepository.findAll();
+		List<Entry> entries = entryRepository.findEntryLast90Days();
 		ArrayList<EntryDTO> entryList = new ArrayList<>();
 		for (Entry entry : entries) {
 			EntryDTO entryDTO = new EntryDTO();
