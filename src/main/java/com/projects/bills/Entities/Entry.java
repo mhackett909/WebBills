@@ -7,8 +7,10 @@ import java.sql.Date;
 import java.util.List;
 
 @Entity
+@Table(name = "entry")
 public class Entry {
 	@Id
+	@Column(name = "id")
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer entryId;
 	private Date date;

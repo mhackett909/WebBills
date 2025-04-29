@@ -5,8 +5,10 @@ import java.math.BigDecimal;
 import java.sql.Date;
 
 @Entity
+@Table(name = "payment")
 public class Payment {
 	@Id
+	@Column(name = "id")
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer paymentId;
 	private Date date;

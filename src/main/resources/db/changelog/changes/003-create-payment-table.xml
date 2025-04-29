@@ -1,0 +1,43 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="003" author="mph">
+        <createTable tableName="payment">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="entryID" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="decimal(7,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="medium" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notes" type="varchar(300)"/>
+        </createTable>
+
+        <createIndex tableName="payment" indexName="idx_payment_entryID">
+            <column name="entryID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint
+                baseTableName="payment"
+                baseColumnNames="entryID"
+                constraintName="payment_ibfk_1"
+                referencedTableName="entry"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

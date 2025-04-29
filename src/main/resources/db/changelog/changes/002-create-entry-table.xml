@@ -1,0 +1,41 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="002" author="mph">
+        <createTable tableName="entry">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(75)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="decimal(7,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="services" type="varchar(300)"/>
+        </createTable>
+
+        <createIndex tableName="entry" indexName="idx_entry_name">
+            <column name="name"/>
+        </createIndex>
+
+        <addForeignKeyConstraint
+                baseTableName="entry"
+                baseColumnNames="name"
+                constraintName="entry_ibfk_1"
+                referencedTableName="bill"
+                referencedColumnNames="name"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

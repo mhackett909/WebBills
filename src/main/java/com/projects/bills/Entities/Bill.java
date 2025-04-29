@@ -1,12 +1,10 @@
 package com.projects.bills.Entities;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
+import jakarta.persistence.*;
 
 import java.util.List;
 
 @Entity
+@Table(name = "bill")
 public class Bill {
 	@Id
 	private String name;
