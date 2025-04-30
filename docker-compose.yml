@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql-bills
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: bills
+      MYSQL_USER: bills
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - bills-data:/var/lib/mysql
+    networks:
+      - bills-net
+
+  spring-app:
+    build: .
+    container_name: bills-app
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:mysql://mysql-bills:3306/bills
+    networks:
+      - bills-net
+
+volumes:
+  bills-data:
+
+networks:
+  bills-net:
+    name: bills-net
+    driver: bridge
