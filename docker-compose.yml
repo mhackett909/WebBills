@@ -25,6 +25,7 @@ services:
       - "8080:8080"
     environment:
       DB_URL: jdbc:mysql://mysql-bills:3306/bills
+    mem_limit: 512m
     networks:
       - bills-net
 
