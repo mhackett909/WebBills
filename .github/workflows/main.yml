@@ -1,0 +1,56 @@
+name: Auto Deploy Spring Boot to Dev
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Spring Boot App (JAR)
+        run: ./mvnw clean package -DskipTests
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Docker Login to ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
+            docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_BACKEND }}:latest
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
+      - name: Render ECS task definition
+        run: |
+          envsubst < task-def-template.json > task-def-backend.json
+      - name: Register New Task Definition and Deploy to ECS
+        run: |
+          NEW_REVISION=$(aws ecs register-task-definition \
+            --cli-input-json file://task-def-backend.json \
+            --query 'taskDefinition.revision' --output text)
+          aws ecs update-service \
+            --cluster bills-dev-cluster \
+            --service webbills-svc-service-1f7nbx06 \
+            --task-definition webbills-svc:$NEW_REVISION \
+            --force-new-deployment
