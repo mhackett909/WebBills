@@ -35,7 +35,9 @@ public class BillController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid bill name");
 		if (billTransfer.getStatus() == null)
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid bill status");
-		Bill bill = new Bill(billTransfer.getName(), billTransfer.getStatus());
+		Bill bill = new Bill();
+		bill.setName(billTransfer.getName());
+		bill.setStatus(billTransfer.getStatus());
 		billService.saveBill(bill);
 	}
 	

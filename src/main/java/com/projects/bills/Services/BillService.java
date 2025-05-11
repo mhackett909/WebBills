@@ -21,14 +21,23 @@ public class BillService {
 	public List<BillDTO> getBills() {
 		List<Bill> bills = billRepository.findAll();
 		ArrayList<BillDTO> billList = new ArrayList<>();
-		for (Bill bill : bills)
-			billList.add(new BillDTO(bill.getName(), bill.getStatus()));
+		for (Bill bill : bills) {
+			BillDTO billDTO = new BillDTO();
+			billDTO.setId(bill.getBillId());
+			billDTO.setName(bill.getName());
+			billDTO.setStatus(bill.getStatus());
+			billList.add(billDTO);
+		}
 		return billList;
 	}
 	public BillDTO getBills(String name) {
 		Bill bill = billRepository.findById(name).orElse(null);
 		if (bill == null) return null;
-		return new BillDTO(bill.getName(), bill.getStatus());
+		BillDTO billDTO = new BillDTO();
+		billDTO.setId(bill.getBillId());
+		billDTO.setName(bill.getName());
+		billDTO.setStatus(bill.getStatus());
+		return billDTO;
 	}
 	
 	public void saveBill(Bill bill) {
