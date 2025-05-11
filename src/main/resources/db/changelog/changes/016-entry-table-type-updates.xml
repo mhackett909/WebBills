@@ -1,0 +1,13 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="016-entry-table-id-and-amount" author="mph">
+        <modifyDataType tableName="entry" columnName="id" newDataType="BIGINT"/>
+        <modifyDataType tableName="entry" columnName="amount" newDataType="DECIMAL(19,2)"/>
+    </changeSet>
+
+
+</databaseChangeLog>

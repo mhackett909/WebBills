@@ -1,0 +1,21 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="015-payment-table-drop-fk" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+                WHERE CONSTRAINT_TYPE = 'FOREIGN KEY'
+                AND CONSTRAINT_NAME = 'payment_ibfk_1'
+                AND TABLE_NAME = 'payment';
+            </sqlCheck>
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="payment" constraintName="payment_ibfk_1"/>
+    </changeSet>
+
+
+</databaseChangeLog>

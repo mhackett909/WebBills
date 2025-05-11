@@ -1,0 +1,18 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="017-payment-table-new-fk" author="mph">
+        <modifyDataType tableName="payment" columnName="entryID" newDataType="BIGINT"/>
+        <addForeignKeyConstraint
+                baseTableName="payment"
+                baseColumnNames="entryID"
+                referencedTableName="entry"
+                referencedColumnNames="id"
+                constraintName="fk_payment_entry_id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
