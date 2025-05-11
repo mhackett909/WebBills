@@ -1,0 +1,21 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="008-drop-primary-key-on-name" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                WHERE TABLE_NAME = 'bill'
+                AND COLUMN_NAME = 'name'
+                AND CONSTRAINT_NAME = 'PRIMARY';
+            </sqlCheck>
+        </preConditions>
+        <dropPrimaryKey tableName="bill"/>
+    </changeSet>
+
+
+</databaseChangeLog>

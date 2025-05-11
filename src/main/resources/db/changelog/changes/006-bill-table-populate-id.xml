@@ -1,0 +1,26 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="006-populate-id-values" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="h2"/>
+        </preConditions>
+        <sql>
+            UPDATE bill SET id = (SELECT ROW_NUMBER() OVER (ORDER BY name));
+        </sql>
+    </changeSet>
+
+    <changeSet id="006-populate-id-values-mysql" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql"/>
+        </preConditions>
+        <sql>
+            SET @rownum = 0;
+            UPDATE bill SET id = (@rownum := @rownum + 1);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
