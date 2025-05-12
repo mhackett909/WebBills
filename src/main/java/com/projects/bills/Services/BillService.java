@@ -31,7 +31,7 @@ public class BillService {
 		return billList;
 	}
 	public BillDTO getBills(String name) {
-		Bill bill = billRepository.findById(name).orElse(null);
+		Bill bill = billRepository.findByName(name).orElse(null);
 		if (bill == null) return null;
 		BillDTO billDTO = new BillDTO();
 		billDTO.setId(bill.getBillId());
@@ -44,5 +44,5 @@ public class BillService {
 		billRepository.save(bill);
 	}
 	
-	public void delBill(String name) { billRepository.deleteById(name); }
+	public void delBill(String name) { billRepository.deleteByName(name); }
 }
