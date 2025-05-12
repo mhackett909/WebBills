@@ -17,7 +17,8 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/api/**")
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/**").permitAll()   // Public API endpoints (JWT protected later)
+                        .requestMatchers("/api/v1/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().authenticated()             // All other endpoints require authentication
                 )
                 .formLogin(); // Enable form login for web access (with CSRF)
