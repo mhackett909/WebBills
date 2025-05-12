@@ -1,6 +1,6 @@
 package com.projects.bills.Services;
 import com.projects.bills.Entities.Entry;
-import com.projects.bills.Entities.EntryDTO;
+import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.Repositories.EntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

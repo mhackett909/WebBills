@@ -1,4 +1,4 @@
-package com.projects.bills.Entities;
+package com.projects.bills.DTOs;
 
 public class BillDTO {
 		private long id;

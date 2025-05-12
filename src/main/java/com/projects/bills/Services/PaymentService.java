@@ -1,6 +1,6 @@
 package com.projects.bills.Services;
 import com.projects.bills.Entities.Payment;
-import com.projects.bills.Entities.PaymentDTO;
+import com.projects.bills.DTOs.PaymentDTO;
 import com.projects.bills.Repositories.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

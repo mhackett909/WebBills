@@ -1,10 +1,9 @@
 package com.projects.bills.Services;
 import com.projects.bills.Entities.Bill;
-import com.projects.bills.Entities.BillDTO;
+import com.projects.bills.DTOs.BillDTO;
 import com.projects.bills.Repositories.BillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 
 import java.util.ArrayList;
 import java.util.List;

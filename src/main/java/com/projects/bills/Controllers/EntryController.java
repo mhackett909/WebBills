@@ -2,7 +2,7 @@ package com.projects.bills.Controllers;
 
 import com.projects.bills.Entities.Bill;
 import com.projects.bills.Entities.Entry;
-import com.projects.bills.Entities.EntryDTO;
+import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.Services.EntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;

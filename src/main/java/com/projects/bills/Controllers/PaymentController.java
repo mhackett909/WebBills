@@ -1,6 +1,5 @@
 package com.projects.bills.Controllers;
-import com.projects.bills.Entities.Payment;
-import com.projects.bills.Entities.PaymentDTO;
+import com.projects.bills.DTOs.PaymentDTO;
 import com.projects.bills.Services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;

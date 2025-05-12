@@ -1,4 +1,4 @@
-package com.projects.bills.Entities;
+package com.projects.bills.DTOs;
 
 import java.math.BigDecimal;
 import java.sql.Date;
