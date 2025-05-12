@@ -9,14 +9,18 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()  // Disable CSRF for simplicity (Enable later for security)
+                .csrf(csrf -> csrf
+                        // Disable CSRF for specific endpoints (like APIs)
+                        .ignoringRequestMatchers("/api/**")
+                )
                 .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll()  // Allow all requests without authentication
-                );
+                        .requestMatchers("/api/**").permitAll()   // Public API endpoints (JWT protected later)
+                        .anyRequest().authenticated()             // All other endpoints require authentication
+                )
+                .formLogin(); // Enable form login for web access (with CSRF)
 
         return http.build();
     }
