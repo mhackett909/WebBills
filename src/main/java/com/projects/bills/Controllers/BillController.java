@@ -1,6 +1,6 @@
 package com.projects.bills.Controllers;
 import com.projects.bills.Entities.Bill;
-import com.projects.bills.Entities.BillDTO;
+import com.projects.bills.DTOs.BillDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,7 @@ public class BillController {
 	public BillController(BillService billService) {
 		this.billService = billService;
 	}
-	
+
 	@GetMapping("/api/v1/bills")
 	public List<BillDTO> getBills() { return billService.getBills(); }
 	
@@ -28,7 +28,8 @@ public class BillController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Bill name: "+name);
 		return bill;
 	}
-	
+
+	// TODO Return the created object
 	@PostMapping("/api/v1/bills")
 	public void newBill(@RequestBody BillDTO billTransfer) {
 		if (billTransfer.getName() == null || billTransfer.getName().isBlank())
@@ -40,7 +41,8 @@ public class BillController {
 		bill.setStatus(billTransfer.getStatus());
 		billService.saveBill(bill);
 	}
-	
+
+	// TODO Return the deleted object
 	@DeleteMapping("/api/v1/bills")
 	public void delBill(@RequestBody BillDTO billTransfer) {
 		if (billTransfer.getName() == null || billTransfer.getName().isBlank())
@@ -49,4 +51,8 @@ public class BillController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill does not exist: "+billTransfer.getName());
 		billService.delBill(billTransfer.getName());
 	}
+
+	// TODO Edit bill (this includes archiving)
+
+	// TODO Recycle Bin
 }

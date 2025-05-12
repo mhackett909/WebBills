@@ -2,7 +2,13 @@ package com.projects.bills.Repositories;
 
 import com.projects.bills.Entities.Bill;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface BillRepository extends JpaRepository<Bill, String> {
+import java.util.Optional;
 
+@Repository
+public interface BillRepository extends JpaRepository<Bill, Long> {
+    Optional<Bill> findByName(String name);
+
+    void deleteByName(String name);
 }
