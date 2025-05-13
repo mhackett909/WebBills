@@ -1,0 +1,11 @@
+meta {
+  name: Get Bills
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BILLS_URL}}/api/v1/bills
+  body: none
+  auth: inherit
+}
