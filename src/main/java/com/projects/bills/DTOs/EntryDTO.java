@@ -10,6 +10,7 @@ public class EntryDTO {
 	private BigDecimal amount;
 	private Boolean status;
 	private String services;
+	private String flow;
 	
 	public String getName() { return name; }
 	public long getId() { return entryId; }
@@ -17,6 +18,7 @@ public class EntryDTO {
 	public BigDecimal getAmount() { return amount; }
 	public Boolean getStatus() { return status; }
 	public String getServices() { return services; }
+	public String getFlow() { return flow; }
 
 	public void setName(String name) { this.name = name; }
 	public void setId(long entryId) { this.entryId = entryId; }
@@ -24,4 +26,5 @@ public class EntryDTO {
 	public void setAmount(BigDecimal amount) { this.amount = amount; }
 	public void setStatus(Boolean status) { this.status = status; }
 	public void setServices(String services) { this.services = services; }
+	public void setFlow(String flow) { this.flow = flow; }
 }

@@ -29,6 +29,7 @@ public class EntryService {
 			entryDTO.setAmount(entry.getAmount());
 			entryDTO.setStatus(entry.getStatus());
 			entryDTO.setServices(entry.getServices());
+			entryDTO.setFlow(entry.getFlow());
 			entryList.add(entryDTO);
 		}
 		return entryList;

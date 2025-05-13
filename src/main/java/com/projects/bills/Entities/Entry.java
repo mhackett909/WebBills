@@ -1,5 +1,4 @@
 package com.projects.bills.Entities;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -17,6 +16,7 @@ public class Entry {
 	private BigDecimal amount;
 	private Boolean status; // isPaid
 	private String services;
+	private String flow;
 
 	@OneToMany(mappedBy="entry")
 	@OrderBy("date DESC")
@@ -35,6 +35,7 @@ public class Entry {
 	public long getId() {
 		return entryId;
 	}
+	public String getFlow() { return flow; }
 
 	public void setDate(Date date) { this.date = date; }
 	public void setAmount(BigDecimal amount) { this.amount = amount; }
@@ -42,9 +43,17 @@ public class Entry {
 	public void setServices(String services) { this.services = services; }
 	public void setPayments(List<Payment> payments) { this.payments = payments; }
 	public void setBill(Bill bill) { this.bill = bill; }
+	public void setFlow(String flow) { this.flow = flow; }
 
 	@Override
 	public String toString() {
-		return "Entry{" + "id=" + entryId + ", date=" + date + ", amount=" + amount + ", status=" + status + ", services='" + services + '\'' + '}';
+		return "Entry{" +
+				"id=" + entryId +
+				", date=" + date +
+				", amount=" + amount +
+				", status=" + status +
+				", services='" + services + '\'' +
+				", flow='" + flow + '\'' +
+				'}';
 	}
 }
