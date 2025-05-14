@@ -29,7 +29,7 @@ public class BillService {
 		}
 		return billList;
 	}
-	public BillDTO getBills(String name) {
+	public BillDTO getBill(String name) {
 		Bill bill = billRepository.findByName(name).orElse(null);
 		if (bill == null) return null;
 		BillDTO billDTO = new BillDTO();

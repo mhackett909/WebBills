@@ -23,7 +23,7 @@ public class BillController {
 	
 	@GetMapping("/api/v1/bills/{name}")
 	public BillDTO getBills(@PathVariable("name") String name) {
-		BillDTO bill = billService.getBills(name);
+		BillDTO bill = billService.getBill(name);
 		if (bill == null)
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Bill name: "+name);
 		return bill;
@@ -47,7 +47,7 @@ public class BillController {
 	public void delBill(@RequestBody BillDTO billTransfer) {
 		if (billTransfer.getName() == null || billTransfer.getName().isBlank())
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid bill name");
-		if (billService.getBills(billTransfer.getName()) == null)
+		if (billService.getBill(billTransfer.getName()) == null)
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill does not exist: "+billTransfer.getName());
 		billService.delBill(billTransfer.getName());
 	}
