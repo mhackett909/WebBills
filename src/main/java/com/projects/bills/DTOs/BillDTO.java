@@ -1,15 +1,16 @@
 package com.projects.bills.DTOs;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class BillDTO {
 	private long id;
 	private String name;
 	private Boolean status; //isArchived
-
-	public String getName() { return name; }
-	public Boolean getStatus() { return status; }
-	public long getId() { return id; }
-
-	public void setName(String name) { this.name = name; }
-	public void setStatus(Boolean status) { this.status = status; }
-	public void setId(long id) { this.id = id; }
 }

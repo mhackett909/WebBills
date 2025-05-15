@@ -1,0 +1,15 @@
+meta {
+  name: Get
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BILLS_URL}}/api/v1/user?userName=johndoe
+  body: none
+  auth: inherit
+}
+
+params:query {
+  userName: johndoe
+}

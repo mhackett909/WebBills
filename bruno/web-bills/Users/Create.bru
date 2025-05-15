@@ -1,0 +1,19 @@
+meta {
+  name: Create
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{BILLS_URL}}/api/v1/users
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "johndoe",
+    "email": "john@example.com",
+    "password": "password123"
+  }
+}
