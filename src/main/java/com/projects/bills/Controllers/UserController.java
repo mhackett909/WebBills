@@ -19,7 +19,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/api/v1/users")
+    @PostMapping("/api/v1/user")
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
         if (userDTO.getUsername() == null || userDTO.getUsername().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
@@ -51,14 +51,16 @@ public class UserController {
     }
 
     @GetMapping("/api/v1/user")
-    public ResponseEntity<Optional<UserDTO>> getUser(@RequestParam String userName) {
+    public ResponseEntity<UserDTO> getUser(@RequestParam String userName) {
         if (userName == null || userName.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
         }
-
         Optional<UserDTO> userDTO = userService.findByUsername(userName);
-
-        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+        if (userDTO.isPresent()) {
+            return new ResponseEntity<>(userDTO.get(), HttpStatus.OK);
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
     }
 
     @PutMapping("/api/v1/user")

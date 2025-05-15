@@ -3,6 +3,8 @@ import com.projects.bills.DTOs.PaymentDTO;
 import com.projects.bills.Services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -10,7 +12,7 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class PaymentController {
 	private final PaymentService paymentService;
-	
+
 	@Autowired
 	public PaymentController(PaymentService paymentService) {
 		this.paymentService = paymentService;
@@ -19,7 +21,7 @@ public class PaymentController {
 	@GetMapping("/api/v1/payments")
 	public List<PaymentDTO> getPayments(@RequestParam Long entryId) {
 		if (entryId == null) {
-			throw new IllegalArgumentException("Entry ID is required");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry ID is required");
 		}
 		return paymentService.getPayments(entryId);
 	}
@@ -31,7 +33,6 @@ public class PaymentController {
 		return paymentService.createPayment(paymentDTO);
 	}
 
-
 	@PutMapping("/api/v1/payments")
 	public PaymentDTO updatePayment(@RequestBody PaymentDTO paymentDTO) {
 		verifyPaymentDTO(paymentDTO);
@@ -41,16 +42,16 @@ public class PaymentController {
 
 	private void verifyPaymentDTO(PaymentDTO paymentDTO) {
 		if (paymentDTO.getAmount() == null) {
-			throw new IllegalArgumentException("Amount is required");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount is required");
 		}
 		if (paymentDTO.getDate() == null) {
-			throw new IllegalArgumentException("Date is required");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date is required");
 		}
 		if (paymentDTO.getType() == null || paymentDTO.getType().isBlank()) {
-			throw new IllegalArgumentException("Type is required");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Type is required");
 		}
 		if (paymentDTO.getMedium() == null || paymentDTO.getMedium().isBlank()) {
-			throw new IllegalArgumentException("Medium is required");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Medium is required");
 		}
 	}
 }

@@ -136,7 +136,7 @@ public class UserService {
     private UpdateType getUpdateType(UserDTO userDTO) {
         if (userDTO.getNewEmail() != null) return UpdateType.EMAIL;
         if (userDTO.getNewPassword() != null) return UpdateType.PASSWORD;
-        if (userDTO.getId() != null) return UpdateType.STATUS;
+        if (!userDTO.isEnabled()) return UpdateType.STATUS;
         return UpdateType.NONE;
     }
 }
