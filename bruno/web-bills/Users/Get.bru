@@ -7,9 +7,13 @@ meta {
 get {
   url: {{BILLS_URL}}/api/v1/user?userName=johndoe
   body: none
-  auth: inherit
+  auth: bearer
 }
 
 params:query {
   userName: johndoe
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6WyJST0xFX1VTRVIiXSwic3ViIjoiam9obmRvZSIsImlhdCI6MTc0NzI4MjM5NiwiZXhwIjoxNzQ3Mjg1OTk2fQ.hkaYUFw2jXKC03CO7mQU8LsBhk5Kk8GkEeiySO1hqT30Ars8hRpmYVSbUzDIr9JRgc0VMrZXhV8CyvXWVNn29w
 }

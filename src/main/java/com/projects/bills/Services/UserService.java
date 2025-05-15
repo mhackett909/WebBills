@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,10 +19,13 @@ public class UserService {
 
     private final PasswordService passwordService;
 
+    private final JwtService jwtService;
+
     @Autowired
-    public UserService(UserRepository userRepository, PasswordService passwordService) {
+    public UserService(UserRepository userRepository, PasswordService passwordService, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordService = passwordService;
+        this.jwtService = jwtService;
     }
 
     public Optional<UserDTO> findByUsername(String username) {
@@ -65,10 +69,15 @@ public class UserService {
             throw new IllegalArgumentException("Login failed");
         }
 
+        String jwt = jwtService.generateJwt(user.getUsername(), List.of(user.getRoles()));
+
         user.setLastLogin(java.time.LocalDateTime.now());
         userRepository.save(user);
 
-        return mapToDTO(user);
+        UserDTO userWithToken = mapToDTO(user);
+        userWithToken.setJwt(jwt);
+
+        return userWithToken;
     }
 
     public UserDTO updateUser(UserDTO userDTO) {
@@ -122,6 +131,7 @@ public class UserService {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
+                null,
                 null,
                 null,
                 null,
