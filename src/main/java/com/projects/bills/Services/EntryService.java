@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EntryService {
@@ -21,12 +22,11 @@ public class EntryService {
 	}
 	//In reality, will be getting entries by some parameters (id, date range, bill name, isDue, isOverpaid, isPaid, amount range)
 	public List<EntryDTO> getEntries() {
-		//List<Entry> entries = entryRepository.findAll();
-		List<Entry> entries = entryRepository.findEntryLast90Days();
+		List<Entry> entries = entryRepository.findAll();
 		ArrayList<EntryDTO> entryList = new ArrayList<>();
 		for (Entry entry : entries) {
 			EntryDTO entryDTO = new EntryDTO();
-			entryDTO.setId(entry.getId());
+			entryDTO.setEntryId(entry.getId());
 			entryDTO.setName(entry.getBill().getName());
 			entryDTO.setDate(entry.getDate());
 			entryDTO.setAmount(entry.getAmount());
@@ -38,6 +38,11 @@ public class EntryService {
 		}
 		return entryList;
 	}
+
+	public Optional<Entry> getEntryById(Long id) {
+		return entryRepository.findById(id);
+	}
+
 	public void saveEntry(Entry entry) { entryRepository.save(entry); }
 
 	private boolean isArchived(Entry entry) {

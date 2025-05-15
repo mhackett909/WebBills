@@ -9,11 +9,5 @@ import java.util.List;
 
 @Repository
 public interface EntryRepository extends JpaRepository<Entry, Long> {
-	@Query(value = "select e.* " +
-			"from entry e " +
-			"join bill b on e.name = b.name " +
-			"where e.date >= DATE_SUB(NOW(), INTERVAL 90 DAY) " +
-			"order by e.date desc", nativeQuery = true)
-	List<Entry> findEntryLast90Days();
-	
+
 }

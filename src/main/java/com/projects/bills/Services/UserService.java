@@ -1,6 +1,8 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.DTOs.UserDTO;
 import com.projects.bills.Entities.User;
+import com.projects.bills.Enums.UpdateType;
 import com.projects.bills.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,89 +24,119 @@ public class UserService {
         this.passwordService = passwordService;
     }
 
-    /**
-     * Registers a new user with a hashed password.
-     * @param user The user object containing registration details.
-     * @return The registered user.
-     */
-    public User registerUser(User user) {
-        if (userRepository.existsByUsername(user.getUsername())) {
+    public Optional<UserDTO> findByUsername(String username) {
+        return userRepository.findByUsername(username).map(this::mapToDTO);
+    }
+
+    public UserDTO registerUser(UserDTO userDTO) {
+        if (userRepository.existsByUsername(userDTO.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
 
-        if (user.getEmail() != null && userRepository.existsByEmail(user.getEmail())) {
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new IllegalArgumentException("Email already registered");
         }
 
-        // Hash password before saving
-        user.setPassword(passwordService.hashPassword(user.getPassword()));
+        User user = new User();
+        user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordService.hashPassword(userDTO.getPassword()));
+        user.setEnabled(true);
+        user.setRoles("ROLE_USER");
+        user.setMfaEnabled(false);
+        user.setCreatedAt(java.time.LocalDateTime.now());
 
-        // Set default roles if not provided
-        if (user.getRoles() == null || user.getRoles().isEmpty()) {
-            user.setRoles("ROLE_USER");
+        User newUser = userRepository.save(user);
+
+        return mapToDTO(newUser);
+    }
+
+    public UserDTO login(UserDTO userDTO) {
+        Optional<User> userOpt = userRepository.findByUsername(userDTO.getUsername());
+
+        if (userOpt.isEmpty()) {
+            // Allows the username or email to be used for login
+            userOpt = userRepository.findByEmail(userDTO.getUsername());
         }
 
-        return userRepository.save(user);
-    }
+        User user = userOpt.orElseThrow(() -> new IllegalArgumentException("Login failed"));
 
-    /**
-     * Finds a user by username.
-     * @param username The username to search for.
-     * @return Optional containing the user if found.
-     */
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
+        if (!passwordService.verifyPassword(userDTO.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Login failed");
+        }
 
-    /**
-     * Finds a user by email.
-     * @param email The email to search for.
-     * @return Optional containing the user if found.
-     */
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    /**
-     * Updates a user's information (excluding password).
-     * @param id The user ID.
-     * @param updatedUser The updated user details.
-     * @return The updated user.
-     */
-    public User updateUser(Long id, User updatedUser) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        user.setUsername(updatedUser.getUsername());
-        user.setEmail(updatedUser.getEmail());
-        user.setEnabled(updatedUser.isEnabled());
-        user.setRoles(updatedUser.getRoles());
-
-        return userRepository.save(user);
-    }
-
-    /**
-     * Changes the user's password with secure hashing.
-     * @param id The user ID.
-     * @param newPassword The new password.
-     */
-    public void changePassword(Long id, String newPassword) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        user.setPassword(passwordService.hashPassword(newPassword));
+        user.setLastLogin(java.time.LocalDateTime.now());
         userRepository.save(user);
+
+        return mapToDTO(user);
     }
 
-    /**
-     * Deletes a user by ID.
-     * @param id The user ID to delete.
-     */
-    public void deleteUser(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new IllegalArgumentException("User not found");
+    public UserDTO updateUser(UserDTO userDTO) {
+        if (userDTO.getId() == null) {
+            throw new IllegalArgumentException("User ID is required for update");
         }
 
-        userRepository.deleteById(id);
+        User user = userRepository.findById(userDTO.getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (!passwordService.verifyPassword(userDTO.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Login failed");
+        }
+
+        switch (getUpdateType(userDTO)) {
+            case EMAIL -> updateEmail(userDTO, user);
+            case PASSWORD -> updatePassword(userDTO, user);
+            case STATUS -> updateAccountStatus(userDTO, user);
+            default -> throw new IllegalArgumentException("No valid update operation specified");
+        }
+
+        User savedUser = userRepository.save(user);
+        return mapToDTO(savedUser);
+    }
+
+    private void updatePassword(UserDTO userDTO, User user) {
+        // TODO Password format validation
+        user.setPassword(passwordService.hashPassword(userDTO.getNewPassword()));
+    }
+
+    private void updateEmail(UserDTO userDTO, User user) {
+        // TODO Email format validation
+
+        String newEmail = Optional.ofNullable(userDTO.getNewEmail())
+                .filter(email -> !email.isBlank())
+                .orElseThrow(() -> new IllegalArgumentException("New email is required"));
+
+        if (userRepository.existsByEmail(newEmail)) {
+            throw new IllegalArgumentException("Email already registered");
+        }
+
+        user.setEmail(newEmail);
+    }
+
+    private void updateAccountStatus(UserDTO userDTO, User user) {
+        user.setEnabled(userDTO.isEnabled());
+    }
+
+    private UserDTO mapToDTO(User user) {
+        return new UserDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                null,
+                null,
+                null,
+                user.getRoles(),
+                user.isEnabled(),
+                user.isMfaEnabled(),
+                user.getCreatedAt(),
+                user.getLastLogin()
+        );
+    }
+
+    private UpdateType getUpdateType(UserDTO userDTO) {
+        if (userDTO.getNewEmail() != null) return UpdateType.EMAIL;
+        if (userDTO.getNewPassword() != null) return UpdateType.PASSWORD;
+        if (!userDTO.isEnabled()) return UpdateType.STATUS;
+        return UpdateType.NONE;
     }
 }
