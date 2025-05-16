@@ -1,9 +1,13 @@
 package com.projects.bills.Entities;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "bill")
 public class Bill {
 	@Id
@@ -12,20 +16,14 @@ public class Bill {
 	private long billId;
 	private String name;
 	private Boolean status; //isArchived
+
+	@ManyToOne
+	@JoinColumn(name="userID", referencedColumnName = "id")
+	private User user;
 	
 	@OneToMany(mappedBy="bill")
 	@OrderBy("date DESC")
 	private List<Entry> entries;
-
-	public String getName() { return name; }
-	public Boolean getStatus() { return status; }
-	public long getBillId() { return billId; }
-	public List<Entry> getEntries() { return entries; }
-
-	public void setName(String name) { this.name = name; }
-	public void setStatus(Boolean status) { this.status = status; }
-	public void setEntries(List<Entry> entries) { this.entries = entries; }
-	public void setBillId(long id) { this.billId = id; }
 
 	@Override
 	public String toString() {

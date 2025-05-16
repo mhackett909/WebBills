@@ -1,0 +1,19 @@
+meta {
+  name: Get Payments
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BILLS_URL}}/api/v1/payments?entryId=1
+  body: none
+  auth: bearer
+}
+
+params:query {
+  entryId: 1
+}
+
+auth:bearer {
+  token: {{jwtToken}}
+}

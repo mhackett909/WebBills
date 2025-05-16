@@ -1,4 +1,5 @@
 package com.projects.bills.Services;
+import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.Entities.Entry;
 import com.projects.bills.Entities.Payment;
 import com.projects.bills.DTOs.PaymentDTO;
@@ -71,7 +72,7 @@ public class PaymentService {
 			return null;
 		}
 		PaymentDTO dto = new PaymentDTO();
-		dto.setPaymentId(payment.getId());
+		dto.setPaymentId(payment.getPaymentId());
 		dto.setDate(payment.getDate());
 		dto.setAmount(payment.getAmount());
 		dto.setType(payment.getType());

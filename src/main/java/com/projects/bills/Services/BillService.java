@@ -1,8 +1,11 @@
 package com.projects.bills.Services;
 import com.projects.bills.Entities.Bill;
 import com.projects.bills.DTOs.BillDTO;
+import com.projects.bills.Entities.User;
 import com.projects.bills.Repositories.BillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,11 +15,13 @@ import java.util.Optional;
 @Service
 public class BillService {
 	private final BillRepository billRepository;
-	
+	private final UserService userService;
+
 	@Autowired
-	public BillService(BillRepository billRepository) {
+	public BillService(BillRepository billRepository, UserService userService) {
 		this.billRepository = billRepository;
-	}
+        this.userService = userService;
+    }
 
 	//Need to take in a boolean for inactive billers
 	public List<BillDTO> getBills() {
@@ -34,8 +39,23 @@ public class BillService {
 		if (bill == null) return null;
 		return mapToDTO(bill);
 	}
+
+	public Bill getBillEntityById(Long id) {
+		return billRepository.findById(id).orElse(null);
+	}
 	
-	public BillDTO saveBill(Bill bill) {
+	public BillDTO saveBill(BillDTO billTransfer) {
+		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+		Optional<User> user = userService.findByUsername(username);
+		if (user.isEmpty()) {
+			throw new IllegalArgumentException("User not found");
+		}
+
+		Bill bill = new Bill();
+		bill.setName(billTransfer.getName());
+		bill.setStatus(billTransfer.getStatus());
+		bill.setUser(user.get());
+
 		Bill updatedBill = billRepository.save(bill);
 		return mapToDTO(updatedBill);
 	}

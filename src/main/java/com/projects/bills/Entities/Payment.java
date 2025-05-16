@@ -1,10 +1,14 @@
 package com.projects.bills.Entities;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "payment")
 public class Payment {
 	@Id
@@ -20,20 +24,6 @@ public class Payment {
 	@ManyToOne
 	@JoinColumn(name="entryID")
 	private Entry entry;
-	public Date getDate() { return date; }
-	public BigDecimal getAmount() {	return amount; }
-	public String getType() { return type; }
-	public String getMedium() { return medium; }
-	public String getNotes() { return notes; }
-	public Entry getEntry() { return entry;	}
-	public long getId() { return paymentId; }
-
-	public void setDate(Date date) { this.date = date; }
-	public void setAmount(BigDecimal amount) { this.amount = amount; }
-	public void setType(String type) { this.type = type; }
-	public void setMedium(String medium) { this.medium = medium; }
-	public void setNotes(String notes) { this.notes = notes; }
-	public void setEntry(Entry entry) {	this.entry = entry; }
 
 	@Override
 	public String toString() {

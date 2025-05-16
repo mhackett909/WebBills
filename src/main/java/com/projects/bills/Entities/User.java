@@ -2,6 +2,7 @@ package com.projects.bills.Entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -37,6 +38,10 @@ public class User {
 
     @Column(name = "mfa_secret")
     private String mfaSecret;
+
+    @OneToMany(mappedBy = "user")
+    @OrderBy("name DESC")
+    private List<Bill> bills;
 
     // Constructors
     public User() {

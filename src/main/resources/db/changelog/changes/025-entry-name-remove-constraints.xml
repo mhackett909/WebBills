@@ -1,0 +1,21 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="025-entry-name-remove-constraints" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT CASE
+                WHEN IS_NULLABLE = 'NO' THEN 1
+                ELSE 0
+                END
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE UPPER(TABLE_NAME) = 'ENTRY' AND UPPER(COLUMN_NAME) = 'NAME'
+            </sqlCheck>
+        </preConditions>
+        <dropNotNullConstraint tableName="entry" columnName="name" columnDataType="VARCHAR(255)"/>
+    </changeSet>
+
+</databaseChangeLog>

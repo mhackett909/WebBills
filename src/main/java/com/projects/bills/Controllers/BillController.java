@@ -3,6 +3,7 @@ import com.projects.bills.Entities.Bill;
 import com.projects.bills.DTOs.BillDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.projects.bills.Services.BillService;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,34 +19,36 @@ public class BillController {
 	}
 
 	@GetMapping("/api/v1/bills")
-	public List<BillDTO> getBills() { return billService.getBills(); }
+	public ResponseEntity<List<BillDTO>> getBills() {
+		List<BillDTO> bills = billService.getBills();
+		return new ResponseEntity<>(bills, HttpStatus.OK);
+	}
 
 	@GetMapping("/api/v1/bills/{name}")
-	public BillDTO getBills(@PathVariable("name") String name) {
+	public ResponseEntity<BillDTO> getBillsByName(@PathVariable("name") String name) {
 		if (name == null || name.isBlank()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Bill name");
 		}
 
 		BillDTO bill = billService.getBill(name);
-		if (bill == null)
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill does not exist: "+name);
+		if (bill == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill does not exist: " + name);
+		}
 
-		return bill;
+		return new ResponseEntity<>(bill, HttpStatus.OK);
 	}
 
 	@PostMapping("/api/v1/bills")
-	public BillDTO newBill(@RequestBody BillDTO billTransfer) {
+	public ResponseEntity<BillDTO> newBill(@RequestBody BillDTO billTransfer) {
 		if (billTransfer.getName() == null || billTransfer.getName().isBlank())
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid bill name");
 
-		Bill bill = new Bill();
-		bill.setName(billTransfer.getName());
-		bill.setStatus(billTransfer.getStatus()); // Default to active
-		return billService.saveBill(bill);
+		BillDTO savedBill = billService.saveBill(billTransfer);
+		return ResponseEntity.status(HttpStatus.CREATED).body(savedBill);
 	}
 
 	@DeleteMapping("/api/v1/bills")
-	public BillDTO delBill(@RequestBody BillDTO billTransfer) {
+	public ResponseEntity<BillDTO> delBill(@RequestBody BillDTO billTransfer) {
 		if (billTransfer.getName() == null || billTransfer.getName().isBlank())
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid bill name");
 
@@ -53,7 +56,7 @@ public class BillController {
 		if (deleted == null)
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill does not exist: " + billTransfer.getName());
 
-		return deleted;
+		return new ResponseEntity<>(deleted, HttpStatus.OK);
 	}
 
 	// TODO Edit bill (this includes archiving)

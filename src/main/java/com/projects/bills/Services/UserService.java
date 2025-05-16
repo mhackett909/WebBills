@@ -28,8 +28,12 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
-    public Optional<UserDTO> findByUsername(String username) {
+    public Optional<UserDTO> findDtoByUsername(String username) {
         return userRepository.findByUsername(username).map(this::mapToDTO);
+    }
+
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     public UserDTO registerUser(UserDTO userDTO) {

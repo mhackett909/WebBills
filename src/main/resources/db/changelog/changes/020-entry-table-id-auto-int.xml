@@ -1,0 +1,31 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- For MySQL (supports AUTO_INCREMENT) -->
+    <changeSet id="020-set-entry-id-auto-increment-mysql" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE payment DROP FOREIGN KEY fk_payment_entry_id;
+            ALTER TABLE entry MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT;
+            ALTER TABLE payment ADD CONSTRAINT fk_payment_entry_id FOREIGN KEY (entryID) REFERENCES entry(id);
+        </sql>
+    </changeSet>
+
+    <!-- For H2 (AUTO_INCREMENT is IDENTITY in H2) -->
+    <changeSet id="020-set-entry-id-identity-h2" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="h2"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE payment DROP CONSTRAINT fk_payment_entry_id;
+            ALTER TABLE entry ALTER COLUMN id BIGINT AUTO_INCREMENT;
+            ALTER TABLE payment ADD CONSTRAINT fk_payment_entry_id FOREIGN KEY (entryID) REFERENCES entry(id);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
