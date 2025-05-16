@@ -1,17 +1,17 @@
 meta {
-  name: Get
+  name: Get Bill By Name
   type: http
-  seq: 1
+  seq: 2
 }
 
 get {
-  url: {{BILLS_URL}}/api/v1/user?userName=johndoe
+  url: {{BILLS_URL}}/api/v1/bills?name=test
   body: none
   auth: bearer
 }
 
 params:query {
-  userName: johndoe
+  name: test
 }
 
 auth:bearer {

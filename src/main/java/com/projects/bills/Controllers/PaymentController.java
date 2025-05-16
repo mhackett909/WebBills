@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 public class PaymentController {
 	private final PaymentService paymentService;
 

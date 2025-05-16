@@ -28,23 +28,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        String authorizationHeader = request.getHeader("Authorization");
+        String path = request.getRequestURI();
+//        System.out.println("JWT Filter: Incoming request to " + path);
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            Claims claims = jwtService.validateJwt(token);
-            if (claims != null) {
-                String username = claims.getSubject();
-                List<String> roles = claims.get("roles", List.class);
-
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        username, null, roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+        // Skip JWT filter for login and health endpoints
+        if (path.startsWith("/api/v1/auth/login") || path.startsWith("/actuator/health")) {
+//            System.out.println("JWT Filter: Skipping for " + path);
+            chain.doFilter(request, response);
+            return;
         }
 
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+//            System.out.println("JWT Filter: Missing or invalid Authorization header");
+            chain.doFilter(request, response);
+            return;
+        }
+
+        String token = authorizationHeader.substring(7);
+        Claims claims = jwtService.validateJwt(token);
+
+        if (claims == null) {
+//            System.out.println("JWT Filter: Invalid JWT token");
+            SecurityContextHolder.clearContext();
+            chain.doFilter(request, response);
+            return;
+        }
+
+        String username = claims.getSubject();
+        List<String> roles = claims.get("roles", List.class);
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                username, null, roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+//        System.out.println("JWT Filter: JWT is valid for user " + username);
         chain.doFilter(request, response);
     }
 }
+

@@ -41,6 +41,7 @@ docker run -d \
   -e DB_URL="jdbc:mysql://mysql-bills:3306/bills" \
   -e SPRING_DATASOURCE_USERNAME="root" \
   -e SPRING_DATASOURCE_PASSWORD="password" \
+  -e SPRING_PROFILES_ACTIVE=dev \
   bills-app \
   java -Xmx256m -Xms128m -jar app.jar
 

@@ -7,5 +7,9 @@ meta {
 get {
   url: {{BILLS_URL}}/api/v1/bills
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwtToken}}
 }
