@@ -14,6 +14,7 @@ import java.sql.Date;
 @NoArgsConstructor
 public class EntryDTO {
 	private long entryId;
+	private long billId;
 	private String name;
 	private Date date;
 	private BigDecimal amount;

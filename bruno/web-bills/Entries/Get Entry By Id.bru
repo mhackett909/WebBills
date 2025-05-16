@@ -1,0 +1,19 @@
+meta {
+  name: Get Entry By Id
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{BILLS_URL}}/api/v1/entries/:id
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id: 1
+}
+
+auth:bearer {
+  token: {{jwtToken}}
+}

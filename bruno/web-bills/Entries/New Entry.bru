@@ -1,0 +1,25 @@
+meta {
+  name: New Entry
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{BILLS_URL}}/api/v1/new
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwtToken}}
+}
+
+body:json {
+  {
+    "name": "test bill",
+    "date": "2025-06-01",
+    "amount": 120.51,
+    "services": "Meter Reading",
+    "flow": "Income"
+  }
+}

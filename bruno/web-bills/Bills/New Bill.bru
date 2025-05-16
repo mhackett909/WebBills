@@ -1,0 +1,22 @@
+meta {
+  name: New Bill
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{BILLS_URL}}/api/v1/bills
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwtToken}}
+}
+
+body:json {
+  {
+    "name": "Electricity",
+    "status": 1
+  }
+}

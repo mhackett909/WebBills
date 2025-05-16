@@ -4,10 +4,12 @@ import com.projects.bills.DTOs.BillDTO;
 import com.projects.bills.Entities.Bill;
 import com.projects.bills.Entities.Entry;
 import com.projects.bills.DTOs.EntryDTO;
+import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Services.BillService;
 import com.projects.bills.Services.EntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,14 +31,22 @@ public class EntryController {
 
 	// TODO filters
 	@GetMapping("/api/v1/entries")
-	public List<EntryDTO> getEntries() { return entryService.getEntries(); }
+	public ResponseEntity<List<EntryDTO>> getEntries() {
+		List<EntryDTO> entries = entryService.getEntries();
+		return new ResponseEntity<>(entries, HttpStatus.OK);
+	}
 
-	// TODO Get entry by id
+	@GetMapping("/api/v1/entries/{id}")
+	public ResponseEntity<EntryDTO> getEntryById(@PathVariable Long id) {
+		return entryService.getEntryDtoById(id)
+				.map(entryDTO -> new ResponseEntity<>(entryDTO, HttpStatus.OK))
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found with id: " + id));
+	}
 
 	@PostMapping("api/v1/new")
-	public void addEntry(@RequestBody EntryDTO entryDTO) {
-		if (entryDTO.getName() == null || entryDTO.getName().isBlank()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill name is required");
+	public ResponseEntity<EntryDTO> addEntry(@RequestBody EntryDTO entryDTO) {
+		if (entryDTO.getBillId() == 0) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill id is required");
 		}
 		if (entryDTO.getDate() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date is required");
@@ -44,27 +54,27 @@ public class EntryController {
 		if (entryDTO.getAmount() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount is required");
 		}
+		if (entryDTO.getFlow() == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Flow is required");
+		}
 		if (entryDTO.getStatus() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is required");
 		}
 
-		BillDTO billDTO = billService.getBill(entryDTO.getName());
-		if (billDTO == null) {
+		Bill bill = billService.getBillEntityById(entryDTO.getBillId());
+		if (bill == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill not found for name: " + entryDTO.getName());
 		}
 
-		Bill bill = new Bill();
-		bill.setBillId(billDTO.getId());
-		bill.setName(billDTO.getName());
+		FlowType type;
+		try {
+			type = FlowType.fromType(entryDTO.getFlow());
+		} catch (IllegalArgumentException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid flow type: " + entryDTO.getFlow());
+		}
 
-		Entry entry = new Entry();
-		entry.setBill(bill);
-		entry.setDate(entryDTO.getDate());
-		entry.setAmount(entryDTO.getAmount());
-		entry.setStatus(entryDTO.getStatus());
-		entry.setServices(entryDTO.getServices());
-
-		entryService.saveEntry(entry);
+		EntryDTO savedEntry = entryService.saveEntry(entryDTO, bill, type);
+		return new ResponseEntity<>(savedEntry, HttpStatus.CREATED);
 	}
 
 	// TODO Edit entry

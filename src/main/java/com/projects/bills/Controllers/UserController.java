@@ -54,7 +54,7 @@ public class UserController {
         if (userName == null || userName.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
         }
-        Optional<UserDTO> userDTO = userService.findByUsername(userName);
+        Optional<UserDTO> userDTO = userService.findDtoByUsername(userName);
         if (userDTO.isPresent()) {
             return new ResponseEntity<>(userDTO.get(), HttpStatus.OK);
         } else {

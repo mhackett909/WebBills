@@ -1,0 +1,30 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="022-bill-table-change-uq" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists
+                        tableName="bill"
+                        indexName="uq_bill_name_user"/>
+            </not>
+        </preConditions>
+        <!-- Drop old foreign key constraint -->
+        <dropForeignKeyConstraint
+                baseTableName="entry"
+                constraintName="fk_entry_bill_name"/>
+        <!-- Drop old unique constraint -->
+        <dropUniqueConstraint
+                constraintName="uq_bill_name"
+                tableName="bill"/>
+        <!-- Add new unique constraint -->
+        <addUniqueConstraint
+                tableName="bill"
+                columnNames="name, userID"
+                constraintName="uq_bill_name_user"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,24 @@
+
+
+<databaseChangeLog
+xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="024-entry-table-change-fk" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <primaryKeyExists tableName="bill"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="entry"
+                baseColumnNames="billID"
+                constraintName="fk_entry_bill_id"
+                referencedTableName="bill"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
