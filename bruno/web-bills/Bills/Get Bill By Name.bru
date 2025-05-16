@@ -5,13 +5,9 @@ meta {
 }
 
 get {
-  url: {{BILLS_URL}}/api/v1/bills?name=test
+  url: {{BILLS_URL}}/api/v1/bills/test bill
   body: none
   auth: bearer
-}
-
-params:query {
-  name: test
 }
 
 auth:bearer {

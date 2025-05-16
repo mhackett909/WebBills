@@ -3,7 +3,7 @@ package com.projects.bills.Services;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.SignatureException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -16,7 +16,8 @@ import java.util.Map;
 
 @Service
 public class JwtService {
-    private final String secretKey = "yourSecretKeyMustBeALittleBitLongerThanThisThisIsOnlyLikeThreeHundredFortyCharactersLetMeMakeSureItIsLongEnough";
+    @Value("${jwt.secret}")
+    private String secretKey;
 
     public String generateJwt(String username, List<String> roles) {
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
