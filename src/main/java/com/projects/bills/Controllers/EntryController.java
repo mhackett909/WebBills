@@ -54,7 +54,8 @@ public class EntryController {
 		}
 
 		Bill bill = new Bill();
-		bill.setName(entryDTO.getName());
+		bill.setBillId(billDTO.getId());
+		bill.setName(billDTO.getName());
 
 		Entry entry = new Entry();
 		entry.setBill(bill);

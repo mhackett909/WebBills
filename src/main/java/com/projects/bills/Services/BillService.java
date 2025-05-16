@@ -41,9 +41,10 @@ public class BillService {
 	}
 
 	public BillDTO delBill(String name) {
-		Optional<Bill> deletedBill = billRepository.deleteByName(name);
-        return deletedBill.map(BillService::mapToDTO).orElse(null);
-    }
+		Optional<Bill> bill = billRepository.findByName(name);
+		bill.ifPresent(billRepository::delete);
+		return bill.map(BillService::mapToDTO).orElse(null);
+	}
 
 	public static BillDTO mapToDTO(Bill bill) {
 		if (bill == null) return null;

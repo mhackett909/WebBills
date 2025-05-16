@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface BillRepository extends JpaRepository<Bill, Long> {
     Optional<Bill> findByName(String name);
 
-    Optional<Bill> deleteByName(String name);
+    void deleteByName(String name);
 }

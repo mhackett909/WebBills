@@ -40,7 +40,7 @@ public class BillController {
 
 		Bill bill = new Bill();
 		bill.setName(billTransfer.getName());
-		bill.setStatus(true); // Default to active
+		bill.setStatus(billTransfer.getStatus()); // Default to active
 		return billService.saveBill(bill);
 	}
 
