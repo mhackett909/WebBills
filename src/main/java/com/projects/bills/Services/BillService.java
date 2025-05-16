@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BillService {
@@ -16,21 +17,36 @@ public class BillService {
 	public BillService(BillRepository billRepository) {
 		this.billRepository = billRepository;
 	}
+
 	//Need to take in a boolean for inactive billers
 	public List<BillDTO> getBills() {
 		List<Bill> bills = billRepository.findAll();
 		ArrayList<BillDTO> billList = new ArrayList<>();
 		for (Bill bill : bills) {
-			BillDTO billDTO = new BillDTO();
-			billDTO.setId(bill.getBillId());
-			billDTO.setName(bill.getName());
-			billDTO.setStatus(bill.getStatus());
+			BillDTO billDTO = mapToDTO(bill);
 			billList.add(billDTO);
 		}
 		return billList;
 	}
+
 	public BillDTO getBill(String name) {
 		Bill bill = billRepository.findByName(name).orElse(null);
+		if (bill == null) return null;
+		return mapToDTO(bill);
+	}
+	
+	public BillDTO saveBill(Bill bill) {
+		Bill updatedBill = billRepository.save(bill);
+		return mapToDTO(updatedBill);
+	}
+
+	public BillDTO delBill(String name) {
+		Optional<Bill> bill = billRepository.findByName(name);
+		bill.ifPresent(billRepository::delete);
+		return bill.map(BillService::mapToDTO).orElse(null);
+	}
+
+	public static BillDTO mapToDTO(Bill bill) {
 		if (bill == null) return null;
 		BillDTO billDTO = new BillDTO();
 		billDTO.setId(bill.getBillId());
@@ -38,10 +54,4 @@ public class BillService {
 		billDTO.setStatus(bill.getStatus());
 		return billDTO;
 	}
-	
-	public void saveBill(Bill bill) {
-		billRepository.save(bill);
-	}
-	
-	public void delBill(String name) { billRepository.deleteByName(name); }
 }

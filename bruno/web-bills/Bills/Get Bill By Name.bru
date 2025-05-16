@@ -1,11 +1,11 @@
 meta {
-  name: Get Bills
+  name: Get Bill By Name
   type: http
-  seq: 1
+  seq: 2
 }
 
 get {
-  url: {{BILLS_URL}}/api/v1/bills
+  url: {{BILLS_URL}}/api/v1/bills/test bill
   body: none
   auth: bearer
 }

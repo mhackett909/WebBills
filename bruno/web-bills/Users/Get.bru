@@ -7,9 +7,13 @@ meta {
 get {
   url: {{BILLS_URL}}/api/v1/user?userName=johndoe
   body: none
-  auth: inherit
+  auth: bearer
 }
 
 params:query {
   userName: johndoe
+}
+
+auth:bearer {
+  token: {{jwtToken}}
 }

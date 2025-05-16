@@ -25,6 +25,10 @@
         {
           "name": "DB_URL",
           "valueFrom": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:webbills-db-dev:DB_URL::"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:webbills-db-dev:JWT_SECRET::"
         }
       ],
       "logConfiguration": {

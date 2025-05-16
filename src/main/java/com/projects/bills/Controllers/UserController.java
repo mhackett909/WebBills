@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
     private final UserService userService;
@@ -19,7 +18,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/api/v1/user")
+    @PostMapping("/api/v1/auth/create")
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
         if (userDTO.getUsername() == null || userDTO.getUsername().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
@@ -36,7 +35,7 @@ public class UserController {
         return new ResponseEntity<>(newUserDTO, HttpStatus.CREATED);
     }
 
-    @PostMapping("/api/v1/login")
+    @PostMapping("/api/v1/auth/login")
     public ResponseEntity<UserDTO> login(@RequestBody UserDTO userDTO) {
         if (userDTO.getUsername() == null || userDTO.getUsername().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");

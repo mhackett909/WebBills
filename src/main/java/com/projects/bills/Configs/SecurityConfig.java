@@ -1,28 +1,34 @@
 package com.projects.bills.Configs;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter; // Custom JWT Filter
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf
-                        // Disable CSRF for specific endpoints (like APIs)
-                        .ignoringRequestMatchers("/api/v1/**")
-                )
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/v1/**").permitAll()
-                        .requestMatchers("/actuator/health").permitAll()
-                        .anyRequest().authenticated()             // All other endpoints require authentication
+                        .requestMatchers("/api/v1/auth/login", "/api/v1/auth/create", "/actuator/health").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .formLogin(); // Enable form login for web access (with CSRF)
-
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

@@ -25,15 +25,16 @@ public class EntryService {
 		List<Entry> entries = entryRepository.findAll();
 		ArrayList<EntryDTO> entryList = new ArrayList<>();
 		for (Entry entry : entries) {
-			EntryDTO entryDTO = new EntryDTO();
-			entryDTO.setEntryId(entry.getId());
-			entryDTO.setName(entry.getBill().getName());
-			entryDTO.setDate(entry.getDate());
-			entryDTO.setAmount(entry.getAmount());
-			entryDTO.setStatus(entry.getStatus());
-			entryDTO.setServices(entry.getServices());
-			entryDTO.setFlow(entry.getFlow());
-			entryDTO.setArchived(isArchived(entry));
+			EntryDTO entryDTO = new EntryDTO(
+					entry.getId(),
+					entry.getBill().getName(),
+					entry.getDate(),
+					entry.getAmount(),
+					entry.getStatus(),
+					entry.getServices(),
+					entry.getFlow(),
+					isArchived(entry)
+			);
 			entryList.add(entryDTO);
 		}
 		return entryList;
