@@ -39,11 +39,15 @@ public class UserService {
 
     public UserDTO registerUser(UserDTO userDTO) {
         if (userRepository.existsByUsername(userDTO.getUsername())) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT, "Username already exists"
+            );
         }
 
         if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new IllegalArgumentException("Email already registered");
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT, "Email already registered"
+            );
         }
 
         User user = new User();
