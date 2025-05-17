@@ -18,7 +18,6 @@ public class UserDTO {
     private String password;
     private String newPassword;
     private String newEmail;
-    private String jwt;
     private String roles;
     private boolean enabled;
     private boolean mfaEnabled;

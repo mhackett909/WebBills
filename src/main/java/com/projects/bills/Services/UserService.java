@@ -1,5 +1,6 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.DTOs.AuthResponse;
 import com.projects.bills.DTOs.UserDTO;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Enums.UpdateType;
@@ -59,7 +60,7 @@ public class UserService {
         return mapToDTO(newUser);
     }
 
-    public UserDTO login(UserDTO userDTO) {
+    public AuthResponse login(UserDTO userDTO) {
         Optional<User> userOpt = userRepository.findByUsername(userDTO.getUsername());
 
         if (userOpt.isEmpty()) {
@@ -73,15 +74,18 @@ public class UserService {
             throw new IllegalArgumentException("Login failed");
         }
 
-        String jwt = jwtService.generateJwt(user.getUsername(), List.of(user.getRoles()));
-
         user.setLastLogin(java.time.LocalDateTime.now());
         userRepository.save(user);
 
-        UserDTO userWithToken = mapToDTO(user);
-        userWithToken.setJwt(jwt);
+        String jwt = jwtService.generateAccessToken(user.getUsername(), List.of(user.getRoles()));
+        String refreshToken = jwtService.generateRefreshToken(user.getUsername(), List.of(user.getRoles()));
 
-        return userWithToken;
+        AuthResponse authResponse = new AuthResponse();
+        authResponse.setUsername(user.getUsername());
+        authResponse.setAccessToken(jwt);
+        authResponse.setRefreshToken(refreshToken);
+
+        return authResponse;
     }
 
     public UserDTO updateUser(UserDTO userDTO) {
@@ -135,7 +139,6 @@ public class UserService {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                null,
                 null,
                 null,
                 null,
