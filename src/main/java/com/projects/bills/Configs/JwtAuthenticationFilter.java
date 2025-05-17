@@ -2,6 +2,7 @@ package com.projects.bills.Configs;
 
 import com.projects.bills.Services.JwtService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,10 +47,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String token = authorizationHeader.substring(7);
-        Claims claims = jwtService.validateJwt(token);
+        Claims claims = null;
+        try {
+            claims = jwtService.validateJwt(token);
+        } catch (ExpiredJwtException e) {
+          //  System.out.println("JWT Filter: JWT token expired");
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Invalid or expired JWT token");
+            return;
+        }
 
         if (claims == null) {
-//            System.out.println("JWT Filter: Invalid JWT token");
+           // System.out.println("JWT Filter: Invalid JWT token");
             SecurityContextHolder.clearContext();
             chain.doFilter(request, response);
             return;

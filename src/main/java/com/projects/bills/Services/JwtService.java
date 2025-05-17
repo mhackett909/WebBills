@@ -19,7 +19,21 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    public String generateJwt(String username, List<String> roles) {
+    @Value("${jwt.accessTokenExpirationMs}")
+    private long accessTokenExpirationMs;
+
+    @Value("${jwt.refreshTokenExpirationMs}")
+    private long refreshTokenExpirationMs;
+
+    public String generateAccessToken(String username, List<String> roles) {
+        return generateJwt(username, roles, accessTokenExpirationMs);
+    }
+
+    public String generateRefreshToken(String username, List<String> roles) {
+        return generateJwt(username, roles, refreshTokenExpirationMs);
+    }
+
+    private String generateJwt(String username, List<String> roles, long expirationMs) {
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         Key key = new SecretKeySpec(keyBytes, SignatureAlgorithm.HS512.getJcaName());
 
@@ -30,13 +44,12 @@ public class JwtService {
                 .setClaims(claims)
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hour expiration
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
 
     public Claims validateJwt(String token) {
-        try {
             byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
             Key key = new SecretKeySpec(keyBytes, SignatureAlgorithm.HS512.getJcaName());
             return Jwts.parserBuilder()
@@ -44,8 +57,6 @@ public class JwtService {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (Exception e) {
-            return null;
-        }
+
     }
 }
