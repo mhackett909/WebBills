@@ -57,8 +57,6 @@ public class EntryController {
 		return new ResponseEntity<>(updatedEntry, HttpStatus.OK);
 	}
 
-	// TODO Recycle entry
-
 	// TODO Get Stats
 
 	// TODO Export to CSV
@@ -81,6 +79,9 @@ public class EntryController {
 		}
 		if (entryDTO.getStatus() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is required");
+		}
+		if (entryDTO.getRecycle() == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Recycle status is required");
 		}
 
 		try {

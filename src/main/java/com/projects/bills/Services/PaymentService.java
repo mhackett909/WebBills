@@ -6,6 +6,7 @@ import com.projects.bills.Repositories.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class PaymentService {
 	}
 
 	public List<PaymentDTO> getPayments(Long entryId) {
-		List<Payment> payments = paymentRepository.findAllByEntryId(entryId);
+		List<Payment> payments = paymentRepository.findAllByEntryIdAndRecycleDateIsNull(entryId);
 		ArrayList<PaymentDTO> paymentList = new ArrayList<>();
 		for (Payment payment : payments) {
 			PaymentDTO paymentDTO = mapToPaymentDTO(payment);
@@ -59,7 +60,9 @@ public class PaymentService {
 		payment.setType(paymentDTO.getType());
 		payment.setMedium(paymentDTO.getMedium());
 		payment.setNotes(paymentDTO.getNotes());
-
+		if (paymentDTO.getRecycle() != null && paymentDTO.getRecycle()) {
+			payment.setRecycleDate(LocalDateTime.now());
+		}
 		Optional<Entry> entry = entryService.getEntryById(paymentDTO.getEntryId());
 		if (entry.isEmpty()) {
 			throw new IllegalArgumentException("Entry not found");
@@ -78,6 +81,7 @@ public class PaymentService {
 		dto.setType(payment.getType());
 		dto.setMedium(payment.getMedium());
 		dto.setNotes(payment.getNotes());
+		dto.setRecycle(payment.getRecycleDate() != null);
 		if (payment.getEntry() != null) {
 			dto.setEntryId(payment.getEntry().getId());
 		}

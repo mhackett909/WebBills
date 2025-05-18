@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class EntryService {
 
 		List<Bill> userBills = billService.getBills(userName);
 
-		List<Entry> entries = entryRepository.findAllByBillIn(userBills);
+		List<Entry> entries = entryRepository.findAllByBillInAndRecycleDateIsNull(userBills);
 
 		ArrayList<EntryDTO> entryList = new ArrayList<>();
 		for (Entry entry : entries) {
@@ -98,6 +99,7 @@ public class EntryService {
 				entry.getDate() != null ? entry.getDate().toLocalDate() : null,
 				entry.getAmount(),
 				entry.getStatus(),
+				entry.getRecycleDate() != null,
 				entry.getServices(),
 				entry.getFlow(),
 				isArchived(entry)
@@ -112,6 +114,10 @@ public class EntryService {
 		entry.setStatus(entryDTO.getStatus());
 		entry.setServices(entryDTO.getServices());
 		entry.setFlow(flowType.toString());
+		if (entryDTO.getRecycle() != null && entryDTO.getRecycle()) {
+			entry.setRecycleDate(LocalDateTime.now());
+			// TODO Cascade to payments
+		}
 		return entry;
 	}
 }

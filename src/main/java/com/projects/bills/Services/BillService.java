@@ -33,11 +33,11 @@ public class BillService {
 		List<Bill> bills;
 
 		if ("active".equalsIgnoreCase(filter)) {
-			bills = billRepository.findAllByStatusAndUser(true, realUser.get());
+			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNull(true, realUser.get());
 		} else if ("inactive".equalsIgnoreCase(filter)) {
-			bills = billRepository.findAllByStatusAndUser(false, realUser.get());
+			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNull(false, realUser.get());
 		} else {
-			bills = billRepository.findAllByUser(realUser.get());
+			bills = billRepository.findAllByUserAndRecycleDateIsNull(realUser.get());
 		}
 
 		for (Bill bill : bills) {
@@ -54,7 +54,7 @@ public class BillService {
 			throw new IllegalArgumentException("User not found");
 		}
 
-		return billRepository.findAllByUser(realUser.get());
+		return billRepository.findAllByUserAndRecycleDateIsNull(realUser.get());
 	}
 
 	public BillDTO getBill(Long id) {
