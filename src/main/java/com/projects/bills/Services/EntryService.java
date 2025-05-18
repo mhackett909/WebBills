@@ -3,6 +3,7 @@ import com.projects.bills.DTOs.BillDTO;
 import com.projects.bills.Entities.Bill;
 import com.projects.bills.Entities.Entry;
 import com.projects.bills.DTOs.EntryDTO;
+import com.projects.bills.Entities.User;
 import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Repositories.EntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +20,25 @@ import java.sql.Date;
 public class EntryService {
 	private final EntryRepository entryRepository;
 	private final BillService billService;
+	private final UserService userService;
 
 	@Autowired
-	public EntryService(EntryRepository entryRepository, BillService billService) {
+	public EntryService(EntryRepository entryRepository, BillService billService, UserService userService) {
 		this.billService = billService;
 		this.entryRepository = entryRepository;
-	}
-	//In reality, will be getting entries by some parameters (id, date range, bill name, isDue, isOverpaid, isPaid, amount range)
-	public List<EntryDTO> getEntries() {
-		List<Entry> entries = entryRepository.findAll();
+        this.userService = userService;
+    }
+
+	public List<EntryDTO> getEntries(String userName) {
+		Optional<User> realUser = userService.findByUsername(userName);
+		if (realUser.isEmpty()) {
+			throw new IllegalArgumentException("User not found");
+		}
+
+		List<Bill> userBills = billService.getBills(userName);
+
+		List<Entry> entries = entryRepository.findAllByBillIn(userBills);
+
 		ArrayList<EntryDTO> entryList = new ArrayList<>();
 		for (Entry entry : entries) {
 			EntryDTO entryDTO = mapToDTO(entry);
