@@ -2,8 +2,8 @@ package com.projects.bills.Controllers;
 
 import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.Enums.FlowType;
-import com.projects.bills.Services.BillService;
 import com.projects.bills.Services.EntryService;
+import com.projects.bills.Services.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,16 +16,21 @@ import java.util.List;
 @RestController
 public class EntryController {
 	private final EntryService entryService;
+	private final JwtService jwtService;
 
 	@Autowired
-	public EntryController(EntryService entryService, BillService billService) {
+	public EntryController(EntryService entryService, JwtService jwtService) {
 		this.entryService = entryService;
-    }
+		this.jwtService = jwtService;
+	}
 
-	// TODO filters
 	@GetMapping("/api/v1/entries")
-	public ResponseEntity<List<EntryDTO>> getEntries() {
-		List<EntryDTO> entries = entryService.getEntries();
+	public ResponseEntity<List<EntryDTO>> getEntries(
+			@RequestHeader("Authorization") String authHeader) {
+		String token = authHeader.replace("Bearer ", "");
+		String userName = jwtService.validateJwt(token).getSubject();
+
+		List<EntryDTO> entries = entryService.getEntries(userName);
 		return new ResponseEntity<>(entries, HttpStatus.OK);
 	}
 

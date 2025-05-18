@@ -22,16 +22,21 @@ public class BillService {
         this.userService = userService;
     }
 
-	public List<BillDTO> getBills(String filter) {
+	public List<BillDTO> getBillDtoList(String filter, String userName) {
+		Optional<User> realUser = userService.findByUsername(userName);
+		if (realUser.isEmpty()) {
+			throw new IllegalArgumentException("User not found");
+		}
+
 		List<BillDTO> billDtoList = new ArrayList<>();
 		List<Bill> bills;
 
 		if ("active".equalsIgnoreCase(filter)) {
-			bills = billRepository.findByStatus(true);
+			bills = billRepository.findAllByStatusAndUser(true, realUser.get());
 		} else if ("inactive".equalsIgnoreCase(filter)) {
-			bills = billRepository.findByStatus(false);
+			bills = billRepository.findAllByStatusAndUser(false, realUser.get());
 		} else {
-			bills = billRepository.findAll();
+			bills = billRepository.findAllByUser(realUser.get());
 		}
 
 		for (Bill bill : bills) {
@@ -40,6 +45,15 @@ public class BillService {
 		}
 
 		return billDtoList;
+	}
+
+	public List<Bill> getBills(String userName) {
+		Optional<User> realUser = userService.findByUsername(userName);
+		if (realUser.isEmpty()) {
+			throw new IllegalArgumentException("User not found");
+		}
+
+		return billRepository.findAllByUser(realUser.get());
 	}
 
 	public BillDTO getBill(Long id) {
@@ -51,15 +65,25 @@ public class BillService {
 	public Bill getBillEntityById(Long id) {
 		return billRepository.findById(id).orElse(null);
 	}
-	
-	public BillDTO saveBill(BillDTO billTransfer) {
+
+	public BillDTO saveBill(BillDTO billTransfer, boolean existing) {
 		String username = SecurityContextHolder.getContext().getAuthentication().getName();
 		Optional<User> user = userService.findByUsername(username);
 		if (user.isEmpty()) {
 			throw new IllegalArgumentException("User not found");
 		}
 
-		Bill bill = new Bill();
+		Bill bill;
+		if (existing) {
+			// Load existing bill by ID
+			bill = billRepository.findById(billTransfer.getId()).orElse(null);
+			if (bill == null) {
+				throw new IllegalArgumentException("Bill not found with id: " + billTransfer.getId());
+			}
+		} else {
+			bill = new Bill();
+		}
+
 		bill.setName(billTransfer.getName());
 		bill.setStatus(billTransfer.getStatus());
 		bill.setUser(user.get());
