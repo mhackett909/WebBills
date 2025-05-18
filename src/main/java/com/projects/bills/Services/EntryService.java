@@ -32,7 +32,7 @@ public class EntryService {
 	public List<EntryDTO> getEntries(String userName) {
 		Optional<User> realUser = userService.findByUsername(userName);
 		if (realUser.isEmpty()) {
-			throw new IllegalArgumentException("User not found");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 		}
 
 		List<Bill> userBills = billService.getBills(userName);
