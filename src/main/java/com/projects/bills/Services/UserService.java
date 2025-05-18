@@ -111,7 +111,7 @@ public class UserService {
         switch (getUpdateType(userDTO)) {
             case EMAIL -> updateEmail(userDTO, user);
             case PASSWORD -> updatePassword(userDTO, user);
-            case RECYCLE -> updateAccountRecycleDate(userDTO, user);
+            case RECYCLE -> user.setRecycleDate(LocalDateTime.now());
             default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No valid update operation specified");
         }
 
@@ -150,10 +150,6 @@ public class UserService {
         }
 
         user.setEmail(newEmail);
-    }
-
-    private void updateAccountRecycleDate(UserDTO userDTO, User user) {
-        user.setRecycleDate(LocalDateTime.now());
     }
 
     private UserDTO mapToDTO(User user) {
