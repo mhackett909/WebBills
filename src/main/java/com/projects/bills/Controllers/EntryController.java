@@ -2,7 +2,6 @@ package com.projects.bills.Controllers;
 
 import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.Enums.FlowType;
-import com.projects.bills.Services.BillService;
 import com.projects.bills.Services.EntryService;
 import com.projects.bills.Services.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ public class EntryController {
 	private final JwtService jwtService;
 
 	@Autowired
-	public EntryController(EntryService entryService, BillService billService, JwtService jwtService) {
+	public EntryController(EntryService entryService, JwtService jwtService) {
 		this.entryService = entryService;
 		this.jwtService = jwtService;
 	}
