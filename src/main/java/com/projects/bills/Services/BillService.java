@@ -4,7 +4,6 @@ import com.projects.bills.DTOs.BillDTO;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Repositories.BillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -23,19 +22,28 @@ public class BillService {
         this.userService = userService;
     }
 
-	//Need to take in a boolean for inactive billers
-	public List<BillDTO> getBills() {
-		List<Bill> bills = billRepository.findAll();
-		ArrayList<BillDTO> billList = new ArrayList<>();
+	public List<BillDTO> getBills(String filter) {
+		List<BillDTO> billDtoList = new ArrayList<>();
+		List<Bill> bills;
+
+		if ("active".equalsIgnoreCase(filter)) {
+			bills = billRepository.findByStatus(true);
+		} else if ("inactive".equalsIgnoreCase(filter)) {
+			bills = billRepository.findByStatus(false);
+		} else {
+			bills = billRepository.findAll();
+		}
+
 		for (Bill bill : bills) {
 			BillDTO billDTO = mapToDTO(bill);
-			billList.add(billDTO);
+			billDtoList.add(billDTO);
 		}
-		return billList;
+
+		return billDtoList;
 	}
 
-	public BillDTO getBill(String name) {
-		Bill bill = billRepository.findByName(name).orElse(null);
+	public BillDTO getBill(Long id) {
+		Bill bill = billRepository.findById(id).orElse(null);
 		if (bill == null) return null;
 		return mapToDTO(bill);
 	}

@@ -1,8 +1,5 @@
 package com.projects.bills.Controllers;
 
-import com.projects.bills.DTOs.BillDTO;
-import com.projects.bills.Entities.Bill;
-import com.projects.bills.Entities.Entry;
 import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Services.BillService;
@@ -13,20 +10,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
-import java.sql.Date;
 import java.util.List;
 
 
 @RestController
 public class EntryController {
 	private final EntryService entryService;
-	private final BillService billService;
-	
+
 	@Autowired
 	public EntryController(EntryService entryService, BillService billService) {
 		this.entryService = entryService;
-        this.billService = billService;
     }
 
 	// TODO filters
@@ -43,8 +36,32 @@ public class EntryController {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found with id: " + id));
 	}
 
-	@PostMapping("api/v1/new")
+	@PostMapping("api/v1/entries/new")
 	public ResponseEntity<EntryDTO> addEntry(@RequestBody EntryDTO entryDTO) {
+		validateDTO(entryDTO, false);
+
+		EntryDTO savedEntry = entryService.saveEntry(entryDTO, false);
+		return new ResponseEntity<>(savedEntry, HttpStatus.CREATED);
+	}
+
+	@PutMapping("api/v1/entries/edit")
+	public ResponseEntity<EntryDTO> editEntry(@RequestBody EntryDTO entryDTO) {
+		validateDTO(entryDTO, true);
+
+		EntryDTO updatedEntry = entryService.saveEntry(entryDTO, true);
+		return new ResponseEntity<>(updatedEntry, HttpStatus.OK);
+	}
+
+	// TODO Recycle entry
+
+	// TODO Get Stats
+
+	// TODO Export to CSV
+
+	private void validateDTO(EntryDTO entryDTO, boolean validateEntryId) {
+		if (validateEntryId && entryDTO.getEntryId() == 0) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry id is required");
+		}
 		if (entryDTO.getBillId() == 0) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill id is required");
 		}
@@ -61,27 +78,10 @@ public class EntryController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is required");
 		}
 
-		Bill bill = billService.getBillEntityById(entryDTO.getBillId());
-		if (bill == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill not found for name: " + entryDTO.getName());
-		}
-
-		FlowType type;
 		try {
-			type = FlowType.fromType(entryDTO.getFlow());
+			FlowType.fromType(entryDTO.getFlow());
 		} catch (IllegalArgumentException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid flow type: " + entryDTO.getFlow());
 		}
-
-		EntryDTO savedEntry = entryService.saveEntry(entryDTO, bill, type);
-		return new ResponseEntity<>(savedEntry, HttpStatus.CREATED);
 	}
-
-	// TODO Edit entry
-
-	// TODO Delete entry
-
-	// TODO Get Stats
-
-	// TODO Export to CSV
 }

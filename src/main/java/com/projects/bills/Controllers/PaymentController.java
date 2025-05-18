@@ -27,28 +27,37 @@ public class PaymentController {
 
 	@PostMapping("/api/v1/payments")
 	public PaymentDTO createPayment(@RequestBody PaymentDTO paymentDTO) {
-		verifyPaymentDTO(paymentDTO);
+		verifyPaymentDTO(paymentDTO, false);
 
 		return paymentService.createPayment(paymentDTO);
 	}
 
 	@PutMapping("/api/v1/payments")
 	public PaymentDTO updatePayment(@RequestBody PaymentDTO paymentDTO) {
-		verifyPaymentDTO(paymentDTO);
+		verifyPaymentDTO(paymentDTO, true);
 
 		return paymentService.updatePayment(paymentDTO);
 	}
 
-	private void verifyPaymentDTO(PaymentDTO paymentDTO) {
+	// TODO Recycle payment
+
+	private void verifyPaymentDTO(PaymentDTO paymentDTO, boolean verifyExisting) {
+		if (verifyExisting && paymentDTO.getPaymentId() == 0) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment ID is required for update");
+		}
+
 		if (paymentDTO.getAmount() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount is required");
 		}
+
 		if (paymentDTO.getDate() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date is required");
 		}
+
 		if (paymentDTO.getType() == null || paymentDTO.getType().isBlank()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Type is required");
 		}
+
 		if (paymentDTO.getMedium() == null || paymentDTO.getMedium().isBlank()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Medium is required");
 		}

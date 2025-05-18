@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Setter
 @Getter
@@ -16,7 +16,7 @@ public class EntryDTO {
 	private long entryId;
 	private long billId;
 	private String name;
-	private Date date;
+	private LocalDate date;
 	private BigDecimal amount;
 	private Boolean status;
 	private String services;

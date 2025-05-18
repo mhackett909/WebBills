@@ -1,5 +1,4 @@
 package com.projects.bills.Services;
-import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.Entities.Entry;
 import com.projects.bills.Entities.Payment;
 import com.projects.bills.DTOs.PaymentDTO;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.sql.Date;
 
 @Service
 public class PaymentService {
@@ -54,7 +54,7 @@ public class PaymentService {
 	}
 
 	private void buildPaymentFromDTO(PaymentDTO paymentDTO, Payment payment) {
-		payment.setDate(paymentDTO.getDate());
+		payment.setDate(Date.valueOf(paymentDTO.getDate()));
 		payment.setAmount(paymentDTO.getAmount());
 		payment.setType(paymentDTO.getType());
 		payment.setMedium(paymentDTO.getMedium());
@@ -73,7 +73,7 @@ public class PaymentService {
 		}
 		PaymentDTO dto = new PaymentDTO();
 		dto.setPaymentId(payment.getPaymentId());
-		dto.setDate(payment.getDate());
+		dto.setDate(payment.getDate() != null ? payment.getDate().toLocalDate() : null);
 		dto.setAmount(payment.getAmount());
 		dto.setType(payment.getType());
 		dto.setMedium(payment.getMedium());

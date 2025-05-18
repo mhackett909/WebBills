@@ -20,7 +20,7 @@ body:json {
 script:post-response {
   // Parse the response body
   const responseBody = res.body;
-  const jwt = responseBody.jwt;
+  const jwt = responseBody.accessToken;
   
   // Save JWT using Bruno's scripting context
   if (jwt) {

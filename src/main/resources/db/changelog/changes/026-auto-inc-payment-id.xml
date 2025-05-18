@@ -1,0 +1,27 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- MySQL: set AUTO_INCREMENT -->
+    <changeSet id="026-auto-inc-payment-id-mysql" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE payment MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT;
+        </sql>
+    </changeSet>
+
+    <!-- H2: set IDENTITY (auto-increment) -->
+    <changeSet id="026-auto-inc-payment-id-h2" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="h2"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE payment ALTER COLUMN id BIGINT AUTO_INCREMENT;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
