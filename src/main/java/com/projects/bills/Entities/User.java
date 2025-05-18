@@ -44,6 +44,9 @@ public class User {
     @Column(name = "mfa_secret")
     private String mfaSecret;
 
+    @Column(name = "recycle_date")
+    private LocalDateTime recycleDate;
+
     @OneToMany(mappedBy = "user")
     @OrderBy("name DESC")
     private List<Bill> bills;

@@ -21,6 +21,7 @@ public class UserDTO {
     private String roles;
     private boolean enabled;
     private boolean mfaEnabled;
+    private boolean recycle;
     private LocalDateTime createdAt;
     private LocalDateTime lastLogin;
 }

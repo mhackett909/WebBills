@@ -6,11 +6,14 @@ import com.projects.bills.Entities.User;
 import com.projects.bills.Enums.UpdateType;
 import com.projects.bills.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -39,16 +42,16 @@ public class UserService {
 
     public UserDTO registerUser(UserDTO userDTO) {
         if (userRepository.existsByUsername(userDTO.getUsername())) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.CONFLICT, "Username already exists"
-            );
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
         }
 
         if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.CONFLICT, "Email already registered"
-            );
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
+
+        validatePasswordStrength(userDTO.getPassword());
+
+        validateEmailFormat(userDTO.getEmail());
 
         User user = new User();
         user.setUsername(userDTO.getUsername());
@@ -57,7 +60,7 @@ public class UserService {
         user.setEnabled(true);
         user.setRoles("ROLE_USER");
         user.setMfaEnabled(false);
-        user.setCreatedAt(java.time.LocalDateTime.now());
+        user.setCreatedAt(LocalDateTime.now());
 
         User newUser = userRepository.save(user);
 
@@ -72,13 +75,14 @@ public class UserService {
             userOpt = userRepository.findByEmail(userDTO.getUsername());
         }
 
-        User user = userOpt.orElseThrow(() -> new IllegalArgumentException("Login failed"));
+        User user = userOpt.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed"));
 
         if (!passwordService.verifyPassword(userDTO.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Login failed");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed");
         }
 
-        user.setLastLogin(java.time.LocalDateTime.now());
+        user.setLastLogin(LocalDateTime.now());
+        user.setRecycleDate(null);
         userRepository.save(user);
 
         String jwt = jwtService.generateAccessToken(user.getUsername(), List.of(user.getRoles()));
@@ -94,21 +98,21 @@ public class UserService {
 
     public UserDTO updateUser(UserDTO userDTO) {
         if (userDTO.getId() == null) {
-            throw new IllegalArgumentException("User ID is required for update");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is required for update");
         }
 
         User user = userRepository.findById(userDTO.getId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         if (!passwordService.verifyPassword(userDTO.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Login failed");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed");
         }
 
         switch (getUpdateType(userDTO)) {
             case EMAIL -> updateEmail(userDTO, user);
             case PASSWORD -> updatePassword(userDTO, user);
-            case STATUS -> updateAccountStatus(userDTO, user);
-            default -> throw new IllegalArgumentException("No valid update operation specified");
+            case RECYCLE -> updateAccountRecycleDate(userDTO, user);
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No valid update operation specified");
         }
 
         User savedUser = userRepository.save(user);
@@ -116,26 +120,40 @@ public class UserService {
     }
 
     private void updatePassword(UserDTO userDTO, User user) {
-        // TODO Password format validation
+        if (userDTO.getPassword() == null || userDTO.getPassword().isBlank() ||
+                userDTO.getNewPassword() == null || userDTO.getNewPassword().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current and new password are required");
+        }
+
+        if (userDTO.getPassword().equals(userDTO.getNewPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be the same as the current password");
+        }
+
+        validatePasswordStrength(userDTO.getNewPassword());
+
         user.setPassword(passwordService.hashPassword(userDTO.getNewPassword()));
     }
 
     private void updateEmail(UserDTO userDTO, User user) {
-        // TODO Email format validation
-
         String newEmail = Optional.ofNullable(userDTO.getNewEmail())
                 .filter(email -> !email.isBlank())
-                .orElseThrow(() -> new IllegalArgumentException("New email is required"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "New email is required"));
+
+        if (user.getEmail().equals(newEmail)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New email cannot be the same as the current email");
+        }
+
+        validateEmailFormat(newEmail);
 
         if (userRepository.existsByEmail(newEmail)) {
-            throw new IllegalArgumentException("Email already registered");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
 
         user.setEmail(newEmail);
     }
 
-    private void updateAccountStatus(UserDTO userDTO, User user) {
-        user.setEnabled(userDTO.isEnabled());
+    private void updateAccountRecycleDate(UserDTO userDTO, User user) {
+        user.setRecycleDate(LocalDateTime.now());
     }
 
     private UserDTO mapToDTO(User user) {
@@ -149,6 +167,7 @@ public class UserService {
                 user.getRoles(),
                 user.isEnabled(),
                 user.isMfaEnabled(),
+                user.getRecycleDate() != null,
                 user.getCreatedAt(),
                 user.getLastLogin()
         );
@@ -157,7 +176,28 @@ public class UserService {
     private UpdateType getUpdateType(UserDTO userDTO) {
         if (userDTO.getNewEmail() != null) return UpdateType.EMAIL;
         if (userDTO.getNewPassword() != null) return UpdateType.PASSWORD;
-        if (!userDTO.isEnabled()) return UpdateType.STATUS;
+        if (userDTO.isRecycle()) return UpdateType.RECYCLE;
         return UpdateType.NONE;
+    }
+
+    private void validatePasswordStrength(String password) {
+        // At least 8 chars, one upper, one lower, one digit, one special char
+        String pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+        if (password == null || !password.matches(pattern)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Password must be at least 8 characters long and include uppercase, lowercase, digit, and special character"
+            );
+        }
+    }
+
+    private void validateEmailFormat(String email) {
+        String pattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        if (email == null || !email.matches(pattern)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid email format"
+            );
+        }
     }
 }

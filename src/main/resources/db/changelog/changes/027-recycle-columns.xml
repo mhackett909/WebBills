@@ -1,0 +1,22 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="027-recycle-columns" author="mph">
+        <addColumn tableName="users">
+            <column name="recycle_date" type="timestamp"/>
+        </addColumn>
+        <addColumn tableName="payment">
+            <column name="recycle_date" type="timestamp"/>
+        </addColumn>
+        <addColumn tableName="entry">
+            <column name="recycle_date" type="timestamp"/>
+        </addColumn>
+        <addColumn tableName="bill">
+            <column name="recycle_date" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
