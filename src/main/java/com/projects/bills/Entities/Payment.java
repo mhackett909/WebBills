@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -20,6 +21,9 @@ public class Payment {
 	private String type;
 	private String medium;
 	private String notes;
+
+	@Column(name = "recycle_date")
+	private LocalDateTime recycleDate;
 	
 	@ManyToOne
 	@JoinColumn(name="entryID")

@@ -39,8 +39,6 @@ public class PaymentController {
 		return paymentService.updatePayment(paymentDTO);
 	}
 
-	// TODO Recycle payment
-
 	private void verifyPaymentDTO(PaymentDTO paymentDTO, boolean verifyExisting) {
 		if (verifyExisting && paymentDTO.getPaymentId() == 0) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment ID is required for update");
@@ -60,6 +58,9 @@ public class PaymentController {
 
 		if (paymentDTO.getMedium() == null || paymentDTO.getMedium().isBlank()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Medium is required");
+		}
+		if (paymentDTO.getRecycle() == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Recycle is required");
 		}
 	}
 }

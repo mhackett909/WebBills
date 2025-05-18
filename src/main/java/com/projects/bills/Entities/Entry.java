@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -21,6 +22,9 @@ public class Entry {
 	private String name; // obsolete, keeping for now
 	private String services;
 	private String flow;
+
+	@Column(name = "recycle_date")
+	private LocalDateTime recycleDate;
 
 	@OneToMany(mappedBy="entry")
 	@OrderBy("date DESC")

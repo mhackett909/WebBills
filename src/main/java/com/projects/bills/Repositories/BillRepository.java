@@ -10,8 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface BillRepository extends JpaRepository<Bill, Long> {
-    Optional<Bill> findByName(String name);
-    List<Bill> findAllByUser(User user);
-    List<Bill> findAllByStatusAndUser(Boolean status, User user);
-    void deleteByName(String name);
+    List<Bill> findAllByUserAndRecycleDateIsNull(User user);
+    List<Bill> findAllByStatusAndUserAndRecycleDateIsNull(Boolean status, User user);
 }
