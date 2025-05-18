@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -88,14 +89,13 @@ public class BillService {
 		bill.setStatus(billTransfer.getStatus());
 		bill.setUser(user.get());
 
+		if (billTransfer.getRecycle()) {
+			bill.setRecycleDate(LocalDateTime.now());
+			// TODO mark all entries and payments for this bill as recycled
+		}
+
 		Bill updatedBill = billRepository.save(bill);
 		return mapToDTO(updatedBill);
-	}
-
-	public BillDTO delBill(String name) {
-		Optional<Bill> bill = billRepository.findByName(name);
-		bill.ifPresent(billRepository::delete);
-		return bill.map(BillService::mapToDTO).orElse(null);
 	}
 
 	public static BillDTO mapToDTO(Bill bill) {
@@ -104,6 +104,7 @@ public class BillService {
 		billDTO.setId(bill.getBillId());
 		billDTO.setName(bill.getName());
 		billDTO.setStatus(bill.getStatus());
+		billDTO.setRecycle(bill.getRecycleDate() != null);
 		return billDTO;
 	}
 }

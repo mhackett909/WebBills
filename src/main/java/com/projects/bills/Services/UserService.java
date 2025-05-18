@@ -176,7 +176,7 @@ public class UserService {
     private UpdateType getUpdateType(UserDTO userDTO) {
         if (userDTO.getNewEmail() != null) return UpdateType.EMAIL;
         if (userDTO.getNewPassword() != null) return UpdateType.PASSWORD;
-        if (userDTO.isRecycle()) return UpdateType.RECYCLE;
+        if (userDTO.getRecycle() != null) return UpdateType.RECYCLE;
         return UpdateType.NONE;
     }
 

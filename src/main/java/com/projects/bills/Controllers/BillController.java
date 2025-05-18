@@ -54,18 +54,6 @@ public class BillController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(savedBill);
 	}
 
-	@DeleteMapping("/api/v1/bills")
-	public ResponseEntity<BillDTO> delBill(@RequestBody BillDTO billTransfer) {
-		if (billTransfer.getName() == null || billTransfer.getName().isBlank())
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid bill name");
-
-		BillDTO deleted = billService.delBill(billTransfer.getName());
-		if (deleted == null)
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill does not exist: " + billTransfer.getName());
-
-		return new ResponseEntity<>(deleted, HttpStatus.OK);
-	}
-
 	@PutMapping("/api/v1/bills")
 	public ResponseEntity<BillDTO> editBill(@RequestBody BillDTO billTransfer) {
 		if (billTransfer.getId() == 0) {
@@ -77,10 +65,12 @@ public class BillController {
 		if (billTransfer.getStatus() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill status is required");
 		}
+		if (billTransfer.getRecycle() == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill recycle status is required");
+		}
 
 		BillDTO updatedBill = billService.saveBill(billTransfer, true);
 		return ResponseEntity.ok(updatedBill);
 	}
 
-	// TODO Recycle Bin
 }

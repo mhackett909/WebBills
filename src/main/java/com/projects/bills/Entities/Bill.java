@@ -3,6 +3,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -16,6 +17,9 @@ public class Bill {
 	private long billId;
 	private String name;
 	private Boolean status; //isArchived
+
+	@Column(name = "recycle_date")
+	private LocalDateTime recycleDate;
 
 	@ManyToOne
 	@JoinColumn(name="userID", referencedColumnName = "id")
