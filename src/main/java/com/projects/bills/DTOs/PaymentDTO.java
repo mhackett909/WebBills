@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -15,7 +15,7 @@ import java.sql.Date;
 public class PaymentDTO {
 	private long paymentId;
 	private long entryId;
-	private Date date;
+	private LocalDate date;
 	private BigDecimal amount;
 	private String type;
 	private String medium;

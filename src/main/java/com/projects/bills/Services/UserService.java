@@ -1,6 +1,6 @@
 package com.projects.bills.Services;
 
-import com.projects.bills.DTOs.AuthResponse;
+import com.projects.bills.DTOs.AuthDTO;
 import com.projects.bills.DTOs.UserDTO;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Enums.UpdateType;
@@ -64,7 +64,7 @@ public class UserService {
         return mapToDTO(newUser);
     }
 
-    public AuthResponse login(UserDTO userDTO) {
+    public AuthDTO login(UserDTO userDTO) {
         Optional<User> userOpt = userRepository.findByUsername(userDTO.getUsername());
 
         if (userOpt.isEmpty()) {
@@ -84,12 +84,12 @@ public class UserService {
         String jwt = jwtService.generateAccessToken(user.getUsername(), List.of(user.getRoles()));
         String refreshToken = jwtService.generateRefreshToken(user.getUsername(), List.of(user.getRoles()));
 
-        AuthResponse authResponse = new AuthResponse();
-        authResponse.setUsername(user.getUsername());
-        authResponse.setAccessToken(jwt);
-        authResponse.setRefreshToken(refreshToken);
+        AuthDTO authDTO = new AuthDTO();
+        authDTO.setUsername(user.getUsername());
+        authDTO.setAccessToken(jwt);
+        authDTO.setRefreshToken(refreshToken);
 
-        return authResponse;
+        return authDTO;
     }
 
     public UserDTO updateUser(UserDTO userDTO) {

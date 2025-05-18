@@ -6,11 +6,14 @@ import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Repositories.EntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.sql.Date;
 
 @Service
 public class EntryService {
@@ -41,21 +44,34 @@ public class EntryService {
 		return entryRepository.findById(id);
 	}
 
-	public EntryDTO saveEntry(EntryDTO entryDTO, Bill bill, FlowType type) {
-		Entry entry = new Entry();
-		entry.setBill(bill);
-		entry.setDate(entryDTO.getDate());
-		entry.setAmount(entryDTO.getAmount());
-		entry.setStatus(entryDTO.getStatus());
-		entry.setServices(entryDTO.getServices());
-		entry.setFlow(type.toString());
+	public EntryDTO saveEntry(EntryDTO entryDTO, boolean existing) {
+		Entry entry;
+		if (existing) {
+			// Check if entry exists
+			Optional<Entry> existingEntry = getEntryById(entryDTO.getEntryId());
+			if (existingEntry.isEmpty()) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found with id: " + entryDTO.getEntryId());
+			}
+			entry = existingEntry.get();
+		} else {
+			entry = new Entry();
+		}
 
-		Entry savedEntry = entryRepository.save(entry);
+		Bill bill = billService.getBillEntityById(entryDTO.getBillId());
+		if (bill == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill not found for id: " + entryDTO.getBillId());
+		}
+
+		FlowType type = FlowType.fromType(entryDTO.getFlow());
+
+		Entry mappedEntry = mapToEntity(entryDTO, entry, bill, type);
+
+		Entry savedEntry = entryRepository.save(mappedEntry);
 		return mapToDTO(savedEntry);
 	}
 
 	private boolean isArchived(Entry entry) {
-		BillDTO bill = billService.getBill(entry.getBill().getName());
+		BillDTO bill = billService.getBill(entry.getBill().getBillId());
 		if (bill == null || bill.getStatus() == null) {
 			return false;
 		}
@@ -68,12 +84,23 @@ public class EntryService {
 				entry.getId(),
 				entry.getBill().getBillId(),
 				entry.getBill().getName(), // Not using entry.getBill().getName() because it is legacy
-				entry.getDate(),
+				entry.getDate() != null ? entry.getDate().toLocalDate() : null,
 				entry.getAmount(),
 				entry.getStatus(),
 				entry.getServices(),
 				entry.getFlow(),
 				isArchived(entry)
 		);
+	}
+
+	private Entry mapToEntity(EntryDTO entryDTO, Entry entry, Bill bill, FlowType flowType) {
+		entry.setId(entryDTO.getEntryId());
+		entry.setBill(bill);
+		entry.setDate(Date.valueOf(entryDTO.getDate()));
+		entry.setAmount(entryDTO.getAmount());
+		entry.setStatus(entryDTO.getStatus());
+		entry.setServices(entryDTO.getServices());
+		entry.setFlow(flowType.toString());
+		return entry;
 	}
 }

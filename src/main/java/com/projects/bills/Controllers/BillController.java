@@ -1,5 +1,4 @@
 package com.projects.bills.Controllers;
-import com.projects.bills.Entities.Bill;
 import com.projects.bills.DTOs.BillDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,20 +18,16 @@ public class BillController {
 	}
 
 	@GetMapping("/api/v1/bills")
-	public ResponseEntity<List<BillDTO>> getBills() {
-		List<BillDTO> bills = billService.getBills();
+	public ResponseEntity<List<BillDTO>> getBills(@RequestParam(required = false) String filter) {
+		List<BillDTO> bills = billService.getBills(filter);
 		return new ResponseEntity<>(bills, HttpStatus.OK);
 	}
 
-	@GetMapping("/api/v1/bills/{name}")
-	public ResponseEntity<BillDTO> getBillsByName(@PathVariable("name") String name) {
-		if (name == null || name.isBlank()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Bill name");
-		}
-
-		BillDTO bill = billService.getBill(name);
+	@GetMapping("/api/v1/bills/{id}")
+	public ResponseEntity<BillDTO> getBillsById(@PathVariable("id") Long id) {
+		BillDTO bill = billService.getBill(id);
 		if (bill == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill does not exist: " + name);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill does not exist by id: " + id);
 		}
 
 		return new ResponseEntity<>(bill, HttpStatus.OK);

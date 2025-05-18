@@ -1,11 +1,11 @@
 meta {
-  name: New Entry
+  name: Edit Entry
   type: http
-  seq: 3
+  seq: 4
 }
 
-post {
-  url: {{BILLS_URL}}/api/v1/entries/new
+put {
+  url: {{BILLS_URL}}/api/v1/entries/edit
   body: json
   auth: bearer
 }
@@ -17,8 +17,9 @@ auth:bearer {
 body:json {
   {
     "billId": 2,
+    "entryId": 44,
     "date": "2025-05-20",
-    "amount": 987.56,
+    "amount": 987.55,
     "services": "Gas Meter Reading",
     "flow": "Expense",
     "status": 0
