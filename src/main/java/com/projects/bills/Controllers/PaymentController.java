@@ -44,6 +44,10 @@ public class PaymentController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment ID is required for update");
 		}
 
+		if (paymentDTO.getEntryId() == 0) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry ID is required");
+		}
+
 		if (paymentDTO.getAmount() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount is required");
 		}
@@ -59,6 +63,7 @@ public class PaymentController {
 		if (paymentDTO.getMedium() == null || paymentDTO.getMedium().isBlank()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Medium is required");
 		}
+
 		if (paymentDTO.getRecycle() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Recycle is required");
 		}

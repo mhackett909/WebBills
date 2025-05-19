@@ -46,6 +46,7 @@ public class BillController {
 	public ResponseEntity<BillDTO> newBill(@RequestBody BillDTO billTransfer) {
 		if (billTransfer.getName() == null || billTransfer.getName().isBlank())
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid bill name");
+
 		if (billTransfer.getStatus() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill status is required");
 		}

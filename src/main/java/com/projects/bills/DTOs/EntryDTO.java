@@ -23,4 +23,5 @@ public class EntryDTO {
 	private String services;
 	private String flow;
 	private Boolean archived;
+	private Boolean overpaid;
 }

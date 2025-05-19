@@ -4,6 +4,7 @@ import com.projects.bills.DTOs.UserDTO;
 import com.projects.bills.Services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -23,6 +24,12 @@ public class UserController {
         if (userName == null || userName.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
         }
+
+        String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!userName.equalsIgnoreCase(requestingUser)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to access this user");
+        }
+
         Optional<UserDTO> userDTO = userService.findDtoByUsername(userName);
         if (userDTO.isPresent()) {
             return new ResponseEntity<>(userDTO.get(), HttpStatus.OK);

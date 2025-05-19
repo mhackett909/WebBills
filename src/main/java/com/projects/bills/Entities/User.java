@@ -12,7 +12,6 @@ import java.util.List;
 @Setter
 @Table(name = "users")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -50,16 +49,4 @@ public class User {
     @OneToMany(mappedBy = "user")
     @OrderBy("name DESC")
     private List<Bill> bills;
-
-    // Constructors
-    public User() {
-    }
-
-    public User(String username, String password, String email, boolean enabled, String roles) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.enabled = enabled;
-        this.roles = roles;
-    }
 }

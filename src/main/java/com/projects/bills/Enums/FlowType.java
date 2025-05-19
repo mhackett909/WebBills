@@ -1,5 +1,8 @@
 package com.projects.bills.Enums;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 public enum FlowType {
     INCOMING("Income"),
     OUTGOING("Expense");
@@ -20,6 +23,15 @@ public enum FlowType {
                 return flowType;
             }
         }
-        throw new IllegalArgumentException("Invalid FlowType: " + type);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid FlowType: " + type);
+    }
+
+    public static String fromName(String name) {
+        for (FlowType flowType : FlowType.values()) {
+            if (flowType.name().equalsIgnoreCase(name)) {
+                return flowType.getType();
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid FlowType Name: " + name);
     }
 }

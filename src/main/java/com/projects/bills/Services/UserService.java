@@ -7,6 +7,7 @@ import com.projects.bills.Enums.UpdateType;
 import com.projects.bills.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -97,12 +98,17 @@ public class UserService {
     }
 
     public UserDTO updateUser(UserDTO userDTO) {
-        if (userDTO.getId() == null) {
+        if (userDTO.getId() == null || userDTO.getId() == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is required for update");
         }
 
         User user = userRepository.findById(userDTO.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!user.getUsername().equalsIgnoreCase(requestingUser)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this user");
+        }
 
         if (!passwordService.verifyPassword(userDTO.getPassword(), user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Login failed");
