@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface EntryRepository extends JpaRepository<Entry, Long> {
-    List<Entry> findAllByBillInAndRecycleDateIsNull(List<Bill> bills);
+    List<Entry> findAllByBillInAndRecycleDateIsNullOrderByDateDesc(List<Bill> bills);    Entry findByIdAndRecycleDateIsNull(long id);
 }

@@ -28,9 +28,4 @@ public class Payment {
 	@ManyToOne
 	@JoinColumn(name="entryID")
 	private Entry entry;
-
-	@Override
-	public String toString() {
-		return "Payment{" + "id=" + paymentId + ", entryID=" + entry.getId() + ", date=" + date + ", amount=" + amount + ", type='" + type + '\'' + ", medium='" + medium + '\'' + ", notes='" + notes + '\'' + '}';
-	}
 }

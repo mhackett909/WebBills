@@ -28,13 +28,4 @@ public class Bill {
 	@OneToMany(mappedBy="bill")
 	@OrderBy("date DESC")
 	private List<Entry> entries;
-
-	@Override
-	public String toString() {
-		return "Bill{" +
-				"billId=" + billId +
-				", name='" + name + '\'' +
-				", status=" + status +
-				'}';
-	}
 }

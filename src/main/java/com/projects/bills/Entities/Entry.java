@@ -26,6 +26,12 @@ public class Entry {
 	@Column(name = "recycle_date")
 	private LocalDateTime recycleDate;
 
+	@Column(name = "invoiceID")
+	private long invoiceId;
+
+	@Column(name = "overpaid")
+	private Boolean overpaid;
+
 	@OneToMany(mappedBy="entry")
 	@OrderBy("date DESC")
 	private List<Payment> payments;
@@ -33,16 +39,4 @@ public class Entry {
 	@ManyToOne
 	@JoinColumn(name="billID", referencedColumnName = "id")
 	private Bill bill;
-
-	@Override
-	public String toString() {
-		return "Entry{" +
-				"id=" + id +
-				", date=" + date +
-				", amount=" + amount +
-				", status=" + status +
-				", services='" + services + '\'' +
-				", flow='" + flow + '\'' +
-				'}';
-	}
 }

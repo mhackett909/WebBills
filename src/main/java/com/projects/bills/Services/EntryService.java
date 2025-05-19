@@ -8,6 +8,7 @@ import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Repositories.EntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -38,7 +39,7 @@ public class EntryService {
 
 		List<Bill> userBills = billService.getBills(userName);
 
-		List<Entry> entries = entryRepository.findAllByBillInAndRecycleDateIsNull(userBills);
+		List<Entry> entries = entryRepository.findAllByBillInAndRecycleDateIsNullOrderByDateDesc(userBills);
 
 		ArrayList<EntryDTO> entryList = new ArrayList<>();
 		for (Entry entry : entries) {
@@ -49,10 +50,18 @@ public class EntryService {
 	}
 
 	public Optional<EntryDTO> getEntryDtoById(Long id) {
-		return entryRepository.findById(id).map(this::mapToDTO);
+		Optional<Entry> entry = Optional.ofNullable(entryRepository.findByIdAndRecycleDateIsNull(id));
+		if (entry.isPresent()) {
+			User user = entry.get().getBill().getUser();
+			String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
+			if (!user.getUsername().equalsIgnoreCase(requestingUser)) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this entry");
+			}
+		}
+		return entry.map(this::mapToDTO);
 	}
 
-	public Optional<Entry> getEntryById(Long id) {
+	protected Optional<Entry> getEntryById(Long id) {
 		return entryRepository.findById(id);
 	}
 
@@ -65,6 +74,19 @@ public class EntryService {
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found with id: " + entryDTO.getEntryId());
 			}
 			entry = existingEntry.get();
+
+			String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
+			if (!entry.getBill().getUser().getUsername().equalsIgnoreCase(requestingUser)) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this invoice");
+			}
+
+			if (entry.getRecycleDate() != null) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update a recycled entry");
+			}
+
+			if (!entry.getBill().getStatus()) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update an entry linked to an archived party");
+			}
 		} else {
 			entry = new Entry();
 		}
@@ -72,6 +94,11 @@ public class EntryService {
 		Bill bill = billService.getBillEntityById(entryDTO.getBillId());
 		if (bill == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill not found for id: " + entryDTO.getBillId());
+		}
+
+		String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
+		if (!bill.getUser().getUsername().equalsIgnoreCase(requestingUser)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this bill");
 		}
 
 		FlowType type = FlowType.fromType(entryDTO.getFlow());
@@ -102,7 +129,8 @@ public class EntryService {
 				entry.getRecycleDate() != null,
 				entry.getServices(),
 				entry.getFlow(),
-				isArchived(entry)
+				isArchived(entry),
+				entry.getOverpaid()
 		);
 	}
 
@@ -114,6 +142,7 @@ public class EntryService {
 		entry.setStatus(entryDTO.getStatus());
 		entry.setServices(entryDTO.getServices());
 		entry.setFlow(flowType.toString());
+		entry.setOverpaid(entryDTO.getOverpaid());
 		if (entryDTO.getRecycle() != null && entryDTO.getRecycle()) {
 			entry.setRecycleDate(LocalDateTime.now());
 			// TODO Cascade to payments

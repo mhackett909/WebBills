@@ -4,8 +4,10 @@ import com.projects.bills.DTOs.BillDTO;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Repositories.BillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,21 +25,39 @@ public class BillService {
         this.userService = userService;
     }
 
-	public List<BillDTO> getBillDtoList(String filter, String userName) {
+	protected List<Bill> getBills(String userName) {
 		Optional<User> realUser = userService.findByUsername(userName);
 		if (realUser.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+		}
+
+		return billRepository.findAllByUserAndRecycleDateIsNull(realUser.get());
+	}
+
+	protected Bill getBillEntityById(Long id) {
+		return billRepository.findById(id).orElse(null);
+	}
+
+	public List<BillDTO> getBillDtoList(String filter, String userName) {
+		Optional<User> user = userService.findByUsername(userName);
+		if (user.isEmpty()) {
 			throw new IllegalArgumentException("User not found");
+		}
+
+		String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
+		if (!user.get().getUsername().equalsIgnoreCase(requestingUser)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access these bills");
 		}
 
 		List<BillDTO> billDtoList = new ArrayList<>();
 		List<Bill> bills;
 
 		if ("active".equalsIgnoreCase(filter)) {
-			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNull(true, realUser.get());
+			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNull(true, user.get());
 		} else if ("inactive".equalsIgnoreCase(filter)) {
-			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNull(false, realUser.get());
+			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNull(false, user.get());
 		} else {
-			bills = billRepository.findAllByUserAndRecycleDateIsNull(realUser.get());
+			bills = billRepository.findAllByUserAndRecycleDateIsNull(user.get());
 		}
 
 		for (Bill bill : bills) {
@@ -48,30 +68,27 @@ public class BillService {
 		return billDtoList;
 	}
 
-	public List<Bill> getBills(String userName) {
-		Optional<User> realUser = userService.findByUsername(userName);
-		if (realUser.isEmpty()) {
-			throw new IllegalArgumentException("User not found");
-		}
-
-		return billRepository.findAllByUserAndRecycleDateIsNull(realUser.get());
-	}
-
 	public BillDTO getBill(Long id) {
 		Bill bill = billRepository.findById(id).orElse(null);
 		if (bill == null) return null;
-		return mapToDTO(bill);
-	}
 
-	public Bill getBillEntityById(Long id) {
-		return billRepository.findById(id).orElse(null);
+		String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
+		if (!bill.getUser().getUsername().equalsIgnoreCase(requestingUser)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this bill");
+		}
+
+		if (bill.getRecycleDate() != null) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bill is recycled");
+		}
+
+		return mapToDTO(bill);
 	}
 
 	public BillDTO saveBill(BillDTO billTransfer, boolean existing) {
 		String username = SecurityContextHolder.getContext().getAuthentication().getName();
 		Optional<User> user = userService.findByUsername(username);
 		if (user.isEmpty()) {
-			throw new IllegalArgumentException("User not found");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 		}
 
 		Bill bill;
@@ -79,7 +96,7 @@ public class BillService {
 			// Load existing bill by ID
 			bill = billRepository.findById(billTransfer.getId()).orElse(null);
 			if (bill == null) {
-				throw new IllegalArgumentException("Bill not found with id: " + billTransfer.getId());
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found with id: " + billTransfer.getId());
 			}
 		} else {
 			bill = new Bill();
