@@ -145,7 +145,6 @@ public class EntryService {
 		entry.setOverpaid(entryDTO.getOverpaid());
 		if (entryDTO.getRecycle() != null && entryDTO.getRecycle()) {
 			entry.setRecycleDate(LocalDateTime.now());
-			// TODO Cascade to payments
 		}
 		return entry;
 	}

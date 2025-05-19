@@ -108,7 +108,6 @@ public class BillService {
 
 		if (billTransfer.getRecycle()) {
 			bill.setRecycleDate(LocalDateTime.now());
-			// TODO mark all entries and payments for this bill as recycled
 		}
 
 		Bill updatedBill = billRepository.save(bill);
