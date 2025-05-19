@@ -87,7 +87,6 @@ public class RecycleService {
         recycleDTO.setEntityType(EntityType.PARTY.getValue());
         recycleDTO.setRecycleDate(bill.getRecycleDate());
         recycleDTO.setPartyName(bill.getName());
-        recycleDTO.setInvoiceNumber(bill.getBillId());
         recycleDTO.setType(bill.getStatus() ? "Active" : "Archived");
         return recycleDTO;
     }
