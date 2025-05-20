@@ -25,6 +25,15 @@ public class PaymentController {
 		return paymentService.getPayments(entryId);
 	}
 
+	@GetMapping("/api/v1/payments/{id}")
+	public PaymentDTO getPaymentById(@PathVariable("id") Long paymentId) {
+		if (paymentId == null || paymentId == 0) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment ID is required");
+		}
+
+		return paymentService.getPaymentById(paymentId);
+	}
+
 	@PostMapping("/api/v1/payments")
 	public PaymentDTO createPayment(@RequestBody PaymentDTO paymentDTO) {
 		verifyPaymentDTO(paymentDTO, false);
@@ -33,10 +42,10 @@ public class PaymentController {
 	}
 
 	@PutMapping("/api/v1/payments")
-	public PaymentDTO updatePayment(@RequestBody PaymentDTO paymentDTO) {
+	public PaymentDTO updatePayment(@RequestBody PaymentDTO paymentDTO, @RequestParam(required = false) String filter) {
 		verifyPaymentDTO(paymentDTO, true);
 
-		return paymentService.updatePayment(paymentDTO);
+		return paymentService.updatePayment(paymentDTO, filter);
 	}
 
 	private void verifyPaymentDTO(PaymentDTO paymentDTO, boolean verifyExisting) {

@@ -6,6 +6,7 @@ import com.projects.bills.Entities.Entry;
 import com.projects.bills.Entities.Payment;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Enums.EntityType;
+import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Repositories.BillRepository;
 import com.projects.bills.Repositories.EntryRepository;
 import com.projects.bills.Repositories.PaymentRepository;
@@ -100,9 +101,9 @@ public class RecycleService {
         recycleDTO.setEntityDate(entry.getDate());
         recycleDTO.setRecycleDate(entry.getRecycleDate());
         recycleDTO.setPartyName(entryBill.getName());
-        recycleDTO.setInvoiceNumber(entryBill.getBillId());
+        recycleDTO.setInvoiceNumber(entry.getId());
         recycleDTO.setAmount(entry.getAmount());
-        recycleDTO.setType(entry.getFlow());
+        recycleDTO.setType(FlowType.fromName(entry.getFlow()));
         recycleDTO.setDetails(entry.getServices());
 
         return recycleDTO;

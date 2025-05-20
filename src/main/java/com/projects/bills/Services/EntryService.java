@@ -49,8 +49,13 @@ public class EntryService {
 		return entryList;
 	}
 
-	public Optional<EntryDTO> getEntryDtoById(Long id) {
-		Optional<Entry> entry = Optional.ofNullable(entryRepository.findByIdAndRecycleDateIsNull(id));
+	public Optional<EntryDTO> getEntryDtoById(Long id, String filter) {
+		Optional<Entry> entry;
+		if (!"bypass".equalsIgnoreCase(filter)) {
+			entry = Optional.ofNullable(entryRepository.findByIdAndRecycleDateIsNull(id));
+		} else {
+			entry = entryRepository.findById(id);
+		}
 		if (entry.isPresent()) {
 			User user = entry.get().getBill().getUser();
 			String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -65,7 +70,7 @@ public class EntryService {
 		return entryRepository.findById(id);
 	}
 
-	public EntryDTO saveEntry(EntryDTO entryDTO, boolean existing) {
+	public EntryDTO saveEntry(EntryDTO entryDTO, boolean existing, String filter) {
 		Entry entry;
 		if (existing) {
 			// Check if entry exists
@@ -80,7 +85,7 @@ public class EntryService {
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this invoice");
 			}
 
-			if (entry.getRecycleDate() != null) {
+			if (entry.getRecycleDate() != null && !"bypass".equalsIgnoreCase(filter)) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update a recycled entry");
 			}
 
@@ -110,7 +115,7 @@ public class EntryService {
 	}
 
 	private boolean isArchived(Entry entry) {
-		BillDTO bill = billService.getBill(entry.getBill().getBillId());
+		BillDTO bill = billService.getBill(entry.getBill().getBillId(), null);
 		if (bill == null || bill.getStatus() == null) {
 			return false;
 		}
@@ -142,10 +147,10 @@ public class EntryService {
 		entry.setStatus(entryDTO.getStatus());
 		entry.setServices(entryDTO.getServices());
 		entry.setFlow(flowType.toString());
-		entry.setOverpaid(entryDTO.getOverpaid());
-		if (entryDTO.getRecycle() != null && entryDTO.getRecycle()) {
-			entry.setRecycleDate(LocalDateTime.now());
+		if (entry.getOverpaid() == null) {
+			entry.setOverpaid(false);
 		}
+		entry.setRecycleDate(entryDTO.getRecycle() ? LocalDateTime.now() : null);
 		return entry;
 	}
 }

@@ -19,7 +19,7 @@ public class EntryDTO {
 	private LocalDate date;
 	private BigDecimal amount;
 	private Boolean status;
-	private Boolean recycle;
+	private Boolean recycle = false;
 	private String services;
 	private String flow;
 	private Boolean archived;

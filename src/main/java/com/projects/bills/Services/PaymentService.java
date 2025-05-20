@@ -41,6 +41,15 @@ public class PaymentService {
 		return paymentList;
 	}
 
+	public PaymentDTO getPaymentById(Long paymentId) {
+		Payment payment = paymentRepository.findById(paymentId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
+
+		validateUserAccess(payment.getEntry().getId());
+
+		return mapToPaymentDTO(payment);
+	}
+
 	public PaymentDTO createPayment(PaymentDTO paymentDTO) {
 		Payment payment = new Payment();
 
@@ -59,7 +68,7 @@ public class PaymentService {
 		return mapToPaymentDTO(savedPayment);
 	}
 
-	public PaymentDTO updatePayment(PaymentDTO paymentDTO) {
+	public PaymentDTO updatePayment(PaymentDTO paymentDTO, String filter) {
 		Entry entry = validateUserAccess(paymentDTO.getEntryId());
 
 		if (!entry.getBill().getStatus()) {
@@ -69,7 +78,7 @@ public class PaymentService {
 		Payment payment = paymentRepository.findById(paymentDTO.getPaymentId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
 
-		if (payment.getRecycleDate() != null) {
+		if (payment.getRecycleDate() != null && !"bypass".equalsIgnoreCase(filter)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update a recycled payment");
 		}
 
@@ -86,7 +95,7 @@ public class PaymentService {
 		BigDecimal entryAmount = entry.getAmount();
 		BigDecimal paidAmount = paymentRepository.sumAmountByEntryIdAndRecycleDateIsNull(entry.getId());
 
-		EntryDTO entryDTO = entryService.getEntryDtoById(entry.getId())
+		EntryDTO entryDTO = entryService.getEntryDtoById(entry.getId(), null)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry DTO not found"));
 
 		// The entry is paid if the paid amount is greater than or equal to the entry amount
@@ -97,7 +106,7 @@ public class PaymentService {
 
 		entryDTO.setFlow(FlowType.fromName(entryDTO.getFlow()));
 
-		entryService.saveEntry(entryDTO, true);
+		entryService.saveEntry(entryDTO, true, null);
 	}
 
 	private void buildPaymentFromDTO(PaymentDTO paymentDTO, Payment payment, Entry entry) {
@@ -107,9 +116,7 @@ public class PaymentService {
 		payment.setMedium(paymentDTO.getMedium());
 		payment.setNotes(paymentDTO.getNotes());
 		payment.setEntry(entry);
-		if (paymentDTO.getRecycle() != null && paymentDTO.getRecycle()) {
-			payment.setRecycleDate(LocalDateTime.now());
-		}
+		payment.setRecycleDate(paymentDTO.getRecycle() ? LocalDateTime.now() : null);
 	}
 
 	private PaymentDTO mapToPaymentDTO(Payment payment) {

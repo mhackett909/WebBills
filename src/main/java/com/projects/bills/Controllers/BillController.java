@@ -33,8 +33,10 @@ public class BillController {
 	}
 
 	@GetMapping("/api/v1/bills/{id}")
-	public ResponseEntity<BillDTO> getBillsById(@PathVariable("id") Long id) {
-		BillDTO bill = billService.getBill(id);
+	public ResponseEntity<BillDTO> getBillsById(@PathVariable("id") Long id,
+												@RequestParam(required = false) String filter,
+												@RequestHeader("Authorization") String authHeader) {
+		BillDTO bill = billService.getBill(id, filter);
 		if (bill == null) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill does not exist by id: " + id);
 		}
