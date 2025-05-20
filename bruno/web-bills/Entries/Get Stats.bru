@@ -1,0 +1,15 @@
+meta {
+  name: Get Stats
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{BILLS_URL}}/api/v1/entries/stats
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwtToken}}
+}

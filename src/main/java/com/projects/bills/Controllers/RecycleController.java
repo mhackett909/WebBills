@@ -3,6 +3,8 @@ package com.projects.bills.Controllers;
 import com.projects.bills.DTOs.RecycleDTO;
 
 import com.projects.bills.Services.RecycleService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +20,8 @@ public class RecycleController {
     }
 
     @GetMapping("/api/v1/recycle")
-    public List<RecycleDTO> getRecycleBin() {
-        return recycleService.getRecycleBin();
+    public ResponseEntity<List<RecycleDTO>> getRecycleBin() {
+        List<RecycleDTO> recycleDTOS = recycleService.getRecycleBin();
+        return new ResponseEntity<>(recycleDTOS, HttpStatus.OK);
     }
 }
