@@ -1,8 +1,10 @@
 package com.projects.bills.Enums;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+@Getter
 public enum FlowType {
     INCOMING("Income"),
     OUTGOING("Expense");
@@ -11,10 +13,6 @@ public enum FlowType {
 
     FlowType(String type) {
         this.type = type;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public static FlowType fromType(String type) {

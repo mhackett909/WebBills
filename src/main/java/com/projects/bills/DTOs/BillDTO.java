@@ -13,5 +13,5 @@ public class BillDTO {
 	private long id;
 	private String name;
 	private Boolean status; //isArchived
-	private Boolean recycle;
+	private Boolean recycle = false;
 }

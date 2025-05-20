@@ -35,8 +35,8 @@ public class EntryController {
 	}
 
 	@GetMapping("/api/v1/entries/{id}")
-	public ResponseEntity<EntryDTO> getEntryById(@PathVariable Long id) {
-		return entryService.getEntryDtoById(id)
+	public ResponseEntity<EntryDTO> getEntryById(@PathVariable Long id, @RequestParam(required = false) String filter) {
+		return entryService.getEntryDtoById(id, filter)
 				.map(entryDTO -> new ResponseEntity<>(entryDTO, HttpStatus.OK))
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found with id: " + id));
 	}
@@ -45,15 +45,16 @@ public class EntryController {
 	public ResponseEntity<EntryDTO> addEntry(@RequestBody EntryDTO entryDTO) {
 		validateDTO(entryDTO, false);
 
-		EntryDTO savedEntry = entryService.saveEntry(entryDTO, false);
+		EntryDTO savedEntry = entryService.saveEntry(entryDTO, false, null);
 		return new ResponseEntity<>(savedEntry, HttpStatus.CREATED);
 	}
 
 	@PutMapping("api/v1/entries/edit")
-	public ResponseEntity<EntryDTO> editEntry(@RequestBody EntryDTO entryDTO) {
+	public ResponseEntity<EntryDTO> editEntry(
+			@RequestBody EntryDTO entryDTO,
+			@RequestParam(required = false) String filter) {
 		validateDTO(entryDTO, true);
-
-		EntryDTO updatedEntry = entryService.saveEntry(entryDTO, true);
+		EntryDTO updatedEntry = entryService.saveEntry(entryDTO, true, filter);
 		return new ResponseEntity<>(updatedEntry, HttpStatus.OK);
 	}
 

@@ -1,0 +1,15 @@
+meta {
+  name: Get Recycle Bin
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{BILLS_URL}}/api/v1/recycle
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwtToken}}
+}

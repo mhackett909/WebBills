@@ -68,7 +68,7 @@ public class BillService {
 		return billDtoList;
 	}
 
-	public BillDTO getBill(Long id) {
+	public BillDTO getBill(Long id, String filter) {
 		Bill bill = billRepository.findById(id).orElse(null);
 		if (bill == null) return null;
 
@@ -77,7 +77,7 @@ public class BillService {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this bill");
 		}
 
-		if (bill.getRecycleDate() != null) {
+		if (bill.getRecycleDate() != null && !"bypass".equalsIgnoreCase(filter)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bill is recycled");
 		}
 
@@ -108,7 +108,8 @@ public class BillService {
 
 		if (billTransfer.getRecycle()) {
 			bill.setRecycleDate(LocalDateTime.now());
-			// TODO mark all entries and payments for this bill as recycled
+		} else {
+			bill.setRecycleDate(null);
 		}
 
 		Bill updatedBill = billRepository.save(bill);

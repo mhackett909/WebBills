@@ -20,5 +20,5 @@ public class PaymentDTO {
 	private String type;
 	private String medium;
 	private String notes;
-	private Boolean recycle;
+	private Boolean recycle = false;
 }
