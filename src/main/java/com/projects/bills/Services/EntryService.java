@@ -318,7 +318,7 @@ public class EntryService {
 		return filters;
 	}
 
-	private StatsDTO mapToStatsDTO(StatsDTO statsDTO, List<Object[]> resultList, String resultType) {
+	private void mapToStatsDTO(StatsDTO statsDTO, List<Object[]> resultList, String resultType) {
 		switch (resultType) {
 			case "totalEntryAmountsByFlow":
 				for (Object[] result : resultList) {
@@ -390,7 +390,5 @@ public class EntryService {
 					statsDTO.setTopIncomeTypes(top5IncomeTypes);
 				break;
 		}
-
-		return statsDTO;
 	}
 }
