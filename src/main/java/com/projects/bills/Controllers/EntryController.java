@@ -1,6 +1,7 @@
 package com.projects.bills.Controllers;
 
 import com.projects.bills.DTOs.EntryDTO;
+import com.projects.bills.DTOs.StatsDTO;
 import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Services.EntryService;
 import com.projects.bills.Services.JwtService;
@@ -10,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -41,7 +44,7 @@ public class EntryController {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found with id: " + id));
 	}
 
-	@PostMapping("api/v1/entries/new")
+	@PostMapping("/api/v1/entries/new")
 	public ResponseEntity<EntryDTO> addEntry(@RequestBody EntryDTO entryDTO) {
 		validateDTO(entryDTO, false);
 
@@ -49,7 +52,7 @@ public class EntryController {
 		return new ResponseEntity<>(savedEntry, HttpStatus.CREATED);
 	}
 
-	@PutMapping("api/v1/entries/edit")
+	@PutMapping("/api/v1/entries/edit")
 	public ResponseEntity<EntryDTO> editEntry(
 			@RequestBody EntryDTO entryDTO,
 			@RequestParam(required = false) String filter) {
@@ -58,7 +61,27 @@ public class EntryController {
 		return new ResponseEntity<>(updatedEntry, HttpStatus.OK);
 	}
 
-	// TODO Get Stats
+	@GetMapping("/api/v1/entries/stats")
+	public ResponseEntity<StatsDTO> getStats(
+			@RequestParam(required = false) LocalDate startDate,
+			@RequestParam(required = false) LocalDate endDate,
+			@RequestParam(required = false) Long invoiceNum,
+			@RequestParam(required = false) List<String> partyList,
+			@RequestParam(required = false) BigDecimal min,
+			@RequestParam(required = false) BigDecimal max,
+			@RequestParam(required = false) String flow,
+			@RequestParam(required = false) String paid,
+			@RequestParam(required = false) String archives,
+			@RequestHeader("Authorization") String authHeader
+	) {
+		String token = authHeader.replace("Bearer ", "");
+		String userName = jwtService.validateJwt(token).getSubject();
+
+		StatsDTO statsDTO = entryService.getStats(
+				userName, startDate, endDate, invoiceNum, partyList, min, max, flow, paid, archives
+		);
+		return new ResponseEntity<>(statsDTO, HttpStatus.OK);
+	}
 
 	// TODO Export to CSV
 

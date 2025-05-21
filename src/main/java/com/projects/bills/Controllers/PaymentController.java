@@ -2,6 +2,7 @@ package com.projects.bills.Controllers;
 import com.projects.bills.DTOs.PaymentDTO;
 import com.projects.bills.Services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -18,34 +19,38 @@ public class PaymentController {
 	}
 
 	@GetMapping("/api/v1/payments")
-	public List<PaymentDTO> getPayments(@RequestParam Long entryId) {
+	public ResponseEntity<List<PaymentDTO>> getPayments(@RequestParam Long entryId) {
 		if (entryId == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry ID is required");
 		}
-		return paymentService.getPayments(entryId);
+		List<PaymentDTO> paymentDTOS = paymentService.getPayments(entryId);
+		return new ResponseEntity<>(paymentDTOS, HttpStatus.OK);
 	}
 
 	@GetMapping("/api/v1/payments/{id}")
-	public PaymentDTO getPaymentById(@PathVariable("id") Long paymentId) {
+	public ResponseEntity<PaymentDTO> getPaymentById(@PathVariable("id") Long paymentId) {
 		if (paymentId == null || paymentId == 0) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment ID is required");
 		}
+		PaymentDTO paymentDTO = paymentService.getPaymentById(paymentId);
 
-		return paymentService.getPaymentById(paymentId);
+		return new ResponseEntity<>(paymentDTO, HttpStatus.OK);
 	}
 
 	@PostMapping("/api/v1/payments")
-	public PaymentDTO createPayment(@RequestBody PaymentDTO paymentDTO) {
+	public ResponseEntity<PaymentDTO> createPayment(@RequestBody PaymentDTO paymentDTO) {
 		verifyPaymentDTO(paymentDTO, false);
 
-		return paymentService.createPayment(paymentDTO);
+		PaymentDTO responseDTO = paymentService.createPayment(paymentDTO);
+		return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/api/v1/payments")
-	public PaymentDTO updatePayment(@RequestBody PaymentDTO paymentDTO, @RequestParam(required = false) String filter) {
+	public ResponseEntity<PaymentDTO> updatePayment(@RequestBody PaymentDTO paymentDTO, @RequestParam(required = false) String filter) {
 		verifyPaymentDTO(paymentDTO, true);
 
-		return paymentService.updatePayment(paymentDTO, filter);
+		PaymentDTO responseDTO = paymentService.updatePayment(paymentDTO, filter);
+		return new ResponseEntity<>(responseDTO, HttpStatus.OK);
 	}
 
 	private void verifyPaymentDTO(PaymentDTO paymentDTO, boolean verifyExisting) {
