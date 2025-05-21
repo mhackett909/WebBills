@@ -44,7 +44,7 @@ public class EntryController {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found with id: " + id));
 	}
 
-	@PostMapping("api/v1/entries/new")
+	@PostMapping("/api/v1/entries/new")
 	public ResponseEntity<EntryDTO> addEntry(@RequestBody EntryDTO entryDTO) {
 		validateDTO(entryDTO, false);
 
@@ -52,7 +52,7 @@ public class EntryController {
 		return new ResponseEntity<>(savedEntry, HttpStatus.CREATED);
 	}
 
-	@PutMapping("api/v1/entries/edit")
+	@PutMapping("/api/v1/entries/edit")
 	public ResponseEntity<EntryDTO> editEntry(
 			@RequestBody EntryDTO entryDTO,
 			@RequestParam(required = false) String filter) {
@@ -61,11 +61,11 @@ public class EntryController {
 		return new ResponseEntity<>(updatedEntry, HttpStatus.OK);
 	}
 
-	@GetMapping("api/v1/entries/stats")
+	@GetMapping("/api/v1/entries/stats")
 	public ResponseEntity<StatsDTO> getStats(
 			@RequestParam(required = false) LocalDate startDate,
 			@RequestParam(required = false) LocalDate endDate,
-			@RequestParam(required = false) Integer invoiceNum,
+			@RequestParam(required = false) Long invoiceNum,
 			@RequestParam(required = false) List<String> partyList,
 			@RequestParam(required = false) BigDecimal min,
 			@RequestParam(required = false) BigDecimal max,

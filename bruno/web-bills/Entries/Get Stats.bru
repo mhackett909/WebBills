@@ -5,9 +5,21 @@ meta {
 }
 
 get {
-  url: {{BILLS_URL}}/api/v1/entries/stats
+  url: {{BILLS_URL}}/api/v1/entries/stats?partyList=test bill
   body: none
   auth: bearer
+}
+
+params:query {
+  partyList: test bill
+  ~invoiceNum: 44
+  ~min: 350
+  ~max: 421
+  ~flow: income
+  ~startDate: 2025-05-19
+  ~endDate: 2025-05-26
+  ~paid: false
+  ~archives: false
 }
 
 auth:bearer {

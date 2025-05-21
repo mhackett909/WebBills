@@ -17,7 +17,7 @@ public class EntryFilters {
     private String userName;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Integer invoiceNum;
+    private Long invoiceNum;
     private List<String> partyList;
     private BigDecimal min;
     private BigDecimal max;

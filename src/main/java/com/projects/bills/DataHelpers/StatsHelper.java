@@ -18,7 +18,7 @@ public class StatsHelper {
         Root<Entry> entryRoot = query.from(Entry.class);
         Join<Entry, Payment> paymentJoin = entryRoot.join("payments", JoinType.INNER);
 
-        Predicate predicate = getFilteredPredicate(cb, filters, entryRoot, paymentJoin);
+        Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
 
         // Selecting the stats we need
         query.multiselect(
@@ -37,9 +37,8 @@ public class StatsHelper {
     public CriteriaQuery<Object[]> getTotalEntryAmountsbyFlow(CriteriaBuilder cb, EntryFilters filters) {
         CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         Root<Entry> entryRoot = query.from(Entry.class);
-        Join<Entry, Payment> paymentJoin = entryRoot.join("payments", JoinType.INNER);
 
-        Predicate predicate = getFilteredPredicate(cb, filters, entryRoot, paymentJoin);
+        Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
 
         query.multiselect(
                 entryRoot.get("flow"),
@@ -58,7 +57,7 @@ public class StatsHelper {
         Join<Entry, Payment> paymentJoin = entryRoot.join("payments", JoinType.INNER);
         Join<Entry, Bill> billJoin = entryRoot.join("bill", JoinType.INNER);
 
-        Predicate predicate = getFilteredPredicate(cb, filters, entryRoot, paymentJoin);
+        Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
 
         // Select: bill name, flow, and sum of payment.amount
         query.multiselect(
@@ -83,7 +82,7 @@ public class StatsHelper {
         Root<Entry> entryRoot = query.from(Entry.class);
         Join<Entry, Payment> paymentJoin = entryRoot.join("payments", JoinType.INNER);
 
-        Predicate predicate = getFilteredPredicate(cb, filters, entryRoot, paymentJoin);
+        Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
 
         // Select: flow, payment_type, sum(amount)
         query.multiselect(
@@ -105,8 +104,7 @@ public class StatsHelper {
 
     private Predicate getFilteredPredicate(CriteriaBuilder cb,
                                            EntryFilters filters,
-                                           Root<Entry> entryRoot,
-                                           Join<Entry, Payment> paymentJoin) {
+                                           Root<Entry> entryRoot) {
         Predicate predicate = cb.conjunction();
 
         // Must be only for requesting user
@@ -120,7 +118,11 @@ public class StatsHelper {
         BigDecimal minAmount = filters.getMin();
         BigDecimal maxAmount = filters.getMax();
         if (minAmount != null && maxAmount != null) {
-            predicate = cb.and(predicate, cb.between(paymentJoin.get("amount"), minAmount, maxAmount));
+            predicate = cb.and(predicate, cb.between(entryRoot.get("amount"), minAmount, maxAmount));
+        } else if (minAmount != null) {
+            predicate = cb.and(predicate, cb.greaterThanOrEqualTo(entryRoot.get("amount"), minAmount));
+        } else if (maxAmount != null) {
+            predicate = cb.and(predicate, cb.lessThanOrEqualTo(entryRoot.get("amount"), maxAmount));
         }
 
         LocalDate startDate = filters.getStartDate();
@@ -133,8 +135,7 @@ public class StatsHelper {
             predicate = cb.and(predicate, cb.lessThanOrEqualTo(entryRoot.get("date"), endDate));
         }
 
-
-        Integer invoiceNum = filters.getInvoiceNum();
+        Long invoiceNum = filters.getInvoiceNum();
         if (invoiceNum != null) {
             predicate = cb.and(predicate, cb.equal(entryRoot.get("id"), invoiceNum));
         }

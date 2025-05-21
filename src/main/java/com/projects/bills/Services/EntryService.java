@@ -67,7 +67,7 @@ public class EntryService {
 	public StatsDTO getStats(String userName,
 							 LocalDate startDate,
 							 LocalDate endDate,
-							 Integer invoiceNum,
+							 Long invoiceNum,
 							 List<String> partyList,
 							 BigDecimal min,
 							 BigDecimal max,
@@ -106,55 +106,83 @@ public class EntryService {
 				min, max, flowType, isPaid, isOverpaid, isArchived
 		);
 
+		if (filters.getInvoiceNum() != null) {
+			Optional<User> user = userService.findByUsername(userName);
+			if (user.isEmpty()) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+			}
+			Entry entry = entryRepository.findByIdAndRecycleDateIsNull(filters.getInvoiceNum());
+			if (entry == null) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found with id: " + filters.getInvoiceNum());
+			}
+			if (!entry.getBill().getUser().getUsername().equalsIgnoreCase(userName)) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this entry");
+			}
+		}
+
 		StatsDTO statsDTO = new StatsDTO();
 
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-		CriteriaQuery<Object[]> query = statsHelper.getmaxAvgSumQuery(cb, filters);
+		CriteriaQuery<Object[]> query = statsHelper.getTotalEntryAmountsbyFlow(cb, filters);
+
+		List<Object[]> totalEntryAmountsByFlow = entityManager.createQuery(query).getResultList();
+
+		mapToStatsDTO(statsDTO, totalEntryAmountsByFlow, "totalEntryAmountsByFlow");
+
+		query = statsHelper.getmaxAvgSumQuery(cb, filters);
 
 		List<Object[]> maxAvgSumResults = entityManager.createQuery(query).getResultList();
 
 		mapToStatsDTO(statsDTO, maxAvgSumResults, "maxAvgSum");
 
-		query = statsHelper.getTotalEntryAmountsbyFlow(cb, filters);
+		boolean switchBack = false;
+		if (filters.getFlow() == null || filters.getFlow().equalsIgnoreCase(FlowType.OUTGOING.toString())) {
+			if (filters.getFlow() == null) {
+				switchBack = true;
+				filters.setFlow(FlowType.OUTGOING.toString());
+			}
+			query = statsHelper.getTop5Parties(cb, filters);
 
-		List<Object[]> totalEntryAmountsbyFlow = entityManager.createQuery(query).getResultList();
+			List<Object[]> top5ExpenseReceipts = entityManager.createQuery(query)
+					.setMaxResults(5)
+					.getResultList();
 
-		mapToStatsDTO(statsDTO, totalEntryAmountsbyFlow, "totalEntryAmountsbyFlow");
+			mapToStatsDTO(statsDTO, top5ExpenseReceipts, "top5ExpenseReceipts");
 
-		filters.setFlow(FlowType.OUTGOING.toString());
-		query = statsHelper.getTop5Parties(cb, filters);
+			query = statsHelper.getTop5Types(cb, filters);
 
-		List<Object[]> top5ExpenseReceipts = entityManager.createQuery(query)
-				.setMaxResults(5)
-				.getResultList();
+			List<Object[]> top5ExpenseTypes = entityManager.createQuery(query)
+					.setMaxResults(5)
+					.getResultList();
 
-		mapToStatsDTO(statsDTO, top5ExpenseReceipts, "top5ExpenseReceipts");
+			mapToStatsDTO(statsDTO, top5ExpenseTypes, "top5ExpenseTypes");
+		}
 
-		query = statsHelper.getTop5Types(cb, filters);
+		if (switchBack) {
+			filters.setFlow(null);
+		}
 
-		List<Object[]> top5ExpenseTypes = entityManager.createQuery(query)
-				.setMaxResults(5)
-				.getResultList();
+		if (filters.getFlow() == null || filters.getFlow().equalsIgnoreCase(FlowType.INCOMING.toString())) {
+			if (filters.getFlow() == null) {
+				filters.setFlow(FlowType.INCOMING.toString());
+			}
+			query = statsHelper.getTop5Parties(cb, filters);
 
-		mapToStatsDTO(statsDTO, top5ExpenseTypes, "top5ExpenseTypes");
+			List<Object[]> top5IncomeSources = entityManager.createQuery(query)
+					.setMaxResults(5)
+					.getResultList();
 
-		filters.setFlow(FlowType.INCOMING.toString());
-		query = statsHelper.getTop5Parties(cb, filters);
+			mapToStatsDTO(statsDTO, top5IncomeSources, "top5IncomeSources");
 
-		List<Object[]> top5IncomeSources = entityManager.createQuery(query)
-				.setMaxResults(5)
-				.getResultList();
+			query = statsHelper.getTop5Types(cb, filters);
 
-		mapToStatsDTO(statsDTO, top5IncomeSources, "top5IncomeSources");
+			List<Object[]> top5IncomeTypes = entityManager.createQuery(query)
+					.setMaxResults(5)
+					.getResultList();
 
-		query = statsHelper.getTop5Types(cb, filters);
-
-		List<Object[]> top5IncomeTypes = entityManager.createQuery(query)
-				.setMaxResults(5)
-				.getResultList();
-
-		mapToStatsDTO(statsDTO, top5IncomeTypes, "top5IncomeTypes");
+			mapToStatsDTO(statsDTO, top5IncomeTypes, "top5IncomeTypes");
+		}
 
 		return statsDTO;
 	}
@@ -267,7 +295,7 @@ public class EntryService {
 	private EntryFilters mapToEntryFilters(String userName,
 										 LocalDate startDate,
 										 LocalDate endDate,
-										 Integer invoiceNum,
+										 Long invoiceNum,
 										 List<String> partyList,
 										 BigDecimal min,
 										 BigDecimal max,
@@ -292,6 +320,16 @@ public class EntryService {
 
 	private StatsDTO mapToStatsDTO(StatsDTO statsDTO, List<Object[]> resultList, String resultType) {
 		switch (resultType) {
+			case "totalEntryAmountsByFlow":
+				for (Object[] result : resultList) {
+					String flowType = (String) result[0];
+					if (flowType.equals(FlowType.OUTGOING.toString())) {
+						statsDTO.setTotalExpenseAmount((BigDecimal) result[1]);
+					} else if (flowType.equals(FlowType.INCOMING.toString())) {
+						statsDTO.setTotalIncomeAmount((BigDecimal) result[1]);
+					}
+				}
+				break;
 			case "maxAvgSum":
 				for (Object[] result : resultList) {
 					String flowType = (String) result[0];
@@ -305,39 +343,15 @@ public class EntryService {
 						statsDTO.setTotalReceivedPaymentAmount((BigDecimal) result[3]);
 					}
 				}
-				break;
-				case "totalEntryAmountsbyFlow":
-					for (Object[] result : resultList) {
-						String flowType = (String) result[0];
-						if (flowType.equals(FlowType.OUTGOING.toString())) {
-							statsDTO.setTotalExpenseAmount((BigDecimal) result[1]);
-						} else if (flowType.equals(FlowType.INCOMING.toString())) {
-							statsDTO.setTotalIncomeAmount((BigDecimal) result[1]);
-						}
-					}
-					// Derive remaining columns
-					BigDecimal totalExpenseUnpaid = statsDTO.getTotalExpenseAmount()
-							.subtract(statsDTO.getTotalSentPaymentAmount());
+				// Derive remaining columns
+				BigDecimal totalExpenseUnpaid = statsDTO.getTotalExpenseAmount()
+						.subtract(statsDTO.getTotalSentPaymentAmount().min(statsDTO.getTotalExpenseAmount()));
 
-					BigDecimal totalIncomeOutstanding = statsDTO.getTotalIncomeAmount()
-							.subtract(statsDTO.getTotalReceivedPaymentAmount());
+				BigDecimal totalIncomeOutstanding = statsDTO.getTotalIncomeAmount()
+						.subtract(statsDTO.getTotalReceivedPaymentAmount().min(statsDTO.getTotalIncomeAmount()));
 
-					BigDecimal totalOverpaidSent = new BigDecimal(0);
-					if (statsDTO.getTotalExpenseAmount().compareTo(statsDTO.getTotalSentPaymentAmount()) < 0) {
-						totalOverpaidSent = statsDTO.getTotalSentPaymentAmount()
-								.subtract(statsDTO.getTotalExpenseAmount());
-					}
-
-					BigDecimal totalOverpaidReceived = new BigDecimal(0);
-					if (statsDTO.getTotalIncomeAmount().compareTo(statsDTO.getTotalReceivedPaymentAmount()) < 0) {
-						totalOverpaidReceived = statsDTO.getTotalReceivedPaymentAmount()
-								.subtract(statsDTO.getTotalIncomeAmount());
-					}
-
-					statsDTO.setTotalOverpaidReceived(totalOverpaidReceived);
-					statsDTO.setTotalOverpaidSent(totalOverpaidSent);
-					statsDTO.setTotalExpenseUnpaid(totalExpenseUnpaid);
-					statsDTO.setTotalIncomeOutstanding(totalIncomeOutstanding);
+				statsDTO.setTotalExpenseUnpaid(totalExpenseUnpaid);
+				statsDTO.setTotalIncomeOutstanding(totalIncomeOutstanding);
 				break;
 				case "top5ExpenseReceipts":
 					HashMap<String, BigDecimal> top5ExpenseReceipts = new HashMap<>();
