@@ -12,7 +12,13 @@ import com.projects.bills.Repositories.EntryRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -46,21 +52,67 @@ public class EntryService {
         this.statsHelper = statsHelper;
     }
 
-	public List<EntryDTO> getEntries(String userName) {
+	public List<EntryDTO> getEntries(String userName,
+									 LocalDate startDate,
+									 LocalDate endDate,
+									 Long invoiceNum,
+									 List<String> partyList,
+									 BigDecimal min,
+									 BigDecimal max,
+									 String flow,
+									 String paid,
+									 String archives,
+									 String sortKey,
+									 Integer pageNum,
+									 Integer pageSize) {
 		Optional<User> realUser = userService.findByUsername(userName);
 		if (realUser.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 		}
 
-		List<Bill> userBills = billService.getBills(userName);
+		EntryFilters filters = mapToEntryFilters(
+				userName, startDate, endDate, invoiceNum, partyList,
+				min, max, flow, paid, archives
+		);
 
-		List<Entry> entries = entryRepository.findAllByBillInAndRecycleDateIsNullOrderByDateDesc(userBills);
+		// List<Bill> userBills = billService.getBills(userName);
+
+		// List<Entry> entries = entryRepository.findAllByBillInAndRecycleDateIsNullOrderByDateDesc(userBills);
+
+		Specification<Entry> spec = buildEntrySpecification(filters);
+
+		if (sortKey == null || sortKey.isEmpty()) {
+			sortKey = "-date";
+		}
+
+		Sort.Direction sortDirection = Sort.Direction.DESC;
+		if (sortKey.startsWith("-")) {
+				sortDirection = Sort.Direction.ASC;
+				sortKey = sortKey.substring(1);
+		}
+
+		Sort sortBy = Sort.by(sortDirection, sortKey);
+
+		if (pageNum == null || pageNum < 0) {
+			pageNum = 0;
+		}
+
+		if (pageSize == null || pageSize < 1) {
+			pageSize = 100;
+		}
+
+		Pageable pageable = PageRequest.of(pageNum, pageSize, sortBy);
+
+		Page<Entry> entryPages = entryRepository.findAll(spec, pageable);
+
+		List<Entry> entries = entryPages.getContent();
 
 		ArrayList<EntryDTO> entryList = new ArrayList<>();
 		for (Entry entry : entries) {
 			EntryDTO entryDTO = mapToDTO(entry);
 			entryList.add(entryDTO);
 		}
+
 		return entryList;
 	}
 
@@ -75,35 +127,9 @@ public class EntryService {
 							 String paid,
 							 String archives) {
 
-		String flowType = null;
-		if (flow != null && !flow.isEmpty()) {
-			flowType = FlowType.fromType(flow).toString();
-        }
-
-		Boolean isPaid = null;
-		Boolean isOverpaid = null;
-		if (paid != null) {
-			if (paid.equalsIgnoreCase("true")) {
-				isPaid = true;
-			} else if (paid.equalsIgnoreCase("false")) {
-				isPaid = false;
-			} else if (paid.equalsIgnoreCase("overpaid")) {
-				isOverpaid = true;
-			}
-		}
-
-		Boolean isArchived = null;
-		if (archives != null) {
-			if (archives.equalsIgnoreCase("true")) {
-				isArchived = true;
-			} else if (archives.equalsIgnoreCase("false")) {
-				isArchived = false;
-			}
-		}
-
 		EntryFilters filters = mapToEntryFilters(
 				userName, startDate, endDate, invoiceNum, partyList,
-				min, max, flowType, isPaid, isOverpaid, isArchived
+				min, max, flow, paid, archives
 		);
 
 		if (filters.getInvoiceNum() != null) {
@@ -310,10 +336,35 @@ public class EntryService {
 										 List<String> partyList,
 										 BigDecimal min,
 										 BigDecimal max,
-										 String flowType,
-										 Boolean isPaid,
-										 Boolean isOverpaid,
-										 Boolean isArchived) {
+										 String flow,
+										 String paid,
+										 String archives) {
+		String flowType = null;
+		if (flow != null && !flow.isEmpty()) {
+			flowType = FlowType.fromType(flow).toString();
+		}
+
+		Boolean isPaid = null;
+		Boolean isOverpaid = null;
+		if (paid != null) {
+			if (paid.equalsIgnoreCase("true")) {
+				isPaid = true;
+			} else if (paid.equalsIgnoreCase("false")) {
+				isPaid = false;
+			} else if (paid.equalsIgnoreCase("overpaid")) {
+				isOverpaid = true;
+			}
+		}
+
+		Boolean isArchived = null;
+		if (archives != null) {
+			if (archives.equalsIgnoreCase("true")) {
+				isArchived = true;
+			} else if (archives.equalsIgnoreCase("false")) {
+				isArchived = false;
+			}
+		}
+
 		EntryFilters filters = new EntryFilters();
 		filters.setUserName(userName);
 		filters.setStartDate(startDate);
@@ -447,5 +498,10 @@ public class EntryService {
 
 		statsDTO.setTotalExpenseUnpaid(totalExpenseUnpaid);
 		statsDTO.setTotalIncomeOutstanding(totalIncomeOutstanding);
+	}
+
+	private Specification<Entry> buildEntrySpecification(EntryFilters filters) {
+		return (root, query, criteriaBuilder)
+				-> statsHelper.getFilteredPredicate(criteriaBuilder, filters, root);
 	}
 }

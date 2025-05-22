@@ -29,11 +29,27 @@ public class EntryController {
 
 	@GetMapping("/api/v1/entries")
 	public ResponseEntity<List<EntryDTO>> getEntries(
+			@RequestParam(required = false) LocalDate startDate,
+			@RequestParam(required = false) LocalDate endDate,
+			@RequestParam(required = false) Long invoiceNum,
+			@RequestParam(required = false) List<String> partyList,
+			@RequestParam(required = false) BigDecimal min,
+			@RequestParam(required = false) BigDecimal max,
+			@RequestParam(required = false) String flow,
+			@RequestParam(required = false) String paid,
+			@RequestParam(required = false) String archives,
+			@RequestParam(required = false) String sortKey,
+			@RequestParam(required = false) Integer pageNum,
+			@RequestParam(required = false) Integer pageSize,
 			@RequestHeader("Authorization") String authHeader) {
 		String token = authHeader.replace("Bearer ", "");
 		String userName = jwtService.validateJwt(token).getSubject();
 
-		List<EntryDTO> entries = entryService.getEntries(userName);
+		List<EntryDTO> entries = entryService.getEntries(
+				userName, startDate, endDate, invoiceNum, partyList,
+				min, max, flow, paid, archives, sortKey, pageNum, pageSize
+		);
+
 		return new ResponseEntity<>(entries, HttpStatus.OK);
 	}
 
