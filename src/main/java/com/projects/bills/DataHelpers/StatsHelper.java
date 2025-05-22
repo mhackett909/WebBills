@@ -34,7 +34,44 @@ public class StatsHelper {
         return query;
     }
 
-    public CriteriaQuery<Object[]> getTotalEntryAmountsbyFlow(CriteriaBuilder cb, EntryFilters filters) {
+    public CriteriaQuery<Object[]> getOverpaidEntryTotals(CriteriaBuilder cb, EntryFilters filters) {
+        CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
+        Root<Entry> entryRoot = query.from(Entry.class);
+
+        Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
+        predicate = cb.and(predicate, cb.equal(entryRoot.get("overpaid"), true));
+
+        query.multiselect(
+                entryRoot.get("flow"),
+                cb.sum(entryRoot.get("amount"))
+        );
+
+        query.where(predicate);
+        query.groupBy(entryRoot.get("flow"));
+
+        return query;
+    }
+
+    public CriteriaQuery<Object[]> getOverpaidPaymentTotals(CriteriaBuilder cb, EntryFilters filters) {
+        CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
+        Root<Entry> entryRoot = query.from(Entry.class);
+        Join<Entry, Payment> paymentJoin = entryRoot.join("payments", JoinType.INNER);
+
+        Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
+        predicate = cb.and(predicate, cb.equal(entryRoot.get("overpaid"), true));
+
+        query.multiselect(
+                entryRoot.get("flow"),
+                cb.sum(paymentJoin.get("amount"))
+        );
+
+        query.where(predicate);
+        query.groupBy(entryRoot.get("flow"));
+
+        return query;
+    }
+
+    public CriteriaQuery<Object[]> getTotalEntryAmountsByFlow(CriteriaBuilder cb, EntryFilters filters) {
         CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         Root<Entry> entryRoot = query.from(Entry.class);
 
@@ -58,6 +95,7 @@ public class StatsHelper {
         Join<Entry, Bill> billJoin = entryRoot.join("bill", JoinType.INNER);
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
+        // predicate = cb.and(predicate, cb.isFalse(paymentJoin.get("tip")));
 
         // Select: bill name, flow, and sum of payment.amount
         query.multiselect(
@@ -83,6 +121,7 @@ public class StatsHelper {
         Join<Entry, Payment> paymentJoin = entryRoot.join("payments", JoinType.INNER);
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
+        // predicate = cb.and(predicate, cb.isFalse(paymentJoin.get("tip")));
 
         // Select: flow, payment_type, sum(amount)
         query.multiselect(
