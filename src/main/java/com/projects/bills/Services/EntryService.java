@@ -416,23 +416,29 @@ public class EntryService {
 			}
 		}
 
-		// Adjust for overpaid amounts
+		adjustOverpaidAmounts(statsDTO, totalOverpaidExpenseExpected, totalOverpaidExpenseActual, totalOverpaidIncomeExpected, totalOverpaidIncomeActual);
+		deriveRemainingColumns(statsDTO);
+	}
 
+	private void adjustOverpaidAmounts(StatsDTO statsDTO,
+									   BigDecimal totalOverpaidExpenseExpected,
+									   BigDecimal totalOverpaidExpenseActual,
+									   BigDecimal totalOverpaidIncomeExpected,
+									   BigDecimal totalOverpaidIncomeActual) {
 		BigDecimal totalOverpaidExpense = totalOverpaidExpenseExpected.subtract(totalOverpaidExpenseActual).abs();
 		BigDecimal totalOverpaidIncome = totalOverpaidIncomeExpected.subtract(totalOverpaidIncomeActual).abs();
 
 		statsDTO.setTotalExpenseOverpaid(totalOverpaidExpense);
 		statsDTO.setTotalIncomeOverpaid(totalOverpaidIncome);
 
-
-		// Derive remaining columns
-
 		BigDecimal adjustedTotalSentPaymentAmount = statsDTO.getTotalSentPaymentAmount().subtract(totalOverpaidExpense);
 		statsDTO.setTotalSentPaymentAmount(adjustedTotalSentPaymentAmount);
 
 		BigDecimal adjustedTotalReceivedPaymentAmount = statsDTO.getTotalReceivedPaymentAmount().subtract(totalOverpaidIncome);
 		statsDTO.setTotalReceivedPaymentAmount(adjustedTotalReceivedPaymentAmount);
+	}
 
+	private void deriveRemainingColumns(StatsDTO statsDTO) {
 		BigDecimal totalExpenseUnpaid = statsDTO.getTotalExpenseAmount()
 				.subtract(statsDTO.getTotalSentPaymentAmount());
 

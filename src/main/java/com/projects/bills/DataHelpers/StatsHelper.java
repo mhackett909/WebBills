@@ -95,7 +95,6 @@ public class StatsHelper {
         Join<Entry, Bill> billJoin = entryRoot.join("bill", JoinType.INNER);
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
-        // predicate = cb.and(predicate, cb.isFalse(paymentJoin.get("tip")));
 
         // Select: bill name, flow, and sum of payment.amount
         query.multiselect(
