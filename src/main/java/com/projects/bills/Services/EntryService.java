@@ -12,7 +12,6 @@ import com.projects.bills.Repositories.EntryRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -74,10 +73,6 @@ public class EntryService {
 				userName, startDate, endDate, invoiceNum, partyList,
 				min, max, flow, paid, archives
 		);
-
-		// List<Bill> userBills = billService.getBills(userName);
-
-		// List<Entry> entries = entryRepository.findAllByBillInAndRecycleDateIsNullOrderByDateDesc(userBills);
 
 		Specification<Entry> spec = buildEntrySpecification(filters);
 
