@@ -124,7 +124,7 @@ public class EntryService {
 
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-		CriteriaQuery<Object[]> query = statsHelper.getTotalEntryAmountsbyFlow(cb, filters);
+		CriteriaQuery<Object[]> query = statsHelper.getTotalEntryAmountsByFlow(cb, filters);
 
 		List<Object[]> totalEntryAmountsByFlow = entityManager.createQuery(query).getResultList();
 
@@ -135,6 +135,16 @@ public class EntryService {
 		List<Object[]> maxAvgSumResults = entityManager.createQuery(query).getResultList();
 
 		mapToStatsDTO(statsDTO, maxAvgSumResults, "maxAvgSum");
+
+		query = statsHelper.getOverpaidEntryTotals(cb, filters);
+
+		List<Object[]> overpaidEntryTotals = entityManager.createQuery(query).getResultList();
+
+		query = statsHelper.getOverpaidPaymentTotals(cb, filters);
+
+		List<Object[]> overpaidPaymentTotals = entityManager.createQuery(query).getResultList();
+
+		mapOverPaymentsToStatsDTO(statsDTO, overpaidEntryTotals, overpaidPaymentTotals);
 
 		boolean switchBack = false;
 		if (filters.getFlow() == null || filters.getFlow().equalsIgnoreCase(FlowType.OUTGOING.toString())) {
@@ -228,7 +238,7 @@ public class EntryService {
 			}
 
 			if (!entry.getBill().getStatus()) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update an entry linked to an archived party");
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update an entry linked to an archived entity");
 			}
 		} else {
 			entry = new Entry();
@@ -285,6 +295,7 @@ public class EntryService {
 		entry.setStatus(entryDTO.getStatus());
 		entry.setServices(entryDTO.getServices());
 		entry.setFlow(flowType.toString());
+		entry.setOverpaid(entryDTO.getOverpaid());
 		if (entry.getOverpaid() == null) {
 			entry.setOverpaid(false);
 		}
@@ -343,15 +354,6 @@ public class EntryService {
 						statsDTO.setTotalReceivedPaymentAmount((BigDecimal) result[3]);
 					}
 				}
-				// Derive remaining columns
-				BigDecimal totalExpenseUnpaid = statsDTO.getTotalExpenseAmount()
-						.subtract(statsDTO.getTotalSentPaymentAmount().min(statsDTO.getTotalExpenseAmount()));
-
-				BigDecimal totalIncomeOutstanding = statsDTO.getTotalIncomeAmount()
-						.subtract(statsDTO.getTotalReceivedPaymentAmount().min(statsDTO.getTotalIncomeAmount()));
-
-				statsDTO.setTotalExpenseUnpaid(totalExpenseUnpaid);
-				statsDTO.setTotalIncomeOutstanding(totalIncomeOutstanding);
 				break;
 				case "top5ExpenseReceipts":
 					HashMap<String, BigDecimal> top5ExpenseReceipts = new HashMap<>();
@@ -390,5 +392,60 @@ public class EntryService {
 					statsDTO.setTopIncomeTypes(top5IncomeTypes);
 				break;
 		}
+	}
+	private void mapOverPaymentsToStatsDTO(StatsDTO statsDTO, List<Object[]> overpaidEntryTotals, List<Object[]> overpaidPaymentTotals) {
+		BigDecimal totalOverpaidExpenseExpected = BigDecimal.ZERO;
+		BigDecimal totalOverpaidIncomeExpected = BigDecimal.ZERO;
+		for (Object[] result : overpaidEntryTotals) {
+			String flowType = (String) result[0];
+			if (flowType.equals(FlowType.OUTGOING.toString())) {
+				totalOverpaidExpenseExpected = (BigDecimal) result[1];
+			} else if (flowType.equals(FlowType.INCOMING.toString())) {
+				totalOverpaidIncomeExpected = (BigDecimal) result[1];
+			}
+		}
+
+		BigDecimal totalOverpaidExpenseActual = BigDecimal.ZERO;
+		BigDecimal totalOverpaidIncomeActual = BigDecimal.ZERO;
+		for (Object[] result : overpaidPaymentTotals) {
+			String flowType = (String) result[0];
+			if (flowType.equals(FlowType.OUTGOING.toString())) {
+				totalOverpaidExpenseActual = (BigDecimal) result[1];
+			} else if (flowType.equals(FlowType.INCOMING.toString())) {
+				totalOverpaidIncomeActual = (BigDecimal) result[1];
+			}
+		}
+
+		adjustOverpaidAmounts(statsDTO, totalOverpaidExpenseExpected, totalOverpaidExpenseActual, totalOverpaidIncomeExpected, totalOverpaidIncomeActual);
+		deriveRemainingColumns(statsDTO);
+	}
+
+	private void adjustOverpaidAmounts(StatsDTO statsDTO,
+									   BigDecimal totalOverpaidExpenseExpected,
+									   BigDecimal totalOverpaidExpenseActual,
+									   BigDecimal totalOverpaidIncomeExpected,
+									   BigDecimal totalOverpaidIncomeActual) {
+		BigDecimal totalOverpaidExpense = totalOverpaidExpenseExpected.subtract(totalOverpaidExpenseActual).abs();
+		BigDecimal totalOverpaidIncome = totalOverpaidIncomeExpected.subtract(totalOverpaidIncomeActual).abs();
+
+		statsDTO.setTotalExpenseOverpaid(totalOverpaidExpense);
+		statsDTO.setTotalIncomeOverpaid(totalOverpaidIncome);
+
+		BigDecimal adjustedTotalSentPaymentAmount = statsDTO.getTotalSentPaymentAmount().subtract(totalOverpaidExpense);
+		statsDTO.setTotalSentPaymentAmount(adjustedTotalSentPaymentAmount);
+
+		BigDecimal adjustedTotalReceivedPaymentAmount = statsDTO.getTotalReceivedPaymentAmount().subtract(totalOverpaidIncome);
+		statsDTO.setTotalReceivedPaymentAmount(adjustedTotalReceivedPaymentAmount);
+	}
+
+	private void deriveRemainingColumns(StatsDTO statsDTO) {
+		BigDecimal totalExpenseUnpaid = statsDTO.getTotalExpenseAmount()
+				.subtract(statsDTO.getTotalSentPaymentAmount());
+
+		BigDecimal totalIncomeOutstanding = statsDTO.getTotalIncomeAmount()
+				.subtract(statsDTO.getTotalReceivedPaymentAmount());
+
+		statsDTO.setTotalExpenseUnpaid(totalExpenseUnpaid);
+		statsDTO.setTotalIncomeOutstanding(totalIncomeOutstanding);
 	}
 }

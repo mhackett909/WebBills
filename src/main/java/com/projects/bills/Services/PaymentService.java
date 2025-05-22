@@ -56,7 +56,7 @@ public class PaymentService {
 		Entry entry = validateUserAccess(paymentDTO.getEntryId());
 
 		if (!entry.getBill().getStatus()) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add a payment for entry linked to an archived party");
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add a payment for entry linked to an archived entity");
 		}
 
 		buildPaymentFromDTO(paymentDTO, payment, entry);
@@ -72,7 +72,7 @@ public class PaymentService {
 		Entry entry = validateUserAccess(paymentDTO.getEntryId());
 
 		if (!entry.getBill().getStatus()) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update payment for entry linked to an archived party");
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update payment for entry linked to an archived entity");
 		}
 
 		Payment payment = paymentRepository.findById(paymentDTO.getPaymentId())

@@ -15,8 +15,10 @@ import java.util.Map;
 public class StatsDTO {
     private BigDecimal totalExpenseAmount = BigDecimal.ZERO;
     private BigDecimal totalExpenseUnpaid = BigDecimal.ZERO;
+    private BigDecimal totalExpenseOverpaid = BigDecimal.ZERO;
     private BigDecimal totalIncomeAmount = BigDecimal.ZERO;
     private BigDecimal totalIncomeOutstanding = BigDecimal.ZERO;
+    private BigDecimal totalIncomeOverpaid = BigDecimal.ZERO;
     private BigDecimal maxReceivedPaymentAmount = BigDecimal.ZERO;
     private BigDecimal maxSentPaymentAmount = BigDecimal.ZERO;
     private BigDecimal avgReceivedPaymentAmount = BigDecimal.ZERO;
