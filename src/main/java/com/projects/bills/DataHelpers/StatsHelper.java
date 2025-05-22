@@ -120,7 +120,6 @@ public class StatsHelper {
         Join<Entry, Payment> paymentJoin = entryRoot.join("payments", JoinType.INNER);
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
-        // predicate = cb.and(predicate, cb.isFalse(paymentJoin.get("tip")));
 
         // Select: flow, payment_type, sum(amount)
         query.multiselect(
