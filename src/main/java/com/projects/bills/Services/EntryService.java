@@ -238,7 +238,7 @@ public class EntryService {
 			}
 
 			if (!entry.getBill().getStatus()) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update an entry linked to an archived party");
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update an entry linked to an archived entity");
 			}
 		} else {
 			entry = new Entry();
@@ -427,17 +427,17 @@ public class EntryService {
 
 		// Derive remaining columns
 
-		BigDecimal adjustedTotalSentPaymentAmount = statsDTO.getTotalSentPaymentAmount().subtract(totalOverpaidExpense).abs();
+		BigDecimal adjustedTotalSentPaymentAmount = statsDTO.getTotalSentPaymentAmount().subtract(totalOverpaidExpense);
 		statsDTO.setTotalSentPaymentAmount(adjustedTotalSentPaymentAmount);
 
-		BigDecimal adjustedTotalReceivedPaymentAmount = statsDTO.getTotalReceivedPaymentAmount().subtract(totalOverpaidIncome).abs();
+		BigDecimal adjustedTotalReceivedPaymentAmount = statsDTO.getTotalReceivedPaymentAmount().subtract(totalOverpaidIncome);
 		statsDTO.setTotalReceivedPaymentAmount(adjustedTotalReceivedPaymentAmount);
 
 		BigDecimal totalExpenseUnpaid = statsDTO.getTotalExpenseAmount()
-				.subtract(statsDTO.getTotalSentPaymentAmount()).abs();
+				.subtract(statsDTO.getTotalSentPaymentAmount());
 
 		BigDecimal totalIncomeOutstanding = statsDTO.getTotalIncomeAmount()
-				.subtract(statsDTO.getTotalReceivedPaymentAmount()).abs();
+				.subtract(statsDTO.getTotalReceivedPaymentAmount());
 
 		statsDTO.setTotalExpenseUnpaid(totalExpenseUnpaid);
 		statsDTO.setTotalIncomeOutstanding(totalIncomeOutstanding);
