@@ -25,6 +25,6 @@ public interface EntryRepository extends JpaRepository<Entry, Long>, JpaSpecific
     @Query("SELECT e FROM Entry e WHERE e.bill.user = :user AND e.recycleDate IS NOT NULL")
     List<Entry> findAllByUserAndRecycleDateIsNotNull(@Param("user") User user);
 
-    @Query("SELECT COALESCE(MAX(e.invoiceId), -1) + 1 FROM Entry e WHERE e.user = :user")
+    @Query("SELECT COALESCE(MAX(e.invoiceId), 0) + 1 FROM Entry e WHERE e.user = :user")
     Long findNextInvoiceIdForUser(@Param("user") User user);
 }
