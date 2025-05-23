@@ -1,6 +1,7 @@
 package com.projects.bills.Controllers;
 
 import com.projects.bills.DTOs.EntryDTO;
+import com.projects.bills.DTOs.EntryDTOList;
 import com.projects.bills.DTOs.StatsDTO;
 import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Services.EntryService;
@@ -28,7 +29,7 @@ public class EntryController {
 	}
 
 	@GetMapping("/api/v1/entries")
-	public ResponseEntity<List<EntryDTO>> getEntries(
+	public ResponseEntity<EntryDTOList> getEntries(
 			@RequestParam(required = false) LocalDate startDate,
 			@RequestParam(required = false) LocalDate endDate,
 			@RequestParam(required = false) Long invoiceNum,
@@ -38,19 +39,21 @@ public class EntryController {
 			@RequestParam(required = false) String flow,
 			@RequestParam(required = false) String paid,
 			@RequestParam(required = false) String archives,
-			@RequestParam(required = false) String sortKey,
 			@RequestParam(required = false) Integer pageNum,
 			@RequestParam(required = false) Integer pageSize,
+			@RequestParam(required = false) String sortField,
+			@RequestParam(required = false) String sortOrder,
 			@RequestHeader("Authorization") String authHeader) {
 		String token = authHeader.replace("Bearer ", "");
 		String userName = jwtService.validateJwt(token).getSubject();
 
-		List<EntryDTO> entries = entryService.getEntries(
+		EntryDTOList entryDTOList = entryService.getEntries(
 				userName, startDate, endDate, invoiceNum, partyList,
-				min, max, flow, paid, archives, sortKey, pageNum, pageSize
+				min, max, flow, paid, archives, pageNum, pageSize,
+				sortField, sortOrder
 		);
 
-		return new ResponseEntity<>(entries, HttpStatus.OK);
+		return new ResponseEntity<>(entryDTOList, HttpStatus.OK);
 	}
 
 	@GetMapping("/api/v1/entries/{id}")

@@ -1,5 +1,6 @@
 package com.projects.bills.Services;
 import com.projects.bills.DTOs.BillDTO;
+import com.projects.bills.DTOs.EntryDTOList;
 import com.projects.bills.DTOs.StatsDTO;
 import com.projects.bills.DataHelpers.EntryFilters;
 import com.projects.bills.DataHelpers.StatsHelper;
@@ -51,7 +52,7 @@ public class EntryService {
         this.statsHelper = statsHelper;
     }
 
-	public List<EntryDTO> getEntries(String userName,
+	public EntryDTOList getEntries(String userName,
 									 LocalDate startDate,
 									 LocalDate endDate,
 									 Long invoiceNum,
@@ -61,9 +62,10 @@ public class EntryService {
 									 String flow,
 									 String paid,
 									 String archives,
-									 String sortKey,
 									 Integer pageNum,
-									 Integer pageSize) {
+									 Integer pageSize,
+								     String sortField,
+								     String sortOrder) {
 		Optional<User> realUser = userService.findByUsername(userName);
 		if (realUser.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -76,17 +78,18 @@ public class EntryService {
 
 		Specification<Entry> spec = buildEntrySpecification(filters);
 
-		if (sortKey == null || sortKey.isEmpty()) {
-			sortKey = "-date";
+		if (sortField == null || sortField.isEmpty()) {
+			sortField = "date";
+		} else {
+			sortField = mapSortField(sortField);
 		}
 
 		Sort.Direction sortDirection = Sort.Direction.DESC;
-		if (sortKey.startsWith("-")) {
+		if (sortOrder != null && sortOrder.equals("asc")) {
 				sortDirection = Sort.Direction.ASC;
-				sortKey = sortKey.substring(1);
 		}
 
-		Sort sortBy = Sort.by(sortDirection, sortKey);
+		Sort sortBy = Sort.by(sortDirection, sortField);
 
 		if (pageNum == null || pageNum < 0) {
 			pageNum = 0;
@@ -108,7 +111,11 @@ public class EntryService {
 			entryList.add(entryDTO);
 		}
 
-		return entryList;
+		EntryDTOList entryDtoList = new EntryDTOList();
+		entryDtoList.setEntries(entryList);
+		entryDtoList.setTotal(entryPages.getTotalElements());
+
+		return entryDtoList;
 	}
 
 	public StatsDTO getStats(String userName,
@@ -498,5 +505,22 @@ public class EntryService {
 	private Specification<Entry> buildEntrySpecification(EntryFilters filters) {
 		return (root, query, criteriaBuilder)
 				-> statsHelper.getFilteredPredicate(criteriaBuilder, filters, root);
+	}
+
+	private String mapSortField(String sortField) {
+		switch (sortField) {
+			case "paid":
+				return "status";
+			case "name":
+				return "bill.name";
+			case "entryId":
+				return "id";
+			case "description":
+				return "services";
+			case "archived":
+				return "bill.status";
+			default:
+				return sortField;
+		}
 	}
 }
