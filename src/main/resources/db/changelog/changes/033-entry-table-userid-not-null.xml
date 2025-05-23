@@ -1,0 +1,14 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="033-entry-table-userid-not-null" author="mph">
+        <addNotNullConstraint
+                tableName="entry"
+                columnName="userID"
+                columnDataType="BIGINT"/>
+    </changeSet>
+
+</databaseChangeLog>

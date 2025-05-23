@@ -13,8 +13,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EntryDTO {
-	private long entryId;
+	private long entryId; // Global ID
 	private long billId;
+	private long invoiceId; // Unique to users (local ID)
 	private String name;
 	private LocalDate date;
 	private BigDecimal amount;

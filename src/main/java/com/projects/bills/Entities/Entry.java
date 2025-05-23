@@ -29,6 +29,10 @@ public class Entry {
 	@Column(name = "invoiceID")
 	private long invoiceId;
 
+	@ManyToOne
+	@JoinColumn(name = "userID", referencedColumnName = "id")
+	private User user;
+
 	@Column(name = "overpaid")
 	private Boolean overpaid;
 

@@ -277,14 +277,16 @@ public class EntryService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill not found for id: " + entryDTO.getBillId());
 		}
 
+		User user = bill.getUser();
+
 		String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
-		if (!bill.getUser().getUsername().equalsIgnoreCase(requestingUser)) {
+		if (!user.getUsername().equalsIgnoreCase(requestingUser)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this bill");
 		}
 
 		FlowType type = FlowType.fromType(entryDTO.getFlow());
 
-		Entry mappedEntry = mapToEntity(entryDTO, entry, bill, type);
+		Entry mappedEntry = mapToEntity(entryDTO, entry, bill, type, user);
 
 		Entry savedEntry = entryRepository.save(mappedEntry);
 		return mapToDTO(savedEntry);
@@ -303,6 +305,7 @@ public class EntryService {
 		return new EntryDTO(
 				entry.getId(),
 				entry.getBill().getBillId(),
+				entry.getInvoiceId(), // Local invoice ID
 				entry.getBill().getName(), // Not using entry.getBill().getName() because it is legacy
 				entry.getDate() != null ? entry.getDate().toLocalDate() : null,
 				entry.getAmount(),
@@ -315,9 +318,10 @@ public class EntryService {
 		);
 	}
 
-	private Entry mapToEntity(EntryDTO entryDTO, Entry entry, Bill bill, FlowType flowType) {
+	private Entry mapToEntity(EntryDTO entryDTO, Entry entry, Bill bill, FlowType flowType, User user) {
 		entry.setId(entryDTO.getEntryId());
 		entry.setBill(bill);
+		entry.setUser(user);
 		entry.setDate(Date.valueOf(entryDTO.getDate()));
 		entry.setAmount(entryDTO.getAmount());
 		entry.setStatus(entryDTO.getStatus());
@@ -326,6 +330,15 @@ public class EntryService {
 		entry.setOverpaid(entryDTO.getOverpaid());
 		if (entry.getOverpaid() == null) {
 			entry.setOverpaid(false);
+		}
+		if (entryDTO.getInvoiceId() != 0) {
+			entry.setInvoiceId(entryDTO.getInvoiceId());
+		} else {
+			long newId = entryRepository.findNextInvoiceIdForUser(entry.getUser());
+			if (newId <= 0) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not retrieve next invoice ID");
+			}
+			entry.setInvoiceId(newId);
 		}
 		entry.setRecycleDate(entryDTO.getRecycle() ? LocalDateTime.now() : null);
 		return entry;

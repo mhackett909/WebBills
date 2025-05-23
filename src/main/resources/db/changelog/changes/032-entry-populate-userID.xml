@@ -1,0 +1,15 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="032-entry-populate-userID" author="mph">
+        <sql>
+            UPDATE bills.entry e
+            JOIN bills.bill b ON e.billID = b.id
+            SET e.userID = b.userID;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
