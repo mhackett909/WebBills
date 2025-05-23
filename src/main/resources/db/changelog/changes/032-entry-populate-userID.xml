@@ -4,11 +4,28 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="032-entry-populate-userID" author="mph">
+    <changeSet id="032-entry-populate-userID-redo" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="mysql"/>
+        </preConditions>
         <sql>
-            UPDATE bills.entry e
-            JOIN bills.bill b ON e.billID = b.id
+            UPDATE entry e
+            JOIN bill b ON e.billID = b.id
             SET e.userID = b.userID;
+        </sql>
+    </changeSet>
+
+    <changeSet id="033-entry-populate-userID-h2" author="mph">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="h2"/>
+        </preConditions>
+        <sql>
+            UPDATE entry
+            SET userID = (
+            SELECT b.userID
+            FROM bill b
+            WHERE b.id = entry.billID
+            );
         </sql>
     </changeSet>
 
