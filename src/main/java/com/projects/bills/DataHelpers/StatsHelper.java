@@ -139,7 +139,7 @@ public class StatsHelper {
         return query;
     }
 
-    private Predicate getFilteredPredicate(CriteriaBuilder cb,
+    public Predicate getFilteredPredicate(CriteriaBuilder cb,
                                            EntryFilters filters,
                                            Root<Entry> entryRoot) {
         Predicate predicate = cb.conjunction();

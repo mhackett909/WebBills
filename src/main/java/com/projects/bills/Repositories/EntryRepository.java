@@ -13,7 +13,6 @@ import java.util.List;
 
 @Repository
 public interface EntryRepository extends JpaRepository<Entry, Long>, JpaSpecificationExecutor<Entry> {
-    List<Entry> findAllByBillInAndRecycleDateIsNullOrderByDateDesc(List<Bill> bills);
     Entry findByIdAndRecycleDateIsNull(long id);
 
     @Query("SELECT e FROM Entry e WHERE e.bill.user = :user AND e.recycleDate IS NOT NULL " +
