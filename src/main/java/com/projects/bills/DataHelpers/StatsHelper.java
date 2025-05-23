@@ -174,7 +174,7 @@ public class StatsHelper {
 
         Long invoiceNum = filters.getInvoiceNum();
         if (invoiceNum != null) {
-            predicate = cb.and(predicate, cb.equal(entryRoot.get("id"), invoiceNum));
+            predicate = cb.and(predicate, cb.equal(entryRoot.get("invoiceId"), invoiceNum));
         }
 
         List<String> partyList = filters.getPartyList();
