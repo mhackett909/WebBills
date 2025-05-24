@@ -5,6 +5,7 @@ import com.projects.bills.DTOs.EntryDTOList;
 import com.projects.bills.DTOs.StatsDTO;
 import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Services.EntryService;
+import com.projects.bills.Services.StatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,15 +18,16 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-
 @RestController
 public class EntryController {
 	private final EntryService entryService;
+	private final StatsService statsService;
 
 	@Autowired
-	public EntryController(EntryService entryService) {
+	public EntryController(EntryService entryService, StatsService statsService) {
 		this.entryService = entryService;
-	}
+        this.statsService = statsService;
+    }
 
 	@GetMapping("/api/v1/entries")
 	public ResponseEntity<EntryDTOList> getEntries(
@@ -95,7 +97,7 @@ public class EntryController {
 			@AuthenticationPrincipal UserDetails user
 	) {
 
-		StatsDTO statsDTO = entryService.getStats(
+		StatsDTO statsDTO = statsService.getStats(
 				user.getUsername(), startDate, endDate, invoiceNum, partyList, min, max, flow, paid, archives
 		);
 
