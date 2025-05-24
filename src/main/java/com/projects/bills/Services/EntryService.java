@@ -1,5 +1,4 @@
 package com.projects.bills.Services;
-import com.projects.bills.DTOs.BillDTO;
 import com.projects.bills.DTOs.EntryDTOList;
 import com.projects.bills.DTOs.StatsDTO;
 import com.projects.bills.DataHelpers.EntryFilters;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -53,19 +51,19 @@ public class EntryService {
     }
 
 	public EntryDTOList getEntries(String userName,
-									 LocalDate startDate,
-									 LocalDate endDate,
-									 Long invoiceNum,
-									 List<String> partyList,
-									 BigDecimal min,
-									 BigDecimal max,
-									 String flow,
-									 String paid,
-									 String archives,
-									 Integer pageNum,
-									 Integer pageSize,
-								     String sortField,
-								     String sortOrder) {
+								   LocalDate startDate,
+								   LocalDate endDate,
+								   Long invoiceNum,
+								   List<String> partyList,
+								   BigDecimal min,
+								   BigDecimal max,
+								   String flow,
+								   String paid,
+								   String archives,
+								   Integer pageNum,
+								   Integer pageSize,
+								   String sortField,
+								   String sortOrder) {
 		Optional<User> realUser = userService.findByUsername(userName);
 		if (realUser.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -96,7 +94,7 @@ public class EntryService {
 		}
 
 		if (pageSize == null || pageSize < 1) {
-			pageSize = 100;
+			pageSize = 25;
 		}
 
 		Pageable pageable = PageRequest.of(pageNum, pageSize, sortBy);
@@ -105,17 +103,7 @@ public class EntryService {
 
 		List<Entry> entries = entryPages.getContent();
 
-		ArrayList<EntryDTO> entryList = new ArrayList<>();
-		for (Entry entry : entries) {
-			EntryDTO entryDTO = mapToDTO(entry);
-			entryList.add(entryDTO);
-		}
-
-		EntryDTOList entryDtoList = new EntryDTOList();
-		entryDtoList.setEntries(entryList);
-		entryDtoList.setTotal(entryPages.getTotalElements());
-
-		return entryDtoList;
+		return mapEntriesToDTOList(entries, entryPages.getTotalElements());
 	}
 
 	public StatsDTO getStats(String userName,
@@ -148,94 +136,30 @@ public class EntryService {
 			}
 		}
 
-		StatsDTO statsDTO = new StatsDTO();
-
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
 		CriteriaQuery<Object[]> query = statsHelper.getTotalEntryAmountsByFlow(cb, filters);
 
-		List<Object[]> totalEntryAmountsByFlow = entityManager.createQuery(query).getResultList();
+		StatsDTO statsDTO = new StatsDTO();
 
-		mapToStatsDTO(statsDTO, totalEntryAmountsByFlow, "totalEntryAmountsByFlow");
+		calculateAmountsByFlow(statsDTO, filters, cb, query);
 
-		query = statsHelper.getmaxAvgSumQuery(cb, filters);
-
-		List<Object[]> maxAvgSumResults = entityManager.createQuery(query).getResultList();
-
-		mapToStatsDTO(statsDTO, maxAvgSumResults, "maxAvgSum");
-
-		query = statsHelper.getOverpaidEntryTotals(cb, filters);
-
-		List<Object[]> overpaidEntryTotals = entityManager.createQuery(query).getResultList();
-
-		query = statsHelper.getOverpaidPaymentTotals(cb, filters);
-
-		List<Object[]> overpaidPaymentTotals = entityManager.createQuery(query).getResultList();
-
-		mapOverPaymentsToStatsDTO(statsDTO, overpaidEntryTotals, overpaidPaymentTotals);
-
-		boolean switchBack = false;
-		if (filters.getFlow() == null || filters.getFlow().equalsIgnoreCase(FlowType.OUTGOING.toString())) {
-			if (filters.getFlow() == null) {
-				switchBack = true;
-				filters.setFlow(FlowType.OUTGOING.toString());
-			}
-			query = statsHelper.getTop5Parties(cb, filters);
-
-			List<Object[]> top5ExpenseReceipts = entityManager.createQuery(query)
-					.setMaxResults(5)
-					.getResultList();
-
-			mapToStatsDTO(statsDTO, top5ExpenseReceipts, "top5ExpenseReceipts");
-
-			query = statsHelper.getTop5Types(cb, filters);
-
-			List<Object[]> top5ExpenseTypes = entityManager.createQuery(query)
-					.setMaxResults(5)
-					.getResultList();
-
-			mapToStatsDTO(statsDTO, top5ExpenseTypes, "top5ExpenseTypes");
-		}
-
-		if (switchBack) {
-			filters.setFlow(null);
-		}
-
-		if (filters.getFlow() == null || filters.getFlow().equalsIgnoreCase(FlowType.INCOMING.toString())) {
-			if (filters.getFlow() == null) {
-				filters.setFlow(FlowType.INCOMING.toString());
-			}
-			query = statsHelper.getTop5Parties(cb, filters);
-
-			List<Object[]> top5IncomeSources = entityManager.createQuery(query)
-					.setMaxResults(5)
-					.getResultList();
-
-			mapToStatsDTO(statsDTO, top5IncomeSources, "top5IncomeSources");
-
-			query = statsHelper.getTop5Types(cb, filters);
-
-			List<Object[]> top5IncomeTypes = entityManager.createQuery(query)
-					.setMaxResults(5)
-					.getResultList();
-
-			mapToStatsDTO(statsDTO, top5IncomeTypes, "top5IncomeTypes");
-		}
+		calculateTop5PartiesAndTypes(statsDTO, filters, cb, query);
 
 		return statsDTO;
 	}
 
-	public Optional<EntryDTO> getEntryDtoById(Long id, String filter) {
+	public Optional<EntryDTO> getEntryDtoById(Long id, String filter, String userName) {
 		Optional<Entry> entry;
+		// "bypass" filter allows access to recycled entries for restoration
 		if (!"bypass".equalsIgnoreCase(filter)) {
 			entry = Optional.ofNullable(entryRepository.findByIdAndRecycleDateIsNull(id));
 		} else {
 			entry = entryRepository.findById(id);
 		}
 		if (entry.isPresent()) {
-			User user = entry.get().getBill().getUser();
-			String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
-			if (!user.getUsername().equalsIgnoreCase(requestingUser)) {
+			User entryUser = entry.get().getBill().getUser();
+			if (!entryUser.getUsername().equalsIgnoreCase(userName)) {
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this entry");
 			}
 		}
@@ -246,7 +170,7 @@ public class EntryService {
 		return entryRepository.findById(id);
 	}
 
-	public EntryDTO saveEntry(EntryDTO entryDTO, boolean existing, String filter) {
+	public EntryDTO saveEntry(EntryDTO entryDTO, boolean existing, String filter, String userName) {
 		Entry entry;
 		if (existing) {
 			// Check if entry exists
@@ -256,11 +180,11 @@ public class EntryService {
 			}
 			entry = existingEntry.get();
 
-			String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
-			if (!entry.getBill().getUser().getUsername().equalsIgnoreCase(requestingUser)) {
+			if (!entry.getBill().getUser().getUsername().equalsIgnoreCase(userName)) {
 				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this invoice");
 			}
 
+			// "bypass" filter allows access to recycled entries for restoration
 			if (entry.getRecycleDate() != null && !"bypass".equalsIgnoreCase(filter)) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update a recycled entry");
 			}
@@ -277,23 +201,22 @@ public class EntryService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill not found for id: " + entryDTO.getBillId());
 		}
 
-		User user = bill.getUser();
+		User billUser = bill.getUser();
 
-		String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
-		if (!user.getUsername().equalsIgnoreCase(requestingUser)) {
+		if (!billUser.getUsername().equalsIgnoreCase(userName)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this bill");
 		}
 
 		FlowType type = FlowType.fromType(entryDTO.getFlow());
 
-		Entry mappedEntry = mapToEntity(entryDTO, entry, bill, type, user);
+		Entry mappedEntry = mapToEntity(entryDTO, entry, bill, type, billUser);
 
 		Entry savedEntry = entryRepository.save(mappedEntry);
 		return mapToDTO(savedEntry);
 	}
 
 	private boolean isArchived(Entry entry) {
-		BillDTO bill = billService.getBill(entry.getBill().getBillId(), null);
+		Bill bill = billService.getBillEntityById(entry.getBill().getBillId());
 		if (bill == null || bill.getStatus() == null) {
 			return false;
 		}
@@ -344,16 +267,30 @@ public class EntryService {
 		return entry;
 	}
 
+	private EntryDTOList mapEntriesToDTOList(List<Entry> entries, Long total) {
+		ArrayList<EntryDTO> entryList = new ArrayList<>();
+		for (Entry entry : entries) {
+			EntryDTO entryDTO = mapToDTO(entry);
+			entryList.add(entryDTO);
+		}
+
+		EntryDTOList entryDtoList = new EntryDTOList();
+		entryDtoList.setEntries(entryList);
+		entryDtoList.setTotal(total);
+
+		return entryDtoList;
+	}
+
 	private EntryFilters mapToEntryFilters(String userName,
-										 LocalDate startDate,
-										 LocalDate endDate,
-										 Long invoiceNum,
-										 List<String> partyList,
-										 BigDecimal min,
-										 BigDecimal max,
-										 String flow,
-										 String paid,
-										 String archives) {
+										   LocalDate startDate,
+										   LocalDate endDate,
+										   Long invoiceNum,
+										   List<String> partyList,
+										   BigDecimal min,
+										   BigDecimal max,
+										   String flow,
+										   String paid,
+										   String archives) {
 		String flowType = null;
 		if (flow != null && !flow.isEmpty()) {
 			flowType = FlowType.fromType(flow).toString();
@@ -393,6 +330,84 @@ public class EntryService {
 		filters.setOverpaid(isOverpaid);
 		filters.setArchived(isArchived);
 		return filters;
+	}
+
+	private void calculateAmountsByFlow(StatsDTO statsDTO,
+										EntryFilters filters,
+										CriteriaBuilder cb,
+										CriteriaQuery<Object[]> query) {
+		List<Object[]> totalEntryAmountsByFlow = entityManager.createQuery(query).getResultList();
+
+		mapToStatsDTO(statsDTO, totalEntryAmountsByFlow, "totalEntryAmountsByFlow");
+
+		query = statsHelper.getmaxAvgSumQuery(cb, filters);
+
+		List<Object[]> maxAvgSumResults = entityManager.createQuery(query).getResultList();
+
+		mapToStatsDTO(statsDTO, maxAvgSumResults, "maxAvgSum");
+
+		query = statsHelper.getOverpaidEntryTotals(cb, filters);
+
+		List<Object[]> overpaidEntryTotals = entityManager.createQuery(query).getResultList();
+
+		query = statsHelper.getOverpaidPaymentTotals(cb, filters);
+
+		List<Object[]> overpaidPaymentTotals = entityManager.createQuery(query).getResultList();
+
+		mapOverPaymentsToStatsDTO(statsDTO, overpaidEntryTotals, overpaidPaymentTotals);
+	}
+
+	private void calculateTop5PartiesAndTypes(StatsDTO statsDTO,
+											  EntryFilters filters,
+											  CriteriaBuilder cb,
+											  CriteriaQuery<Object[]> query) {
+		boolean switchBack = false;
+		if (filters.getFlow() == null || filters.getFlow().equalsIgnoreCase(FlowType.OUTGOING.toString())) {
+			if (filters.getFlow() == null) {
+				switchBack = true;
+				filters.setFlow(FlowType.OUTGOING.toString());
+			}
+			query = statsHelper.getTop5Parties(cb, filters);
+
+			List<Object[]> top5ExpenseReceipts = entityManager.createQuery(query)
+					.setMaxResults(5)
+					.getResultList();
+
+			mapToStatsDTO(statsDTO, top5ExpenseReceipts, "top5ExpenseReceipts");
+
+			query = statsHelper.getTop5Types(cb, filters);
+
+			List<Object[]> top5ExpenseTypes = entityManager.createQuery(query)
+					.setMaxResults(5)
+					.getResultList();
+
+			mapToStatsDTO(statsDTO, top5ExpenseTypes, "top5ExpenseTypes");
+		}
+
+		if (switchBack) {
+			filters.setFlow(null);
+		}
+
+		if (filters.getFlow() == null || filters.getFlow().equalsIgnoreCase(FlowType.INCOMING.toString())) {
+			if (filters.getFlow() == null) {
+				filters.setFlow(FlowType.INCOMING.toString());
+			}
+			query = statsHelper.getTop5Parties(cb, filters);
+
+			List<Object[]> top5IncomeSources = entityManager.createQuery(query)
+					.setMaxResults(5)
+					.getResultList();
+
+			mapToStatsDTO(statsDTO, top5IncomeSources, "top5IncomeSources");
+
+			query = statsHelper.getTop5Types(cb, filters);
+
+			List<Object[]> top5IncomeTypes = entityManager.createQuery(query)
+					.setMaxResults(5)
+					.getResultList();
+
+			mapToStatsDTO(statsDTO, top5IncomeTypes, "top5IncomeTypes");
+		}
 	}
 
 	private void mapToStatsDTO(StatsDTO statsDTO, List<Object[]> resultList, String resultType) {
@@ -459,6 +474,7 @@ public class EntryService {
 				break;
 		}
 	}
+
 	private void mapOverPaymentsToStatsDTO(StatsDTO statsDTO, List<Object[]> overpaidEntryTotals, List<Object[]> overpaidPaymentTotals) {
 		BigDecimal totalOverpaidExpenseExpected = BigDecimal.ZERO;
 		BigDecimal totalOverpaidIncomeExpected = BigDecimal.ZERO;

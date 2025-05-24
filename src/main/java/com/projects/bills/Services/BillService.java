@@ -5,7 +5,6 @@ import com.projects.bills.Entities.User;
 import com.projects.bills.Repositories.BillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -44,8 +43,7 @@ public class BillService {
 			throw new IllegalArgumentException("User not found");
 		}
 
-		String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
-		if (!user.get().getUsername().equalsIgnoreCase(requestingUser)) {
+		if (!user.get().getUsername().equalsIgnoreCase(userName)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access these bills");
 		}
 
@@ -68,15 +66,17 @@ public class BillService {
 		return billDtoList;
 	}
 
-	public BillDTO getBill(Long id, String filter) {
+	public BillDTO getBill(Long id, String filter, String userName) {
 		Bill bill = billRepository.findById(id).orElse(null);
-		if (bill == null) return null;
+		if (bill == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill does not exist by id: " + id);
+		}
 
-		String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
-		if (!bill.getUser().getUsername().equalsIgnoreCase(requestingUser)) {
+		if (!bill.getUser().getUsername().equalsIgnoreCase(userName)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this bill");
 		}
 
+		// "bypass" filter allows access to recycled bills for restoration
 		if (bill.getRecycleDate() != null && !"bypass".equalsIgnoreCase(filter)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bill is recycled");
 		}
@@ -84,9 +84,8 @@ public class BillService {
 		return mapToDTO(bill);
 	}
 
-	public BillDTO saveBill(BillDTO billTransfer, boolean existing) {
-		String username = SecurityContextHolder.getContext().getAuthentication().getName();
-		Optional<User> user = userService.findByUsername(username);
+	public BillDTO saveBill(BillDTO billTransfer, boolean existing, String userName) {
+		Optional<User> user = userService.findByUsername(userName);
 		if (user.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 		}

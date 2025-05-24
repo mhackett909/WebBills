@@ -5,10 +5,11 @@ import com.projects.bills.DTOs.EntryDTOList;
 import com.projects.bills.DTOs.StatsDTO;
 import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Services.EntryService;
-import com.projects.bills.Services.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -20,12 +21,10 @@ import java.util.List;
 @RestController
 public class EntryController {
 	private final EntryService entryService;
-	private final JwtService jwtService;
 
 	@Autowired
-	public EntryController(EntryService entryService, JwtService jwtService) {
+	public EntryController(EntryService entryService) {
 		this.entryService = entryService;
-		this.jwtService = jwtService;
 	}
 
 	@GetMapping("/api/v1/entries")
@@ -43,12 +42,10 @@ public class EntryController {
 			@RequestParam(required = false) Integer pageSize,
 			@RequestParam(required = false) String sortField,
 			@RequestParam(required = false) String sortOrder,
-			@RequestHeader("Authorization") String authHeader) {
-		String token = authHeader.replace("Bearer ", "");
-		String userName = jwtService.validateJwt(token).getSubject();
+			@AuthenticationPrincipal UserDetails user) {
 
 		EntryDTOList entryDTOList = entryService.getEntries(
-				userName, startDate, endDate, invoiceNum, partyList,
+				user.getUsername(), startDate, endDate, invoiceNum, partyList,
 				min, max, flow, paid, archives, pageNum, pageSize,
 				sortField, sortOrder
 		);
@@ -57,26 +54,30 @@ public class EntryController {
 	}
 
 	@GetMapping("/api/v1/entries/{id}")
-	public ResponseEntity<EntryDTO> getEntryById(@PathVariable Long id, @RequestParam(required = false) String filter) {
-		return entryService.getEntryDtoById(id, filter)
+	public ResponseEntity<EntryDTO> getEntryById(@PathVariable Long id,
+												 @RequestParam(required = false) String filter,
+												 @AuthenticationPrincipal UserDetails user) {
+		return entryService.getEntryDtoById(id, filter, user.getUsername())
 				.map(entryDTO -> new ResponseEntity<>(entryDTO, HttpStatus.OK))
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found with id: " + id));
 	}
 
 	@PostMapping("/api/v1/entries/new")
-	public ResponseEntity<EntryDTO> addEntry(@RequestBody EntryDTO entryDTO) {
+	public ResponseEntity<EntryDTO> addEntry(@RequestBody EntryDTO entryDTO,
+											 @AuthenticationPrincipal UserDetails user) {
 		validateDTO(entryDTO, false);
 
-		EntryDTO savedEntry = entryService.saveEntry(entryDTO, false, null);
+		EntryDTO savedEntry = entryService.saveEntry(entryDTO, false, null, user.getUsername());
 		return new ResponseEntity<>(savedEntry, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/api/v1/entries/edit")
 	public ResponseEntity<EntryDTO> editEntry(
 			@RequestBody EntryDTO entryDTO,
-			@RequestParam(required = false) String filter) {
+			@RequestParam(required = false) String filter,
+			@AuthenticationPrincipal UserDetails user) {
 		validateDTO(entryDTO, true);
-		EntryDTO updatedEntry = entryService.saveEntry(entryDTO, true, filter);
+		EntryDTO updatedEntry = entryService.saveEntry(entryDTO, true, filter, user.getUsername());
 		return new ResponseEntity<>(updatedEntry, HttpStatus.OK);
 	}
 
@@ -91,14 +92,13 @@ public class EntryController {
 			@RequestParam(required = false) String flow,
 			@RequestParam(required = false) String paid,
 			@RequestParam(required = false) String archives,
-			@RequestHeader("Authorization") String authHeader
+			@AuthenticationPrincipal UserDetails user
 	) {
-		String token = authHeader.replace("Bearer ", "");
-		String userName = jwtService.validateJwt(token).getSubject();
 
 		StatsDTO statsDTO = entryService.getStats(
-				userName, startDate, endDate, invoiceNum, partyList, min, max, flow, paid, archives
+				user.getUsername(), startDate, endDate, invoiceNum, partyList, min, max, flow, paid, archives
 		);
+
 		return new ResponseEntity<>(statsDTO, HttpStatus.OK);
 	}
 

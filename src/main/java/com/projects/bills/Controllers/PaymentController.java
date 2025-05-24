@@ -3,6 +3,8 @@ import com.projects.bills.DTOs.PaymentDTO;
 import com.projects.bills.Services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -19,37 +21,47 @@ public class PaymentController {
 	}
 
 	@GetMapping("/api/v1/payments")
-	public ResponseEntity<List<PaymentDTO>> getPayments(@RequestParam Long entryId) {
+	public ResponseEntity<List<PaymentDTO>> getPayments(
+			@RequestParam Long entryId,
+			@AuthenticationPrincipal UserDetails user
+	) {
 		if (entryId == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry ID is required");
 		}
-		List<PaymentDTO> paymentDTOS = paymentService.getPayments(entryId);
+		List<PaymentDTO> paymentDTOS = paymentService.getPayments(entryId, user.getUsername());
 		return new ResponseEntity<>(paymentDTOS, HttpStatus.OK);
 	}
 
 	@GetMapping("/api/v1/payments/{id}")
-	public ResponseEntity<PaymentDTO> getPaymentById(@PathVariable("id") Long paymentId) {
+	public ResponseEntity<PaymentDTO> getPaymentById(
+			@PathVariable("id") Long paymentId,
+			@AuthenticationPrincipal UserDetails user) {
 		if (paymentId == null || paymentId == 0) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payment ID is required");
 		}
-		PaymentDTO paymentDTO = paymentService.getPaymentById(paymentId);
+		PaymentDTO paymentDTO = paymentService.getPaymentById(paymentId, user.getUsername());
 
 		return new ResponseEntity<>(paymentDTO, HttpStatus.OK);
 	}
 
 	@PostMapping("/api/v1/payments")
-	public ResponseEntity<PaymentDTO> createPayment(@RequestBody PaymentDTO paymentDTO) {
+	public ResponseEntity<PaymentDTO> createPayment(
+			@RequestBody PaymentDTO paymentDTO,
+			@AuthenticationPrincipal UserDetails user) {
 		verifyPaymentDTO(paymentDTO, false);
 
-		PaymentDTO responseDTO = paymentService.createPayment(paymentDTO);
+		PaymentDTO responseDTO = paymentService.createPayment(paymentDTO, user.getUsername());
 		return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/api/v1/payments")
-	public ResponseEntity<PaymentDTO> updatePayment(@RequestBody PaymentDTO paymentDTO, @RequestParam(required = false) String filter) {
+	public ResponseEntity<PaymentDTO> updatePayment(
+			@RequestBody PaymentDTO paymentDTO,
+			@RequestParam(required = false) String filter,
+			@AuthenticationPrincipal UserDetails user) {
 		verifyPaymentDTO(paymentDTO, true);
 
-		PaymentDTO responseDTO = paymentService.updatePayment(paymentDTO, filter);
+		PaymentDTO responseDTO = paymentService.updatePayment(paymentDTO, filter, user.getUsername());
 		return new ResponseEntity<>(responseDTO, HttpStatus.OK);
 	}
 
