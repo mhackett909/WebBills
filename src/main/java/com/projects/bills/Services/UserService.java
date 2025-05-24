@@ -4,6 +4,7 @@ import com.projects.bills.DTOs.AuthDTO;
 import com.projects.bills.DTOs.UserDTO;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Enums.UpdateType;
+import com.projects.bills.Mappers.UserMapper;
 import com.projects.bills.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,15 +26,18 @@ public class UserService {
 
     private final JwtService jwtService;
 
+    private final UserMapper userMapper;
+
     @Autowired
-    public UserService(UserRepository userRepository, PasswordService passwordService, JwtService jwtService) {
+    public UserService(UserRepository userRepository, PasswordService passwordService, JwtService jwtService, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordService = passwordService;
         this.jwtService = jwtService;
+        this.userMapper = userMapper;
     }
 
     public Optional<UserDTO> findDtoByUsername(String username) {
-        return userRepository.findByUsername(username).map(this::mapToDTO);
+        return userRepository.findByUsername(username).map(userMapper::mapToDTO);
     }
 
     public Optional<User> findByUsername(String username) {
@@ -53,18 +57,13 @@ public class UserService {
 
         validateEmailFormat(userDTO.getEmail());
 
-        User user = new User();
-        user.setUsername(userDTO.getUsername());
-        user.setEmail(userDTO.getEmail());
-        user.setPassword(passwordService.hashPassword(userDTO.getPassword()));
-        user.setEnabled(true);
-        user.setRoles("ROLE_USER");
-        user.setMfaEnabled(false);
-        user.setCreatedAt(LocalDateTime.now());
+        String passwordHash = passwordService.hashPassword(userDTO.getPassword());
+
+        User user = userMapper.mapToEntity(userDTO, passwordHash);
 
         User newUser = userRepository.save(user);
 
-        return mapToDTO(newUser);
+        return userMapper.mapToDTO(newUser);
     }
 
     public AuthDTO login(UserDTO userDTO) {
@@ -120,7 +119,7 @@ public class UserService {
         }
 
         User savedUser = userRepository.save(user);
-        return mapToDTO(savedUser);
+        return userMapper.mapToDTO(savedUser);
     }
 
     private void updatePassword(UserDTO userDTO, User user) {
@@ -154,23 +153,6 @@ public class UserService {
         }
 
         user.setEmail(newEmail);
-    }
-
-    private UserDTO mapToDTO(User user) {
-        return new UserDTO(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                null,
-                null,
-                null,
-                user.getRoles(),
-                user.isEnabled(),
-                user.isMfaEnabled(),
-                user.getRecycleDate() != null,
-                user.getCreatedAt(),
-                user.getLastLogin()
-        );
     }
 
     private UpdateType getUpdateType(UserDTO userDTO) {

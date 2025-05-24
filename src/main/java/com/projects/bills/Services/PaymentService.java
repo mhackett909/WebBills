@@ -1,10 +1,12 @@
 package com.projects.bills.Services;
 import com.projects.bills.DTOs.EntryDTO;
+import com.projects.bills.DTOs.PaymentDTOList;
 import com.projects.bills.Entities.Entry;
 import com.projects.bills.Entities.Payment;
 import com.projects.bills.DTOs.PaymentDTO;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Enums.FlowType;
+import com.projects.bills.Mappers.PaymentMapper;
 import com.projects.bills.Repositories.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,32 +14,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.sql.Date;
 
 @Service
 public class PaymentService {
 	private final PaymentRepository paymentRepository;
 	private final EntryService entryService;
+	private final PaymentMapper paymentMapper;
 	
 	@Autowired
-	public PaymentService(PaymentRepository paymentRepository, EntryService entryService) {
+	public PaymentService(PaymentRepository paymentRepository, EntryService entryService, PaymentMapper paymentMapper) {
 		this.paymentRepository = paymentRepository;
 		this.entryService = entryService;
-	}
+        this.paymentMapper = paymentMapper;
+    }
 
-	public List<PaymentDTO> getPayments(Long entryId, String userName) {
+	public PaymentDTOList getPayments(Long entryId, String userName) {
 		validateUserAccess(entryId, userName);
-
-		List<Payment> payments = paymentRepository.findAllByEntryIdAndRecycleDateIsNull(entryId);
-		ArrayList<PaymentDTO> paymentList = new ArrayList<>();
-		for (Payment payment : payments) {
-			PaymentDTO paymentDTO = mapToPaymentDTO(payment);
-			paymentList.add(paymentDTO);
-		}
-		return paymentList;
+		List<Payment> payments = paymentRepository.findAllByEntryIdAndRecycleDateIsNullOrderByRecycleDateDesc(entryId);
+		return paymentMapper.mapToDtoList(payments);
 	}
 
 	public PaymentDTO getPaymentById(Long paymentId, String userName) {
@@ -46,11 +41,10 @@ public class PaymentService {
 
 		validateUserAccess(payment.getEntry().getId(), userName);
 
-		return mapToPaymentDTO(payment);
+		return paymentMapper.mapToPaymentDTO(payment);
 	}
 
 	public PaymentDTO createPayment(PaymentDTO paymentDTO, String userName) {
-		Payment payment = new Payment();
 
 		Entry entry = validateUserAccess(paymentDTO.getEntryId(), userName);
 
@@ -58,13 +52,13 @@ public class PaymentService {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add a payment for entry linked to an archived entity");
 		}
 
-		buildPaymentFromDTO(paymentDTO, payment, entry);
+		Payment payment = paymentMapper.buildPaymentFromDTO(paymentDTO, new Payment(), entry);
 
 		Payment savedPayment = paymentRepository.save(payment);
 
 		calculatePaid(entry);
 
-		return mapToPaymentDTO(savedPayment);
+		return paymentMapper.mapToPaymentDTO(savedPayment);
 	}
 
 	public PaymentDTO updatePayment(PaymentDTO paymentDTO, String filter, String userName) {
@@ -81,13 +75,13 @@ public class PaymentService {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update a recycled payment");
 		}
 
-		buildPaymentFromDTO(paymentDTO, payment, entry);
+		payment = paymentMapper.buildPaymentFromDTO(paymentDTO, payment, entry);
 
 		Payment savedPayment = paymentRepository.save(payment);
 
 		calculatePaid(entry);
 
-		return mapToPaymentDTO(savedPayment);
+		return paymentMapper.mapToPaymentDTO(savedPayment);
 	}
 
 	private void calculatePaid(Entry entry) {
@@ -109,34 +103,6 @@ public class PaymentService {
 		entryDTO.setFlow(FlowType.fromName(entryDTO.getFlow()));
 
 		entryService.saveEntry(entryDTO, true, null, entryUser);
-	}
-
-	private void buildPaymentFromDTO(PaymentDTO paymentDTO, Payment payment, Entry entry) {
-		payment.setDate(Date.valueOf(paymentDTO.getDate()));
-		payment.setAmount(paymentDTO.getAmount());
-		payment.setType(paymentDTO.getType());
-		payment.setMedium(paymentDTO.getMedium());
-		payment.setNotes(paymentDTO.getNotes());
-		payment.setEntry(entry);
-		payment.setRecycleDate(paymentDTO.getRecycle() ? LocalDateTime.now() : null);
-	}
-
-	private PaymentDTO mapToPaymentDTO(Payment payment) {
-		if (payment == null) {
-			return null;
-		}
-		PaymentDTO dto = new PaymentDTO();
-		dto.setPaymentId(payment.getPaymentId());
-		dto.setDate(payment.getDate() != null ? payment.getDate().toLocalDate() : null);
-		dto.setAmount(payment.getAmount());
-		dto.setType(payment.getType());
-		dto.setMedium(payment.getMedium());
-		dto.setNotes(payment.getNotes());
-		dto.setRecycle(payment.getRecycleDate() != null);
-		if (payment.getEntry() != null) {
-			dto.setEntryId(payment.getEntry().getId());
-		}
-		return dto;
 	}
 
 	private Entry validateUserAccess(long entryId, String userName) {

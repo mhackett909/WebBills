@@ -14,7 +14,7 @@ import java.util.List;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    List<Payment> findAllByEntryIdAndRecycleDateIsNull(Long entryId);
+    List<Payment> findAllByEntryIdAndRecycleDateIsNullOrderByRecycleDateDesc(Long entryId);
 
     @Query("SELECT p FROM Payment p WHERE p.entry.bill.user = :user AND p.recycleDate IS NOT NULL " +
             "AND p.entry NOT IN :entries")

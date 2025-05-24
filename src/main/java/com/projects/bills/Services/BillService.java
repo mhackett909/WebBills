@@ -1,7 +1,9 @@
 package com.projects.bills.Services;
+import com.projects.bills.DTOs.BillDTOList;
 import com.projects.bills.Entities.Bill;
 import com.projects.bills.DTOs.BillDTO;
 import com.projects.bills.Entities.User;
+import com.projects.bills.Mappers.BillMapper;
 import com.projects.bills.Repositories.BillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,11 +18,13 @@ import java.util.Optional;
 public class BillService {
 	private final BillRepository billRepository;
 	private final UserService userService;
+	private final BillMapper billMapper;
 
 	@Autowired
-	public BillService(BillRepository billRepository, UserService userService) {
+	public BillService(BillRepository billRepository, UserService userService, BillMapper billMapper) {
 		this.billRepository = billRepository;
         this.userService = userService;
+        this.billMapper = billMapper;
     }
 
 	protected List<Bill> getBills(String userName) {
@@ -30,14 +33,14 @@ public class BillService {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 		}
 
-		return billRepository.findAllByUserAndRecycleDateIsNull(realUser.get());
+		return billRepository.findAllByUserAndRecycleDateIsNullOrderByNameAsc(realUser.get());
 	}
 
 	protected Bill getBillEntityById(Long id) {
 		return billRepository.findById(id).orElse(null);
 	}
 
-	public List<BillDTO> getBillDtoList(String filter, String userName) {
+	public BillDTOList getBillDtoList(String filter, String userName) {
 		Optional<User> user = userService.findByUsername(userName);
 		if (user.isEmpty()) {
 			throw new IllegalArgumentException("User not found");
@@ -47,23 +50,17 @@ public class BillService {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access these bills");
 		}
 
-		List<BillDTO> billDtoList = new ArrayList<>();
 		List<Bill> bills;
 
 		if ("active".equalsIgnoreCase(filter)) {
-			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNull(true, user.get());
+			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNullOrderByNameAsc(true, user.get());
 		} else if ("inactive".equalsIgnoreCase(filter)) {
-			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNull(false, user.get());
+			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNullOrderByNameAsc(false, user.get());
 		} else {
-			bills = billRepository.findAllByUserAndRecycleDateIsNull(user.get());
+			bills = billRepository.findAllByUserAndRecycleDateIsNullOrderByNameAsc(user.get());
 		}
 
-		for (Bill bill : bills) {
-			BillDTO billDTO = mapToDTO(bill);
-			billDtoList.add(billDTO);
-		}
-
-		return billDtoList;
+		return billMapper.mapToDTOList(bills);
 	}
 
 	public BillDTO getBill(Long id, String filter, String userName) {
@@ -81,7 +78,7 @@ public class BillService {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bill is recycled");
 		}
 
-		return mapToDTO(bill);
+		return billMapper.mapToDTO(bill);
 	}
 
 	public BillDTO saveBill(BillDTO billTransfer, boolean existing, String userName) {
@@ -112,16 +109,6 @@ public class BillService {
 		}
 
 		Bill updatedBill = billRepository.save(bill);
-		return mapToDTO(updatedBill);
-	}
-
-	public static BillDTO mapToDTO(Bill bill) {
-		if (bill == null) return null;
-		BillDTO billDTO = new BillDTO();
-		billDTO.setId(bill.getBillId());
-		billDTO.setName(bill.getName());
-		billDTO.setStatus(bill.getStatus());
-		billDTO.setRecycle(bill.getRecycleDate() != null);
-		return billDTO;
+		return billMapper.mapToDTO(updatedBill);
 	}
 }

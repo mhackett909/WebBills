@@ -1,0 +1,125 @@
+package com.projects.bills.Mappers;
+
+import com.projects.bills.DTOs.EntryDTO;
+import com.projects.bills.DTOs.EntryDTOList;
+import com.projects.bills.DataHelpers.EntryFilters;
+import com.projects.bills.Entities.Bill;
+import com.projects.bills.Entities.Entry;
+import com.projects.bills.Entities.User;
+import com.projects.bills.Enums.FlowType;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Component
+public class EntryMapper {
+    public EntryDTO mapToDTO(Entry entry, boolean isArchived) {
+        return new EntryDTO(
+                entry.getId(),
+                entry.getBill().getBillId(),
+                entry.getInvoiceId(), // Local invoice ID
+                entry.getBill().getName(), // Not using entry.getBill().getName() because it is legacy
+                entry.getDate() != null ? entry.getDate().toLocalDate() : null,
+                entry.getAmount(),
+                entry.getStatus(),
+                entry.getRecycleDate() != null,
+                entry.getServices(),
+                entry.getFlow(),
+                isArchived,
+                entry.getOverpaid()
+        );
+    }
+
+    public Entry mapToEntity(EntryDTO entryDTO, Entry entry, Bill bill, FlowType flowType, User user, Long invoiceId) {
+        entry.setId(entryDTO.getEntryId());
+        entry.setBill(bill);
+        entry.setUser(user);
+        entry.setDate(Date.valueOf(entryDTO.getDate()));
+        entry.setAmount(entryDTO.getAmount());
+        entry.setStatus(entryDTO.getStatus());
+        entry.setServices(entryDTO.getServices());
+        entry.setFlow(flowType.toString());
+        entry.setOverpaid(entryDTO.getOverpaid());
+        if (entry.getOverpaid() == null) {
+            entry.setOverpaid(false);
+        }
+        entry.setInvoiceId(invoiceId);
+        entry.setRecycleDate(entryDTO.getRecycle() ? LocalDateTime.now() : null);
+        return entry;
+    }
+
+    public EntryDTOList mapEntriesToDTOList(ArrayList<EntryDTO> entryList, Long total) {
+        EntryDTOList entryDtoList = new EntryDTOList();
+        entryDtoList.setEntries(entryList);
+        entryDtoList.setTotal(total);
+
+        return entryDtoList;
+    }
+
+    public EntryFilters mapToEntryFilters(String userName,
+                                          LocalDate startDate,
+                                          LocalDate endDate,
+                                          Long invoiceNum,
+                                          List<String> partyList,
+                                          BigDecimal min,
+                                          BigDecimal max,
+                                          String flow,
+                                          String paid,
+                                          String archives) {
+        String flowType = null;
+        if (flow != null && !flow.isEmpty()) {
+            flowType = FlowType.fromType(flow).toString();
+        }
+
+        Boolean isPaid = null;
+        Boolean isOverpaid = null;
+        if (paid != null) {
+            if (paid.equalsIgnoreCase("true")) {
+                isPaid = true;
+            } else if (paid.equalsIgnoreCase("false")) {
+                isPaid = false;
+            } else if (paid.equalsIgnoreCase("overpaid")) {
+                isOverpaid = true;
+            }
+        }
+
+        Boolean isArchived = null;
+        if (archives != null) {
+            if (archives.equalsIgnoreCase("true")) {
+                isArchived = true;
+            } else if (archives.equalsIgnoreCase("false")) {
+                isArchived = false;
+            }
+        }
+
+        EntryFilters filters = new EntryFilters();
+        filters.setUserName(userName);
+        filters.setStartDate(startDate);
+        filters.setEndDate(endDate);
+        filters.setInvoiceNum(invoiceNum);
+        filters.setPartyList(partyList);
+        filters.setMin(min);
+        filters.setMax(max);
+        filters.setFlow(flowType);
+        filters.setPaid(isPaid);
+        filters.setOverpaid(isOverpaid);
+        filters.setArchived(isArchived);
+        return filters;
+    }
+
+    public String mapSortField(String sortField) {
+        return switch (sortField) {
+            case "paid" -> "status";
+            case "name" -> "bill.name";
+            case "entryId" -> "id";
+            case "description" -> "services";
+            case "archived" -> "bill.status";
+            default -> sortField;
+        };
+    }
+}
