@@ -4,7 +4,8 @@ import com.projects.bills.DTOs.UserDTO;
 import com.projects.bills.Services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -20,13 +21,12 @@ public class UserController {
     }
 
     @GetMapping("/api/v1/user")
-    public ResponseEntity<UserDTO> getUser(@RequestParam String userName) {
+    public ResponseEntity<UserDTO> getUser(@RequestParam String userName, @AuthenticationPrincipal UserDetails user) {
         if (userName == null || userName.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is required");
         }
 
-        String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!userName.equalsIgnoreCase(requestingUser)) {
+        if (!userName.equalsIgnoreCase(user.getUsername())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to access this user");
         }
 
@@ -39,8 +39,8 @@ public class UserController {
     }
 
     @PutMapping("/api/v1/user")
-    public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO) {
-        UserDTO responseDTO = userService.updateUser(userDTO);
+    public ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO, @AuthenticationPrincipal UserDetails user) {
+        UserDTO responseDTO = userService.updateUser(userDTO, user.getUsername());
 
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }

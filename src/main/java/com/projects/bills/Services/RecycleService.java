@@ -11,7 +11,6 @@ import com.projects.bills.Repositories.BillRepository;
 import com.projects.bills.Repositories.EntryRepository;
 import com.projects.bills.Repositories.PaymentRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -33,9 +32,8 @@ public class RecycleService {
         this.userService = userService;
     }
 
-    public List<RecycleDTO> getRecycleBin() {
-        String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<User> user = userService.findByUsername(requestingUser);
+    public List<RecycleDTO> getRecycleBin(String userName) {
+        Optional<User> user = userService.findByUsername(userName);
         if (user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }

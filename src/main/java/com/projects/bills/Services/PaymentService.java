@@ -8,7 +8,6 @@ import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Repositories.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,8 +28,8 @@ public class PaymentService {
 		this.entryService = entryService;
 	}
 
-	public List<PaymentDTO> getPayments(Long entryId) {
-		validateUserAccess(entryId);
+	public List<PaymentDTO> getPayments(Long entryId, String userName) {
+		validateUserAccess(entryId, userName);
 
 		List<Payment> payments = paymentRepository.findAllByEntryIdAndRecycleDateIsNull(entryId);
 		ArrayList<PaymentDTO> paymentList = new ArrayList<>();
@@ -41,19 +40,19 @@ public class PaymentService {
 		return paymentList;
 	}
 
-	public PaymentDTO getPaymentById(Long paymentId) {
+	public PaymentDTO getPaymentById(Long paymentId, String userName) {
 		Payment payment = paymentRepository.findById(paymentId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
 
-		validateUserAccess(payment.getEntry().getId());
+		validateUserAccess(payment.getEntry().getId(), userName);
 
 		return mapToPaymentDTO(payment);
 	}
 
-	public PaymentDTO createPayment(PaymentDTO paymentDTO) {
+	public PaymentDTO createPayment(PaymentDTO paymentDTO, String userName) {
 		Payment payment = new Payment();
 
-		Entry entry = validateUserAccess(paymentDTO.getEntryId());
+		Entry entry = validateUserAccess(paymentDTO.getEntryId(), userName);
 
 		if (!entry.getBill().getStatus()) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot add a payment for entry linked to an archived entity");
@@ -68,8 +67,8 @@ public class PaymentService {
 		return mapToPaymentDTO(savedPayment);
 	}
 
-	public PaymentDTO updatePayment(PaymentDTO paymentDTO, String filter) {
-		Entry entry = validateUserAccess(paymentDTO.getEntryId());
+	public PaymentDTO updatePayment(PaymentDTO paymentDTO, String filter, String userName) {
+		Entry entry = validateUserAccess(paymentDTO.getEntryId(), userName);
 
 		if (!entry.getBill().getStatus()) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update payment for entry linked to an archived entity");
@@ -95,7 +94,10 @@ public class PaymentService {
 		BigDecimal entryAmount = entry.getAmount();
 		BigDecimal paidAmount = paymentRepository.sumAmountByEntryIdAndRecycleDateIsNull(entry.getId());
 
-		EntryDTO entryDTO = entryService.getEntryDtoById(entry.getId(), null)
+		// Validation for this entry has already occurred
+		String entryUser = entry.getUser().getUsername();
+
+		EntryDTO entryDTO = entryService.getEntryDtoById(entry.getId(), null, entryUser)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry DTO not found"));
 
 		// The entry is paid if the paid amount is greater than or equal to the entry amount
@@ -106,7 +108,7 @@ public class PaymentService {
 
 		entryDTO.setFlow(FlowType.fromName(entryDTO.getFlow()));
 
-		entryService.saveEntry(entryDTO, true, null);
+		entryService.saveEntry(entryDTO, true, null, entryUser);
 	}
 
 	private void buildPaymentFromDTO(PaymentDTO paymentDTO, Payment payment, Entry entry) {
@@ -137,16 +139,16 @@ public class PaymentService {
 		return dto;
 	}
 
-	private Entry validateUserAccess(long entryId) {
+	private Entry validateUserAccess(long entryId, String userName) {
 		Entry entry = entryService.getEntryById(entryId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry not found"));
 
 		User user = entry.getBill().getUser();
 
-		String requestingUser = SecurityContextHolder.getContext().getAuthentication().getName();
-		if(!user.getUsername().equalsIgnoreCase(requestingUser)) {
+		if(!user.getUsername().equalsIgnoreCase(userName)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to access this entry");
 		}
+
 		return entry;
 	}
 }
