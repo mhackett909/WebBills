@@ -103,7 +103,7 @@ public class EntryService {
 
 		List<Entry> entries = entryPages.getContent();
 
-		return mapEntriesToDTOList(entries, entryPages);
+		return mapEntriesToDTOList(entries, entryPages.getTotalElements());
 	}
 
 	public StatsDTO getStats(String userName,
@@ -267,7 +267,7 @@ public class EntryService {
 		return entry;
 	}
 
-	private EntryDTOList mapEntriesToDTOList(List<Entry> entries, Page<Entry> entryPages) {
+	private EntryDTOList mapEntriesToDTOList(List<Entry> entries, Long total) {
 		ArrayList<EntryDTO> entryList = new ArrayList<>();
 		for (Entry entry : entries) {
 			EntryDTO entryDTO = mapToDTO(entry);
@@ -276,7 +276,7 @@ public class EntryService {
 
 		EntryDTOList entryDtoList = new EntryDTOList();
 		entryDtoList.setEntries(entryList);
-		entryDtoList.setTotal(entryPages.getTotalElements());
+		entryDtoList.setTotal(total);
 
 		return entryDtoList;
 	}
