@@ -1,5 +1,6 @@
 package com.projects.bills.Controllers;
 import com.projects.bills.DTOs.PaymentDTO;
+import com.projects.bills.DTOs.PaymentDTOList;
 import com.projects.bills.Services.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -8,8 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
-
-import java.util.List;
 
 @RestController
 public class PaymentController {
@@ -21,14 +20,14 @@ public class PaymentController {
 	}
 
 	@GetMapping("/api/v1/payments")
-	public ResponseEntity<List<PaymentDTO>> getPayments(
+	public ResponseEntity<PaymentDTOList> getPayments(
 			@RequestParam Long entryId,
 			@AuthenticationPrincipal UserDetails user
 	) {
 		if (entryId == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry ID is required");
 		}
-		List<PaymentDTO> paymentDTOS = paymentService.getPayments(entryId, user.getUsername());
+		PaymentDTOList paymentDTOS = paymentService.getPayments(entryId, user.getUsername());
 		return new ResponseEntity<>(paymentDTOS, HttpStatus.OK);
 	}
 

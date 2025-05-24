@@ -1,5 +1,6 @@
 package com.projects.bills.Controllers;
 import com.projects.bills.DTOs.BillDTO;
+import com.projects.bills.DTOs.BillDTOList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import com.projects.bills.Services.BillService;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.List;
 
 @RestController
 public class BillController {
@@ -20,12 +20,12 @@ public class BillController {
 	}
 
 	@GetMapping("/api/v1/bills")
-	public ResponseEntity<List<BillDTO>> getBills(
+	public ResponseEntity<BillDTOList> getBills(
 			@RequestParam(required = false) String filter,
 			@AuthenticationPrincipal UserDetails user) {
 
-		List<BillDTO> bills = billService.getBillDtoList(filter, user.getUsername());
-		return new ResponseEntity<>(bills, HttpStatus.OK);
+		BillDTOList billDTOList = billService.getBillDtoList(filter, user.getUsername());
+		return new ResponseEntity<>(billDTOList, HttpStatus.OK);
 	}
 
 	@GetMapping("/api/v1/bills/{id}")

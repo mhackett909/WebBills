@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface BillRepository extends JpaRepository<Bill, Long> {
-    List<Bill> findAllByUserAndRecycleDateIsNull(User user);
-    List<Bill> findAllByUserAndRecycleDateIsNotNull(User user);
-    List<Bill> findAllByStatusAndUserAndRecycleDateIsNull(Boolean status, User user);
+    List<Bill> findAllByUserAndRecycleDateIsNullOrderByNameAsc(User user);
+    List<Bill> findAllByUserAndRecycleDateIsNotNullOrderByNameAsc(User user);
+    List<Bill> findAllByStatusAndUserAndRecycleDateIsNullOrderByNameAsc(Boolean status, User user);
 }
