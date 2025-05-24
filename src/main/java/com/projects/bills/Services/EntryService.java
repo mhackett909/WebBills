@@ -142,7 +142,7 @@ public class EntryService {
 
 		StatsDTO statsDTO = new StatsDTO();
 
-        calculateAmountsByFlow(statsDTO, filters, cb, query);
+		calculateAmountsByFlow(statsDTO, filters, cb, query);
 
 		calculateTop5PartiesAndTypes(statsDTO, filters, cb, query);
 
@@ -282,15 +282,15 @@ public class EntryService {
 	}
 
 	private EntryFilters mapToEntryFilters(String userName,
-										 LocalDate startDate,
-										 LocalDate endDate,
-										 Long invoiceNum,
-										 List<String> partyList,
-										 BigDecimal min,
-										 BigDecimal max,
-										 String flow,
-										 String paid,
-										 String archives) {
+										   LocalDate startDate,
+										   LocalDate endDate,
+										   Long invoiceNum,
+										   List<String> partyList,
+										   BigDecimal min,
+										   BigDecimal max,
+										   String flow,
+										   String paid,
+										   String archives) {
 		String flowType = null;
 		if (flow != null && !flow.isEmpty()) {
 			flowType = FlowType.fromType(flow).toString();
@@ -333,9 +333,9 @@ public class EntryService {
 	}
 
 	private void calculateAmountsByFlow(StatsDTO statsDTO,
-								  EntryFilters filters,
-								  CriteriaBuilder cb,
-								  CriteriaQuery<Object[]> query) {
+										EntryFilters filters,
+										CriteriaBuilder cb,
+										CriteriaQuery<Object[]> query) {
 		List<Object[]> totalEntryAmountsByFlow = entityManager.createQuery(query).getResultList();
 
 		mapToStatsDTO(statsDTO, totalEntryAmountsByFlow, "totalEntryAmountsByFlow");
