@@ -11,7 +11,7 @@ echo_error() {
 
 # Step 1: Build the Maven project
 echo_info "Building the Maven project..."
-mvn clean package
+mvn clean verify
 if [ $? -ne 0 ]; then
   echo_error "Maven build failed."
   exit 1

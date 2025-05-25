@@ -66,9 +66,6 @@ public class BillController {
 		if (billTransfer.getStatus() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill status is required");
 		}
-		if (billTransfer.getRecycle() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill recycle status is required");
-		}
 
 		BillDTO updatedBill = billService.saveBill(billTransfer, true, user.getUsername());
 		return ResponseEntity.ok(updatedBill);

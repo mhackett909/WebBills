@@ -88,9 +88,5 @@ public class PaymentController {
 		if (paymentDTO.getMedium() == null || paymentDTO.getMedium().isBlank()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Medium is required");
 		}
-
-		if (paymentDTO.getRecycle() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Recycle is required");
-		}
 	}
 }
