@@ -25,6 +25,11 @@ jobs:
       - name: Build Spring Boot App (JAR)
         run: mvn clean verify
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: target/site/jacoco/jacoco.xml
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
