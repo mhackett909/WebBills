@@ -1,5 +1,7 @@
 # WebBills
 
+[![codecov](https://codecov.io/gh/mhackett909/WebBills/branch/main/graph/badge.svg)](https://codecov.io/gh/mhackett909/WebBills)
+
 WebBills is a secure, user-centric web application for managing bills, payments, financial entries, and user accounts. Built with Java (Spring Boot), it features robust authentication, fine-grained access control, and a modern RESTful API. The application is designed for easy deployment and scalability, supporting Docker and cloud-native workflows.
 
 ## Key Features
