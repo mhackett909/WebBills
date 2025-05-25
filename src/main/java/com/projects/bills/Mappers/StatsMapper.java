@@ -62,7 +62,7 @@ public class StatsMapper {
                 }
                 break;
             case "top5ExpenseReceipts":
-                HashMap<String, BigDecimal> top5ExpenseReceipts = new HashMap<>();
+                Map<String, BigDecimal> top5ExpenseReceipts = new HashMap<>();
                 for (Object[] result : resultList) {
                     String partyName = (String) result[0];
                     BigDecimal amount = (BigDecimal) result[2];
@@ -71,7 +71,7 @@ public class StatsMapper {
                 statsDTO.setTopExpenseRecipients(top5ExpenseReceipts);
                 break;
             case "top5IncomeSources":
-                HashMap<String, BigDecimal> top5IncomeSources = new HashMap<>();
+                Map<String, BigDecimal> top5IncomeSources = new HashMap<>();
                 for (Object[] result : resultList) {
                     String partyName = (String) result[0];
                     BigDecimal amount = (BigDecimal) result[2];
@@ -80,7 +80,7 @@ public class StatsMapper {
                 statsDTO.setTopIncomeSources(top5IncomeSources);
                 break;
             case "top5ExpenseTypes":
-                HashMap<String, BigDecimal> top5ExpenseTypes = new HashMap<>();
+                Map<String, BigDecimal> top5ExpenseTypes = new HashMap<>();
                 for (Object[] result : resultList) {
                     String typeName = (String) result[1];
                     BigDecimal amount = (BigDecimal) result[2];
@@ -89,7 +89,7 @@ public class StatsMapper {
                 statsDTO.setTopExpenseTypes(top5ExpenseTypes);
                 break;
             case "top5IncomeTypes":
-                HashMap<String, BigDecimal> top5IncomeTypes = new HashMap<>();
+                Map<String, BigDecimal> top5IncomeTypes = new HashMap<>();
                 for (Object[] result : resultList) {
                     String typeName = (String) result[1];
                     BigDecimal amount = (BigDecimal) result[2];
