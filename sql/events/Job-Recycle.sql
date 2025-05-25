@@ -1,0 +1,7 @@
+CREATE EVENT IF NOT EXISTS cleanup_recycled_data_daily
+ON SCHEDULE EVERY 1 DAY
+STARTS DATE_ADD(CURRENT_DATE, INTERVAL 12 HOUR)  -- 12:00 UTC = 5:00 AM PDT
+DO
+CALL cleanup_all_recycled_data();
+
+
