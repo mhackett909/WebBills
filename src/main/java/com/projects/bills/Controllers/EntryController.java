@@ -125,9 +125,6 @@ public class EntryController {
 		if (entryDTO.getStatus() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is required");
 		}
-		if (entryDTO.getRecycle() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Recycle status is required");
-		}
 
 		try {
 			FlowType.fromType(entryDTO.getFlow());
