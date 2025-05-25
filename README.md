@@ -25,7 +25,7 @@ WebBills is a secure, user-centric web application for managing bills, payments,
 ### Clone the repository
 
 ```sh
-git clone https://github.com/yourusername/WebBills.git
+git clone https://github.com/mhackett909/WebBills.git
 cd WebBills
 ```
 
