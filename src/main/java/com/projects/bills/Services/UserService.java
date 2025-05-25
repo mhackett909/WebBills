@@ -164,7 +164,7 @@ public class UserService {
 
     private void validatePasswordStrength(String password) {
         // At least 8 chars, one upper, one lower, one digit, one special char
-        String pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_-])[A-Za-z\\d@$!%*?&_-]{8,}$";
+        String pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$!%*?&_-])[A-Za-z\\d@#$!%*?&_-]{8,}$";
 
         if (password == null || !password.matches(pattern)) {
             throw new ResponseStatusException(
