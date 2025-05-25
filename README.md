@@ -51,17 +51,6 @@ The application will start on `http://localhost:8080`.
 docker-compose up --build
 ```
 
-Or use the deployment script the run only the Spring Boot app:
-
-```sh
-./deploy-bills-app.sh
-```
-
-This script will:
-- Build the Spring Boot application using Maven
-- Build a Docker image for the app
-- Run the container locally
-
 You can customize the script as needed for your environment or CI/CD pipeline.
 
 ### Configuration
