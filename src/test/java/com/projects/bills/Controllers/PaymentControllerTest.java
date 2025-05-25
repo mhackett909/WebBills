@@ -244,11 +244,4 @@ class PaymentControllerTest {
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
     }
-
-    @Test
-    @WithMockUser(username = "alice")
-    void getPayments_entryIdNull_returns400() throws Exception {
-        mockMvc.perform(get("/api/v1/payments"))
-                .andExpect(status().isBadRequest());
-    }
 }

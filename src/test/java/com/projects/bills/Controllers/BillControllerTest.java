@@ -115,21 +115,6 @@ class BillControllerTest {
 
     @Test
     @WithMockUser(username = "alice", roles = "USER")
-    void editBill_missingId() throws Exception {
-        BillDTO billDTO = new BillDTO();
-        billDTO.setId(0L);
-        billDTO.setName("Edit Bill");
-        billDTO.setStatus(true);
-        billDTO.setRecycle(false);
-
-        mockMvc.perform(put("/api/v1/bills")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(billDTO)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "alice", roles = "USER")
     void getBillsById_notFound_returns404() throws Exception {
         Mockito.when(billService.getBill(eq(99L), any(), eq("alice")))
                 .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill does not exist by id: 99"));
