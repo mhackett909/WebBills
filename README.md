@@ -51,8 +51,6 @@ The application will start on `http://localhost:8080`.
 docker-compose up --build
 ```
 
-You can customize the script as needed for your environment or CI/CD pipeline.
-
 ### Configuration
 
 Edit `src/main/resources/application.properties` or `application-dev.properties` for environment-specific settings, such as database connection and JWT secrets.
