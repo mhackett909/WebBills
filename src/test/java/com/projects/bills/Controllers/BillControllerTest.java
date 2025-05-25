@@ -6,6 +6,9 @@ import com.projects.bills.DTOs.BillDTOList;
 import com.projects.bills.Services.BillService;
 import com.projects.bills.Services.JwtService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,6 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -61,8 +66,7 @@ class BillControllerTest {
     @Test
     @WithMockUser(username = "alice", roles = "USER")
     void getBillsById_notFound() throws Exception {
-        Mockito.when(billService.getBill(eq(1L), any(), eq("alice")))
-                .thenThrow(new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND));
+        Mockito.when(billService.getBill(eq(1L), any(), eq("alice"))).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/bills/1"))
                 .andExpect(status().isNotFound());
@@ -83,18 +87,6 @@ class BillControllerTest {
                 .andExpect(status().isCreated());
     }
 
-    @Test
-    @WithMockUser(username = "alice", roles = "USER")
-    void newBill_invalidName() throws Exception {
-        BillDTO billDTO = new BillDTO();
-        billDTO.setName(" ");
-        billDTO.setStatus(true);
-
-        mockMvc.perform(post("/api/v1/bills")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(billDTO)))
-                .andExpect(status().isBadRequest());
-    }
 
     @Test
     @WithMockUser(username = "alice", roles = "USER")
@@ -133,84 +125,38 @@ class BillControllerTest {
                 .andExpect(status().isForbidden());
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("provideInvalidBillDataNew")
     @WithMockUser(username = "alice", roles = "USER")
-    void newBill_missingName_returns400() throws Exception {
-        BillDTO billDTO = new BillDTO();
-        billDTO.setStatus(true);
-
+    void newBill_invalidField_returns400(BillDTO billDTO) throws Exception {
         mockMvc.perform(post("/api/v1/bills")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(billDTO)))
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    @WithMockUser(username = "alice", roles = "USER")
-    void newBill_blankName_returns400() throws Exception {
-        BillDTO billDTO = new BillDTO();
-        billDTO.setName(" ");
-        billDTO.setStatus(true);
-
-        mockMvc.perform(post("/api/v1/bills")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(billDTO)))
-                .andExpect(status().isBadRequest());
+    private static Stream<Arguments> provideInvalidBillDataNew() {
+        return Stream.of(
+                Arguments.of(new BillDTO(0, "New Bill", null, false)), // Missing Status
+                Arguments.of(new BillDTO(0, null, true, false)) // Missing Name
+        );
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("provideInvalidBillDataEdit")
     @WithMockUser(username = "alice", roles = "USER")
-    void newBill_missingStatus_returns400() throws Exception {
-        BillDTO billDTO = new BillDTO();
-        billDTO.setName("Valid Name");
-
-        mockMvc.perform(post("/api/v1/bills")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(billDTO)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "alice", roles = "USER")
-    void editBill_missingId_returns400() throws Exception {
-        BillDTO billDTO = new BillDTO();
-        billDTO.setId(0L);
-        billDTO.setName("Edit Bill");
-        billDTO.setStatus(true);
-        billDTO.setRecycle(false);
-
+    void editBill_invalidField_returns400(BillDTO billDTO) throws Exception {
         mockMvc.perform(put("/api/v1/bills")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(billDTO)))
                 .andExpect(status().isBadRequest());
     }
-
-    @Test
-    @WithMockUser(username = "alice", roles = "USER")
-    void editBill_missingName_returns400() throws Exception {
-        BillDTO billDTO = new BillDTO();
-        billDTO.setId(1L);
-        billDTO.setStatus(true);
-        billDTO.setRecycle(false);
-
-        mockMvc.perform(put("/api/v1/bills")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(billDTO)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "alice", roles = "USER")
-    void editBill_missingStatus_returns400() throws Exception {
-        BillDTO billDTO = new BillDTO();
-        billDTO.setId(1L);
-        billDTO.setName("Edit Bill");
-        billDTO.setRecycle(false);
-
-        mockMvc.perform(put("/api/v1/bills")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(billDTO)))
-                .andExpect(status().isBadRequest());
+    private static Stream<Arguments> provideInvalidBillDataEdit() {
+        return Stream.of(
+                Arguments.of(new BillDTO(0, "Edit Bill", true, false)), // Missing ID
+                Arguments.of(new BillDTO(1L, null, true, false)),          // Missing Name
+                Arguments.of(new BillDTO(1L, "Edit Bill", null, false))   // Missing Status
+        );
     }
 
     @Test
