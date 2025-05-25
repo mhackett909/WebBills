@@ -55,21 +55,22 @@ Or use the deployment script for only the spring app:
 ./deploy-bills-app.sh
 ```
 
+This script will:
+- Build the Spring Boot application using Maven
+- Build a Docker image for the app
+- Run the container locally
+
+You can customize the script as needed for your environment or CI/CD pipeline.
+
 ### Configuration
 
 Edit `src/main/resources/application.properties` or `application-dev.properties` for environment-specific settings, such as database connection and JWT secrets.
 
-### API Documentation
+See the [`bruno/web-bills/`](bruno/web-bills/) folder for example requests and environments.
 
-API endpoints are organized under `/api/v1/`:
-- `/auth` – User registration, login, and token refresh
-- `/bills` – Bill CRUD operations
-- `/entries` – Entry CRUD, filtering, and statistics
-- `/payments` – Payment CRUD operations
-- `/recycle` – View recycle bin contents
-- `/user` – User profile and update
+## Repository
 
-See the `bruno/web-bills/` folder for example requests and environments.
+Find the latest source code and updates at: [github.com/mhackett909/WebBills](https://github.com/mhackett909/WebBills/)
 
 ## Testing
 
