@@ -19,10 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -73,16 +70,16 @@ public class StatsService {
             }
         }
 
-        HashMap<String, List<Object[]>> resultMap = buildResultMap(filters);
+        Map<String, List<Object[]>> resultMap = buildResultMap(filters);
         return statsMapper.buildStatsDTO(resultMap);
     }
 
-    private HashMap<String, List<Object[]>> buildResultMap(EntryFilters filters) {
+    private Map<String, List<Object[]>> buildResultMap(EntryFilters filters) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
         CriteriaQuery<Object[]> query = statsHelper.getTotalEntryAmountsByFlow(cb, filters);
 
-        HashMap<String, List<Object[]>> resultMap = new HashMap<>();
+        Map<String, List<Object[]>> resultMap = new HashMap<>();
 
         resultMap.put("totalEntryAmountsByFlow", entityManager.createQuery(query).getResultList());
 
@@ -101,7 +98,7 @@ public class StatsService {
         return buildTop5Totals(filters, resultMap);
     }
 
-    private HashMap<String, List<Object[]>> buildTop5Totals(EntryFilters filters, HashMap<String, List<Object[]>> resultMap) {
+    private Map<String, List<Object[]>> buildTop5Totals(EntryFilters filters, Map<String, List<Object[]>> resultMap) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
         CriteriaQuery<Object[]> query;

@@ -7,10 +7,11 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class StatsMapper {
-    public StatsDTO buildStatsDTO(HashMap<String, List<Object[]>> resultMap) {
+    public StatsDTO buildStatsDTO(Map<String, List<Object[]>> resultMap) {
         StatsDTO statsDTO = new StatsDTO();
 
         mapToStatsDTO(statsDTO, resultMap.get("totalEntryAmountsByFlow"), "totalEntryAmountsByFlow");
