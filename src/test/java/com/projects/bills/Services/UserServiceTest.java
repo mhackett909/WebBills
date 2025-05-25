@@ -1,11 +1,13 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.DTOs.AuthDTO;
 import com.projects.bills.DTOs.UserDTO;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Enums.UpdateType;
 import com.projects.bills.Mappers.UserMapper;
 import com.projects.bills.Repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
 
@@ -140,5 +142,283 @@ class UserServiceTest {
                     userService.updateUser(userDTO, "alice"));
             assertTrue(Objects.requireNonNull(ex.getReason()).contains(expectedError));
         }
+    }
+
+    @Test
+    void testRegisterUser_Success() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("alice");
+        userDTO.setEmail("alice@email.com");
+        userDTO.setPassword("ValidPass1!");
+
+        when(userRepository.existsByUsername("alice")).thenReturn(false);
+        when(userRepository.existsByEmail("alice@email.com")).thenReturn(false);
+        when(passwordService.hashPassword("ValidPass1!")).thenReturn("hashed");
+        User user = new User();
+        user.setUsername("alice");
+        user.setEmail("alice@email.com");
+        user.setPassword("hashed");
+        when(userMapper.mapToEntity(userDTO, "hashed")).thenReturn(user);
+        when(userRepository.save(user)).thenReturn(user);
+        UserDTO mappedDTO = new UserDTO();
+        mappedDTO.setUsername("alice");
+        mappedDTO.setEmail("alice@email.com");
+        when(userMapper.mapToDTO(user)).thenReturn(mappedDTO);
+
+        UserDTO result = userService.registerUser(userDTO);
+        assertEquals("alice", result.getUsername());
+        assertEquals("alice@email.com", result.getEmail());
+    }
+
+    // Successful login
+    @Test
+    void testLogin_Success() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("alice");
+        userDTO.setPassword("ValidPass1!");
+
+        User user = new User();
+        user.setUsername("alice");
+        user.setPassword("hashed");
+        user.setRoles("ROLE_USER");
+
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
+        when(passwordService.verifyPassword("ValidPass1!", "hashed")).thenReturn(true);
+        when(userRepository.save(any())).thenReturn(user);
+        when(jwtService.generateAccessToken(eq("alice"), anyList())).thenReturn("access-token");
+        when(jwtService.generateRefreshToken(eq("alice"), anyList())).thenReturn("refresh-token");
+
+        AuthDTO auth = userService.login(userDTO);
+        assertEquals("alice", auth.getUsername());
+        assertEquals("access-token", auth.getAccessToken());
+        assertEquals("refresh-token", auth.getRefreshToken());
+    }
+
+    @Test
+    void testRegisterUser_UsernameExists() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("alice");
+        userDTO.setEmail("alice@email.com");
+        userDTO.setPassword("ValidPass1!");
+
+        when(userRepository.existsByUsername("alice")).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.registerUser(userDTO));
+        assertTrue(ex.getReason().contains("Username already exists"));
+    }
+
+    @Test
+    void testRegisterUser_EmailExists() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("bob");
+        userDTO.setEmail("bob@email.com");
+        userDTO.setPassword("ValidPass1!");
+
+        when(userRepository.existsByUsername("bob")).thenReturn(false);
+        when(userRepository.existsByEmail("bob@email.com")).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.registerUser(userDTO));
+        assertTrue(ex.getReason().contains("Email already registered"));
+    }
+
+    @Test
+    void testRegisterUser_InvalidEmail() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("bob");
+        userDTO.setEmail("bademail");
+        userDTO.setPassword("ValidPass1!");
+
+        when(userRepository.existsByUsername("bob")).thenReturn(false);
+        when(userRepository.existsByEmail("bademail")).thenReturn(false);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.registerUser(userDTO));
+        assertTrue(ex.getReason().contains("Invalid email format"));
+    }
+
+    @Test
+    void testLogin_UsernameNotFound() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("notfound");
+        userDTO.setPassword("ValidPass1!");
+
+        when(userRepository.findByUsername("notfound")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("notfound")).thenReturn(Optional.empty());
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.login(userDTO));
+        assertEquals(401, ex.getStatusCode().value());
+    }
+
+    @Test
+    void testLogin_WrongPassword() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("alice");
+        userDTO.setPassword("WrongPass1!");
+
+        User user = new User();
+        user.setUsername("alice");
+        user.setPassword("hashed");
+
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
+        when(passwordService.verifyPassword("WrongPass1!", "hashed")).thenReturn(false);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.login(userDTO));
+        assertEquals(401, ex.getStatusCode().value());
+    }
+
+    @Test
+    void testUpdateUser_MissingId() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(null);
+        userDTO.setUsername("alice");
+        userDTO.setPassword("ValidPass1!");
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.updateUser(userDTO, "alice"));
+        assertEquals(400, ex.getStatusCode().value());
+    }
+
+    @Test
+    void testUpdateUser_UserNotFound() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1L);
+        userDTO.setUsername("alice");
+        userDTO.setPassword("ValidPass1!");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.updateUser(userDTO, "alice"));
+        assertEquals(404, ex.getStatusCode().value());
+    }
+
+    @Test
+    void testUpdateUser_Unauthorized() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1L);
+        userDTO.setUsername("alice");
+        userDTO.setPassword("ValidPass1!");
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("bob");
+        user.setPassword("hashed");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.updateUser(userDTO, "alice"));
+        assertEquals(403, ex.getStatusCode().value());
+    }
+
+    @Test
+    void testUpdateUser_WrongPassword() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1L);
+        userDTO.setUsername("alice");
+        userDTO.setPassword("WrongPass1!");
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("alice");
+        user.setPassword("hashed");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordService.verifyPassword("WrongPass1!", "hashed")).thenReturn(false);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.updateUser(userDTO, "alice"));
+        assertEquals(401, ex.getStatusCode().value());
+    }
+
+    @Test
+    void testUpdateUser_InvalidUpdateType() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1L);
+        userDTO.setUsername("alice");
+        userDTO.setPassword("ValidPass1!");
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("alice");
+        user.setPassword("hashed");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordService.verifyPassword(any(), any())).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.updateUser(userDTO, "alice"));
+        assertEquals(400, ex.getStatusCode().value());
+    }
+
+    @Test
+    void testUpdateUser_EmailAlreadyExists() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1L);
+        userDTO.setUsername("alice");
+        userDTO.setPassword("ValidPass1!");
+        userDTO.setNewEmail("new@email.com");
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("alice");
+        user.setEmail("old@email.com");
+        user.setPassword("hashed");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordService.verifyPassword(any(), any())).thenReturn(true);
+        when(userRepository.existsByEmail("new@email.com")).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.updateUser(userDTO, "alice"));
+        assertTrue(ex.getReason().contains("Email already registered"));
+    }
+
+    @Test
+    void testUpdateUser_NewEmailSameAsOld() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1L);
+        userDTO.setUsername("alice");
+        userDTO.setPassword("ValidPass1!");
+        userDTO.setNewEmail("old@email.com");
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("alice");
+        user.setEmail("old@email.com");
+        user.setPassword("hashed");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordService.verifyPassword(any(), any())).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.updateUser(userDTO, "alice"));
+        assertTrue(ex.getReason().contains("New email cannot be the same as the current email"));
+    }
+
+    @Test
+    void testUpdateUser_InvalidEmailFormat() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1L);
+        userDTO.setUsername("alice");
+        userDTO.setPassword("ValidPass1!");
+        userDTO.setNewEmail("bademail");
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("alice");
+        user.setEmail("old@email.com");
+        user.setPassword("hashed");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordService.verifyPassword(any(), any())).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.updateUser(userDTO, "alice"));
+        assertTrue(ex.getReason().contains("Invalid email format"));
     }
 }
