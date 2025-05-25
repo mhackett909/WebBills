@@ -80,7 +80,7 @@ public class EntryService {
 
 		Sort.Direction sortDirection = Sort.Direction.DESC;
 		if (sortOrder != null && sortOrder.equals("asc")) {
-				sortDirection = Sort.Direction.ASC;
+			sortDirection = Sort.Direction.ASC;
 		}
 
 		Sort sortBy = Sort.by(sortDirection, sortField);
