@@ -49,7 +49,7 @@ The application will start on `http://localhost:8080`.
 docker-compose up --build
 ```
 
-Or use the deployment script for only the spring app:
+Or use the deployment script the run only the Spring Boot app:
 
 ```sh
 ./deploy-bills-app.sh
@@ -70,7 +70,7 @@ See the [`bruno/web-bills/`](bruno/web-bills/) folder for example requests and e
 
 ## Repository
 
-Find the latest source code and updates at: [github.com/mhackett909/WebBills](https://github.com/mhackett909/WebBills/)
+Find the latest source code and updates at: [WebBills GitHub Repository](https://github.com/mhackett909/WebBills/)
 
 ## Testing
 
@@ -89,5 +89,5 @@ Test reports are available in the `target/surefire-reports/` directory.
 
 ## License
 
-[MIT](LICENSE)
+[MIT License](LICENSE)
 
