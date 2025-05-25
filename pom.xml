@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.projects</groupId>
 	<artifactId>bills</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>bills</name>
 	<description>Bill Manager Web</description>
 	<properties>
