@@ -1,22 +1,23 @@
 # WebBills
 
-WebBills is a web application for managing bills, payments, entries, and users. It is built with Java (Spring Boot), uses Maven for build management, and supports containerization with Docker.
+WebBills is a secure, user-centric web application for managing bills, payments, financial entries, and user accounts. Built with Java (Spring Boot), it features robust authentication, fine-grained access control, and a modern RESTful API. The application is designed for easy deployment and scalability, supporting Docker and cloud-native workflows.
 
-## Features
+## Key Features
 
-- Bill management (CRUD)
-- Payment tracking and management
-- Entry management with filtering, sorting, and statistics
-- User authentication, registration, and profile management
-- Recycle bin for soft-deleted bills, entries, and payments
-- RESTful API endpoints secured with JWT authentication
-- Dockerized deployment for easy setup
+- **User Authentication & Security**: JWT-based authentication, secure password hashing, and refresh token support.
+- **Bill Management**: Create, update, and view bills. Bills can be archived (recycled) and restored.
+- **Entry Management**: Track financial entries with advanced filtering, sorting, and statistics (including top payees/payers, overpaid entries, and more).
+- **Payment Tracking**: Record, update, and view payments linked to entries. Automatic calculation of paid/overpaid status.
+- **Recycle Bin**: Soft-delete (recycle) bills, entries, and payments, with endpoints to view and restore recycled items.
+- **User Profile**: View and update user details, change email/password, and soft-delete (recycle) user accounts.
+- **Comprehensive API**: All features are accessible via RESTful endpoints under `/api/v1/`.
+- **Dockerized Deployment**: Easily build and run the app in a containerized environment. Includes a deployment script for streamlined setup.
 
 ## Prerequisites
 
-- Java 17+ (or your project’s required version)
+- Java 17+
 - Maven 3.6+
-- Docker (optional, for containerized deployment)
+- Docker (for containerized deployment)
 - Python 3 (for utility scripts, if needed)
 
 ## Getting Started
@@ -48,6 +49,12 @@ The application will start on `http://localhost:8080`.
 docker-compose up --build
 ```
 
+Or use the deployment script for only the spring app:
+
+```sh
+./deploy-bills-app.sh
+```
+
 ### Configuration
 
 Edit `src/main/resources/application.properties` or `application-dev.properties` for environment-specific settings, such as database connection and JWT secrets.
@@ -76,7 +83,8 @@ Test reports are available in the `target/surefire-reports/` directory.
 
 ## Deployment
 
-See `deploy-bills-app.sh` and `task-def-template.json` for deployment scripts and templates.
+- Use `deploy-bills-app.sh` for automated Maven build, Docker image creation, and container startup.
+- See `task-def-template.json` for cloud/container orchestration templates.
 
 ## License
 
