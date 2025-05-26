@@ -194,12 +194,8 @@ public class EntryService {
 	}
 
 	private boolean isArchived(Entry entry) {
-		Bill bill = billService.getBillEntityById(entry.getBill().getBillId());
-		if (bill == null || bill.getStatus() == null) {
-			return false;
-		}
 		// If bill's status is true, it is enabled (and therefore not archived)
-		return !bill.getStatus();
+		return !entry.getBill().getStatus();
 	}
 
 	private EntryDTOList mapEntriesToDTOList(List<Entry> entries, Long total) {

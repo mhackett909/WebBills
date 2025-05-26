@@ -92,11 +92,12 @@ class EntryServiceTest {
         Long entryId = 1L;
         String userName = "alice";
         String filter = "any";
-        Entry entry = new Entry();
-        Bill bill = new Bill();
         User user = new User();
         user.setUsername(userName);
+        Bill bill = new Bill();
         bill.setUser(user);
+        bill.setStatus(true);
+        Entry entry = new Entry();
         entry.setBill(bill);
 
         EntryDTO dto = new EntryDTO();
@@ -147,6 +148,7 @@ class EntryServiceTest {
         user.setUsername(userName);
         bill.setUser(user);
         bill.setBillId(10L);
+        bill.setStatus(true);
 
         Entry mappedEntry = new Entry();
         Entry savedEntry = new Entry();

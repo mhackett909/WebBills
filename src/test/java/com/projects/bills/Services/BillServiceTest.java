@@ -319,4 +319,31 @@ class BillServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.saveBill(billDTO, existing, userName));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
     }
+
+    @Test
+    void testSaveBill_ExistingBillUserNotAuthorized_Throws() {
+        String userName = "alice";
+        boolean existing = true;
+        Long billId = 40L;
+        BillDTO billDTO = new BillDTO();
+        billDTO.setId(billId);
+
+        User user = new User();
+        user.setUsername(userName);
+
+        User otherUser = new User();
+        otherUser.setUsername("bob");
+
+        Bill existingBill = new Bill();
+        existingBill.setBillId(billId);
+        existingBill.setUser(otherUser);
+
+        when(userService.findByUsername(userName)).thenReturn(Optional.of(user));
+        when(billRepository.findById(billId)).thenReturn(Optional.of(existingBill));
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.saveBill(billDTO, existing, userName));
+        assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
+        assertTrue(ex.getReason().contains("User not authorized"));
+    }
 }
+
