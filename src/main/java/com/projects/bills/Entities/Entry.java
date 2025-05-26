@@ -50,6 +50,7 @@ public class Entry {
 		BigDecimal totalPaid = payments == null
 				? BigDecimal.ZERO
 				: payments.stream()
+				.filter(p -> p.getRecycleDate() == null)            // only include non-recycled payments
 				.map(Payment::getAmount)
 				.filter(Objects::nonNull)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
