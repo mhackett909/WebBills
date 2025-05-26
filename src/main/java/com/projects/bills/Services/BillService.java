@@ -94,6 +94,9 @@ public class BillService {
 			if (bill == null) {
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found with id: " + billTransfer.getId());
 			}
+			if (!bill.getUser().getUsername().equalsIgnoreCase(userName)) {
+				throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access this bill");
+			}
 		} else {
 			bill = new Bill();
 		}
