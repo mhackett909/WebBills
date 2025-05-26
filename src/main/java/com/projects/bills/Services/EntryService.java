@@ -194,8 +194,8 @@ public class EntryService {
 	}
 
 	private boolean isArchived(Entry entry) {
-		Bill bill = billService.getBillEntityById(entry.getBill().getBillId());
-		if (bill == null || bill.getStatus() == null) {
+		Bill bill = entry.getBill();
+		if (bill == null) {
 			return false;
 		}
 		// If bill's status is true, it is enabled (and therefore not archived)
