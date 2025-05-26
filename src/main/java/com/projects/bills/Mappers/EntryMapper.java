@@ -8,6 +8,7 @@ import com.projects.bills.Entities.Bill;
 import com.projects.bills.Entities.Entry;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Enums.FlowType;
+import com.projects.bills.Enums.LastAction;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -52,6 +53,7 @@ public class EntryMapper {
         }
         entry.setInvoiceId(invoiceId);
         entry.setRecycleDate(entryDTO.getRecycle() ? LocalDateTime.now() : null);
+        entry.setLastAction(entryDTO.getRecycle() ? LastAction.USER_RECYCLE.toDb() : LastAction.NONE.toDb());
         return entry;
     }
 

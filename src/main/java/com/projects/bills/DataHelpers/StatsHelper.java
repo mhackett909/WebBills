@@ -19,6 +19,7 @@ public class StatsHelper {
         Join<Entry, Payment> paymentJoin = entryRoot.join("payments", JoinType.INNER);
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
+        predicate = cb.and(predicate, cb.isNull(paymentJoin.get("recycleDate")));
 
         // Selecting the stats we need
         query.multiselect(
@@ -59,6 +60,7 @@ public class StatsHelper {
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
         predicate = cb.and(predicate, cb.equal(entryRoot.get("overpaid"), true));
+        predicate = cb.and(predicate, cb.isNull(paymentJoin.get("recycleDate")));
 
         query.multiselect(
                 entryRoot.get("flow"),
@@ -95,6 +97,7 @@ public class StatsHelper {
         Join<Entry, Bill> billJoin = entryRoot.join("bill", JoinType.INNER);
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
+        predicate = cb.and(predicate, cb.isNull(paymentJoin.get("recycleDate")));
 
         // Select: bill name, flow, and sum of payment.amount
         query.multiselect(
@@ -120,6 +123,7 @@ public class StatsHelper {
         Join<Entry, Payment> paymentJoin = entryRoot.join("payments", JoinType.INNER);
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
+        predicate = cb.and(predicate, cb.isNull(paymentJoin.get("recycleDate")));
 
         // Select: flow, payment_type, sum(amount)
         query.multiselect(

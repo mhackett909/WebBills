@@ -4,6 +4,7 @@ import com.projects.bills.DTOs.PaymentDTO;
 import com.projects.bills.DTOs.PaymentDTOList;
 import com.projects.bills.Entities.Entry;
 import com.projects.bills.Entities.Payment;
+import com.projects.bills.Enums.LastAction;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
@@ -39,6 +40,7 @@ public class PaymentMapper {
         payment.setNotes(paymentDTO.getNotes());
         payment.setEntry(entry);
         payment.setRecycleDate(paymentDTO.getRecycle() ? LocalDateTime.now() : null);
+        payment.setLastAction(paymentDTO.getRecycle() ? LastAction.USER_RECYCLE.toDb() : LastAction.NONE.toDb());
         return payment;
     }
 

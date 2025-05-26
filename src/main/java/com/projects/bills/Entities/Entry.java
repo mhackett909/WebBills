@@ -45,6 +45,9 @@ public class Entry {
 	@JoinColumn(name="billID", referencedColumnName = "id")
 	private Bill bill;
 
+	@Column(name = "last_action")
+	private String lastAction;
+
 	@Transient
 	public BigDecimal getBalance() {
 		BigDecimal totalPaid = payments == null
