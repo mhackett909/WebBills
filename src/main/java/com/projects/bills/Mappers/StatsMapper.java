@@ -1,6 +1,7 @@
 package com.projects.bills.Mappers;
 
 import com.projects.bills.DTOs.StatsDTO;
+import com.projects.bills.Constants.StatsResultKeys;
 import com.projects.bills.Enums.FlowType;
 import org.springframework.stereotype.Component;
 
@@ -14,22 +15,16 @@ public class StatsMapper {
     public StatsDTO buildStatsDTO(Map<String, List<Object[]>> resultMap) {
         StatsDTO statsDTO = new StatsDTO();
 
-        mapToStatsDTO(statsDTO, resultMap.get("totalEntryAmountsByFlow"), "totalEntryAmountsByFlow");
-
-        mapToStatsDTO(statsDTO, resultMap.get("maxAvgSum"), "maxAvgSum");
-
-        mapToStatsDTO(statsDTO, resultMap.get("top5ExpenseReceipts"), "top5ExpenseReceipts");
-
-        mapToStatsDTO(statsDTO, resultMap.get("top5ExpenseTypes"), "top5ExpenseTypes");
-
-        mapToStatsDTO(statsDTO, resultMap.get("top5IncomeSources"), "top5IncomeSources");
-
-        mapToStatsDTO(statsDTO, resultMap.get("top5IncomeTypes"), "top5IncomeTypes");
-
+        mapToStatsDTO(statsDTO, resultMap.get(StatsResultKeys.TOTAL_ENTRY_AMOUNTS_BY_FLOW), StatsResultKeys.TOTAL_ENTRY_AMOUNTS_BY_FLOW);
+        mapToStatsDTO(statsDTO, resultMap.get(StatsResultKeys.MAX_AVG_SUM), StatsResultKeys.MAX_AVG_SUM);
+        mapToStatsDTO(statsDTO, resultMap.get(StatsResultKeys.TOP5_EXPENSE_RECEIPTS), StatsResultKeys.TOP5_EXPENSE_RECEIPTS);
+        mapToStatsDTO(statsDTO, resultMap.get(StatsResultKeys.TOP5_EXPENSE_TYPES), StatsResultKeys.TOP5_EXPENSE_TYPES);
+        mapToStatsDTO(statsDTO, resultMap.get(StatsResultKeys.TOP5_INCOME_SOURCES), StatsResultKeys.TOP5_INCOME_SOURCES);
+        mapToStatsDTO(statsDTO, resultMap.get(StatsResultKeys.TOP5_INCOME_TYPES), StatsResultKeys.TOP5_INCOME_TYPES);
         mapOverPaymentsToStatsDTO(
                 statsDTO,
-                resultMap.get("overpaidEntryTotals"),
-                resultMap.get("overpaidPaymentTotals")
+                resultMap.get(StatsResultKeys.OVERPAID_ENTRY_TOTALS),
+                resultMap.get(StatsResultKeys.OVERPAID_PAYMENT_TOTALS)
         );
 
         return statsDTO;
@@ -37,7 +32,7 @@ public class StatsMapper {
 
     private void mapToStatsDTO(StatsDTO statsDTO, List<Object[]> resultList, String resultType) {
         switch (resultType) {
-            case "totalEntryAmountsByFlow":
+            case StatsResultKeys.TOTAL_ENTRY_AMOUNTS_BY_FLOW:
                 for (Object[] result : resultList) {
                     String flowType = (String) result[0];
                     if (flowType.equals(FlowType.OUTGOING.toString())) {
@@ -47,7 +42,7 @@ public class StatsMapper {
                     }
                 }
                 break;
-            case "maxAvgSum":
+            case StatsResultKeys.MAX_AVG_SUM:
                 for (Object[] result : resultList) {
                     String flowType = (String) result[0];
                     if (flowType.equals(FlowType.OUTGOING.toString())) {
@@ -61,7 +56,7 @@ public class StatsMapper {
                     }
                 }
                 break;
-            case "top5ExpenseReceipts":
+            case StatsResultKeys.TOP5_EXPENSE_RECEIPTS:
                 Map<String, BigDecimal> top5ExpenseReceipts = new HashMap<>();
                 for (Object[] result : resultList) {
                     String partyName = (String) result[0];
@@ -70,7 +65,7 @@ public class StatsMapper {
                 }
                 statsDTO.setTopExpenseRecipients(top5ExpenseReceipts);
                 break;
-            case "top5IncomeSources":
+            case StatsResultKeys.TOP5_INCOME_SOURCES:
                 Map<String, BigDecimal> top5IncomeSources = new HashMap<>();
                 for (Object[] result : resultList) {
                     String partyName = (String) result[0];
@@ -79,7 +74,7 @@ public class StatsMapper {
                 }
                 statsDTO.setTopIncomeSources(top5IncomeSources);
                 break;
-            case "top5ExpenseTypes":
+            case StatsResultKeys.TOP5_EXPENSE_TYPES:
                 Map<String, BigDecimal> top5ExpenseTypes = new HashMap<>();
                 for (Object[] result : resultList) {
                     String typeName = (String) result[1];
@@ -88,7 +83,7 @@ public class StatsMapper {
                 }
                 statsDTO.setTopExpenseTypes(top5ExpenseTypes);
                 break;
-            case "top5IncomeTypes":
+            case StatsResultKeys.TOP5_INCOME_TYPES:
                 Map<String, BigDecimal> top5IncomeTypes = new HashMap<>();
                 for (Object[] result : resultList) {
                     String typeName = (String) result[1];

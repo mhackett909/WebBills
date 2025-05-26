@@ -1,5 +1,6 @@
 package com.projects.bills.Mappers;
 
+import com.projects.bills.DTOs.BalanceDTO;
 import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.DTOs.EntryDTOList;
 import com.projects.bills.DataHelpers.EntryFilters;
@@ -26,6 +27,7 @@ public class EntryMapper {
                 entry.getBill().getName(), // Not using entry.getBill().getName() because it is legacy
                 entry.getDate() != null ? entry.getDate().toLocalDate() : null,
                 entry.getAmount(),
+                mapBalance(entry.getBalance()),
                 entry.getStatus(),
                 entry.getRecycleDate() != null,
                 entry.getServices(),
@@ -112,6 +114,17 @@ public class EntryMapper {
         return filters;
     }
 
+    private BalanceDTO mapBalance(BigDecimal balance) {
+        // BalanceDTO already has default values for totalBalance and totalOverpaid
+        BalanceDTO balanceDTO = new BalanceDTO();
+        if (balance.compareTo(BigDecimal.ZERO) > 0) {
+            balanceDTO.setTotalBalance(balance);
+        } else if (balance.compareTo(BigDecimal.ZERO) < 0) {
+            balanceDTO.setTotalOverpaid(balance.abs());
+        }
+        return balanceDTO;
+    }
+
     public String mapSortField(String sortField) {
         return switch (sortField) {
             case "paid" -> "status";
@@ -123,3 +136,4 @@ public class EntryMapper {
         };
     }
 }
+

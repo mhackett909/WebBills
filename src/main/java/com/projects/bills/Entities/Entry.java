@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -43,4 +44,16 @@ public class Entry {
 	@ManyToOne
 	@JoinColumn(name="billID", referencedColumnName = "id")
 	private Bill bill;
+
+	@Transient
+	public BigDecimal getBalance() {
+		BigDecimal totalPaid = payments == null
+				? BigDecimal.ZERO
+				: payments.stream()
+				.map(Payment::getAmount)
+				.filter(Objects::nonNull)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		return amount.subtract(totalPaid);
+	}
 }
