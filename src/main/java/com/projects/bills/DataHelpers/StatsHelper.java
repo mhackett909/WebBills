@@ -147,6 +147,9 @@ public class StatsHelper {
         // Must be only for requesting user
         predicate = cb.and(predicate, cb.equal(entryRoot.get("bill").get("user").get("username"), filters.getUserName()));
 
+        // Exclude recycled entries
+        predicate = cb.and(predicate, cb.isNull(entryRoot.get("recycleDate")));
+
         String flowType = filters.getFlow();
         if (flowType != null && !flowType.isEmpty()) {
             predicate = cb.and(predicate, cb.equal(entryRoot.get("flow"), flowType));
