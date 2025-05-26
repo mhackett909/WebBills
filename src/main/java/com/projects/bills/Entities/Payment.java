@@ -24,7 +24,10 @@ public class Payment {
 
 	@Column(name = "recycle_date")
 	private LocalDateTime recycleDate;
-	
+
+	@Column(name = "last_action")
+	private String lastAction;
+
 	@ManyToOne
 	@JoinColumn(name="entryID")
 	private Entry entry;
