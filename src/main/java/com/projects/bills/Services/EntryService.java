@@ -83,7 +83,16 @@ public class EntryService {
 			sortDirection = Sort.Direction.ASC;
 		}
 
-		Sort sortBy = Sort.by(sortDirection, sortField);
+		Sort sortBy;
+		if ("date".equals(sortField)) {
+			// If sorting by date, also sort by invoiceId to ensure consistent ordering
+			sortBy = Sort.by(
+					new Sort.Order(sortDirection, "date"),
+					new Sort.Order(sortDirection, "invoiceId")
+			);
+		} else {
+			sortBy = Sort.by(sortDirection, sortField);
+		}
 
 		if (pageNum == null || pageNum < 0) {
 			pageNum = 0;
