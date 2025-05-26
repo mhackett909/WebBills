@@ -19,6 +19,7 @@ public class EntryDTO {
 	private String name;
 	private LocalDate date;
 	private BigDecimal amount;
+	private BalanceDTO balance;
 	private Boolean status;
 	private Boolean recycle = false;
 	private String services;

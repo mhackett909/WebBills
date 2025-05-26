@@ -148,7 +148,6 @@ class EntryServiceTest {
         bill.setUser(user);
         bill.setBillId(10L);
 
-        Entry entry = new Entry();
         Entry mappedEntry = new Entry();
         Entry savedEntry = new Entry();
         savedEntry.setBill(bill);

@@ -1,5 +1,6 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.Constants.StatsResultKeys;
 import com.projects.bills.DTOs.StatsDTO;
 import com.projects.bills.DataHelpers.EntryFilters;
 import com.projects.bills.DataHelpers.StatsHelper;
@@ -81,19 +82,19 @@ public class StatsService {
 
         Map<String, List<Object[]>> resultMap = new HashMap<>();
 
-        resultMap.put("totalEntryAmountsByFlow", entityManager.createQuery(query).getResultList());
+        resultMap.put(StatsResultKeys.TOTAL_ENTRY_AMOUNTS_BY_FLOW, entityManager.createQuery(query).getResultList());
 
         query = statsHelper.getmaxAvgSumQuery(cb, filters);
 
-        resultMap.put("maxAvgSum", entityManager.createQuery(query).getResultList());
+        resultMap.put(StatsResultKeys.MAX_AVG_SUM, entityManager.createQuery(query).getResultList());
 
         query = statsHelper.getOverpaidEntryTotals(cb, filters);
 
-        resultMap.put("overpaidEntryTotals", entityManager.createQuery(query).getResultList());
+        resultMap.put(StatsResultKeys.OVERPAID_ENTRY_TOTALS, entityManager.createQuery(query).getResultList());
 
         query = statsHelper.getOverpaidPaymentTotals(cb, filters);
 
-        resultMap.put("overpaidPaymentTotals", entityManager.createQuery(query).getResultList());
+        resultMap.put(StatsResultKeys.OVERPAID_PAYMENT_TOTALS, entityManager.createQuery(query).getResultList());
 
         return buildTop5Totals(filters, resultMap);
     }
@@ -110,18 +111,18 @@ public class StatsService {
             }
             query = statsHelper.getTop5Parties(cb, filters);
 
-            resultMap.put("top5ExpenseReceipts", entityManager.createQuery(query)
+            resultMap.put(StatsResultKeys.TOP5_EXPENSE_RECEIPTS, entityManager.createQuery(query)
                     .setMaxResults(5)
                     .getResultList());
 
             query = statsHelper.getTop5Types(cb, filters);
 
-            resultMap.put("top5ExpenseTypes", entityManager.createQuery(query)
+            resultMap.put(StatsResultKeys.TOP5_EXPENSE_TYPES, entityManager.createQuery(query)
                     .setMaxResults(5)
                     .getResultList());
         } else {
-            resultMap.put("top5ExpenseReceipts", new ArrayList<>());
-            resultMap.put("top5ExpenseTypes", new ArrayList<>());
+            resultMap.put(StatsResultKeys.TOP5_EXPENSE_RECEIPTS, new ArrayList<>());
+            resultMap.put(StatsResultKeys.TOP5_EXPENSE_TYPES, new ArrayList<>());
         }
 
         if (switchBack) {
@@ -134,19 +135,19 @@ public class StatsService {
             }
             query = statsHelper.getTop5Parties(cb, filters);
 
-            resultMap.put("top5IncomeSources", entityManager.createQuery(query)
+            resultMap.put(StatsResultKeys.TOP5_INCOME_SOURCES, entityManager.createQuery(query)
                     .setMaxResults(5)
                     .getResultList());
 
 
             query = statsHelper.getTop5Types(cb, filters);
 
-            resultMap.put("top5IncomeTypes", entityManager.createQuery(query)
+            resultMap.put(StatsResultKeys.TOP5_INCOME_TYPES, entityManager.createQuery(query)
                     .setMaxResults(5)
                     .getResultList());
         } else {
-            resultMap.put("top5IncomeSources", new ArrayList<>());
-            resultMap.put("top5IncomeTypes", new ArrayList<>());
+            resultMap.put(StatsResultKeys.TOP5_INCOME_SOURCES, new ArrayList<>());
+            resultMap.put(StatsResultKeys.TOP5_INCOME_TYPES, new ArrayList<>());
         }
         return resultMap;
     }
