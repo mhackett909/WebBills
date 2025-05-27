@@ -37,19 +37,17 @@ cd WebBills
 ./mvnw clean install
 ```
 
-### Run locally
-
-```sh
-./mvnw spring-boot:run
-```
-
-The application will start on `http://localhost:8080`.
-
 ### Run with Docker
 
 ```sh
 docker-compose up --build
 ```
+
+The application will start on `http://localhost:8080`.
+
+### Subsequent builds
+
+- Use `deploy-bills-app.sh` for automated Maven build, Docker image creation, and container startup.
 
 ### Configuration
 
@@ -73,8 +71,8 @@ Test reports are available in the `target/surefire-reports/` directory.
 
 ## Deployment
 
-- Use `deploy-bills-app.sh` for automated Maven build, Docker image creation, and container startup.
 - See `task-def-template.json` for cloud/container orchestration templates.
+- See [`.github/workflows/`](.github/workflows/) for auto-deploy workflow.
 
 ## License
 
