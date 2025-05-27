@@ -46,10 +46,6 @@ public class BillService {
 			throw new IllegalArgumentException("User not found");
 		}
 
-		if (!user.get().getUsername().equalsIgnoreCase(userName)) {
-			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized to access these bills");
-		}
-
 		List<Bill> bills;
 
 		if ("active".equalsIgnoreCase(filter)) {

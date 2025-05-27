@@ -142,19 +142,6 @@ class BillServiceTest {
     }
 
     @Test
-    void testGetBillDtoList_UserNotAuthorized_Throws() {
-        String userName = "alice";
-        String dbUserName = "bob";
-        User user = new User();
-        user.setUsername(dbUserName);
-
-        when(userService.findByUsername(userName)).thenReturn(Optional.of(user));
-
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.getBillDtoList("active", userName));
-        assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
-    }
-
-    @Test
     void testGetBill_FoundAndAuthorized() {
         Long billId = 1L;
         String userName = "alice";
@@ -343,7 +330,7 @@ class BillServiceTest {
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.saveBill(billDTO, existing, userName));
         assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
-        assertTrue(ex.getReason().contains("User not authorized"));
+        assertTrue(Objects.requireNonNull(ex.getReason()).contains("User not authorized"));
     }
 }
 
