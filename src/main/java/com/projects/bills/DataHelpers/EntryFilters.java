@@ -24,5 +24,6 @@ public class EntryFilters {
     private String flow;
     private Boolean paid;
     private Boolean overpaid;
+    private Boolean partial;
     private Boolean archived;
 }
