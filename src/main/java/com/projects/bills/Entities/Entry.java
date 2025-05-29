@@ -2,12 +2,12 @@ package com.projects.bills.Entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Formula;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Getter
@@ -48,16 +48,9 @@ public class Entry {
 	@Column(name = "last_action")
 	private String lastAction;
 
-	@Transient
-	public BigDecimal getBalance() {
-		BigDecimal totalPaid = payments == null
-				? BigDecimal.ZERO
-				: payments.stream()
-				.filter(p -> p.getRecycleDate() == null)            // only include non-recycled payments
-				.map(Payment::getAmount)
-				.filter(Objects::nonNull)
-				.reduce(BigDecimal.ZERO, BigDecimal::add);
-
-		return amount.subtract(totalPaid);
-	}
+	@Formula("(SELECT e.amount - COALESCE(SUM(p.amount), 0) " +
+			" FROM entry e " +
+			" LEFT JOIN payment p ON p.entryID = e.id AND p.recycle_date IS NULL " +
+			" WHERE e.id = id)")
+	private BigDecimal balance;
 }

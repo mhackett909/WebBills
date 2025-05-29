@@ -117,6 +117,9 @@ public class EntryMapper {
     }
 
     private BalanceDTO mapBalance(BigDecimal balance) {
+        if (balance == null) {
+            return new BalanceDTO();
+        }
         // BalanceDTO already has default values for totalBalance and totalOverpaid
         BalanceDTO balanceDTO = new BalanceDTO();
         if (balance.compareTo(BigDecimal.ZERO) > 0) {

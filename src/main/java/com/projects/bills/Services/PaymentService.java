@@ -1,4 +1,5 @@
 package com.projects.bills.Services;
+import com.projects.bills.Constants.Strings;
 import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.DTOs.PaymentDTOList;
 import com.projects.bills.Entities.Entry;
@@ -64,14 +65,14 @@ public class PaymentService {
 	public PaymentDTO updatePayment(PaymentDTO paymentDTO, String filter, String userName) {
 		Entry entry = validateUserAccess(paymentDTO.getEntryId(), userName);
 
-		if (!entry.getBill().getStatus() && !"bypass".equalsIgnoreCase(filter)) {
+		if (!entry.getBill().getStatus() && !Strings.EDIT_BYPASS.equalsIgnoreCase(filter)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update payment for entry linked to an archived entity");
 		}
 
 		Payment payment = paymentRepository.findById(paymentDTO.getPaymentId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
 
-		if (payment.getRecycleDate() != null && !"bypass".equalsIgnoreCase(filter)) {
+		if (payment.getRecycleDate() != null && !Strings.EDIT_BYPASS.equalsIgnoreCase(filter)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update a recycled payment");
 		}
 
