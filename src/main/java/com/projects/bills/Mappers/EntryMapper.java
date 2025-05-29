@@ -9,6 +9,7 @@ import com.projects.bills.Entities.Entry;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Enums.LastAction;
+import com.projects.bills.Constants.Strings;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -82,21 +83,27 @@ public class EntryMapper {
 
         Boolean isPaid = null;
         Boolean isOverpaid = null;
+        Boolean isPartial = null;
         if (paid != null) {
-            if (paid.equalsIgnoreCase("true")) {
+            if (paid.equalsIgnoreCase(Strings.PAID_TRUE)) {
                 isPaid = true;
-            } else if (paid.equalsIgnoreCase("false")) {
+            } else if (paid.equalsIgnoreCase(Strings.PAID_FALSE)) {
                 isPaid = false;
-            } else if (paid.equalsIgnoreCase("overpaid")) {
+            } else if (paid.equalsIgnoreCase(Strings.PAID_OVERPAID)) {
                 isOverpaid = true;
+            }
+            else if (paid.equalsIgnoreCase(Strings.PAID_PARTIAL)) {
+                // Unpaid entries with balance < entry amount
+                isPaid = false;
+                isPartial = true;
             }
         }
 
         Boolean isArchived = null;
         if (archives != null) {
-            if (archives.equalsIgnoreCase("true")) {
+            if (archives.equalsIgnoreCase(Strings.ARCHIVES_TRUE)) {
                 isArchived = true;
-            } else if (archives.equalsIgnoreCase("false")) {
+            } else if (archives.equalsIgnoreCase(Strings.ARCHIVES_FALSE)) {
                 isArchived = false;
             }
         }
@@ -113,10 +120,14 @@ public class EntryMapper {
         filters.setPaid(isPaid);
         filters.setOverpaid(isOverpaid);
         filters.setArchived(isArchived);
+        filters.setPartial(isPartial);
         return filters;
     }
 
     private BalanceDTO mapBalance(BigDecimal balance) {
+        if (balance == null) {
+            return new BalanceDTO();
+        }
         // BalanceDTO already has default values for totalBalance and totalOverpaid
         BalanceDTO balanceDTO = new BalanceDTO();
         if (balance.compareTo(BigDecimal.ZERO) > 0) {

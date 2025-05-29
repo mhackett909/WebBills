@@ -66,6 +66,7 @@ class EntryMapperTest {
         entry.setFlow(flow);
         entry.setOverpaid(overpaid);
         entry.setPayments(List.of(payment));
+        entry.setBalance(balance); // Set balance explicitly for test
 
         EntryDTO dto = mapper.mapToDTO(entry, archived);
 
@@ -101,6 +102,7 @@ class EntryMapperTest {
         String flow = FlowType.OUTGOING.toString();
         Boolean overpaid = true;
 
+
         Bill bill = new Bill();
         bill.setBillId(billId);
         bill.setName(billName);
@@ -118,6 +120,7 @@ class EntryMapperTest {
         entry.setStatus(status);
         entry.setFlow(flow);
         entry.setOverpaid(overpaid);
+        entry.setBalance(overPaid.negate()); // Set balance explicitly for test
         entry.setPayments(List.of(payment));
 
         EntryDTO dto = mapper.mapToDTO(entry, true);

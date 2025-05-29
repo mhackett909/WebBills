@@ -199,6 +199,13 @@ public class StatsHelper {
             predicate = cb.and(predicate, cb.equal(entryRoot.get("overpaid"), overpaid));
         }
 
+        Boolean partial = filters.getPartial();
+        if (partial != null) {
+            // Filter for partial payments: balance < amount
+            // Note that isPaid must be false for this to work correctly (it is set in the mapper)
+            predicate = cb.and(predicate, cb.lessThan(entryRoot.get("balance"), entryRoot.get("amount")));
+        }
+
         Boolean enabled = filters.getArchived();
         if (enabled != null) {
             // Disabled = archived

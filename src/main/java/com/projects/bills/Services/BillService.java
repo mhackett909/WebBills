@@ -1,4 +1,5 @@
 package com.projects.bills.Services;
+import com.projects.bills.Constants.Strings;
 import com.projects.bills.DTOs.BillDTOList;
 import com.projects.bills.Entities.Bill;
 import com.projects.bills.DTOs.BillDTO;
@@ -70,7 +71,7 @@ public class BillService {
 		}
 
 		// "bypass" filter allows access to recycled bills for restoration
-		if (bill.getRecycleDate() != null && !"bypass".equalsIgnoreCase(filter)) {
+		if (bill.getRecycleDate() != null && !Strings.EDIT_BYPASS.equalsIgnoreCase(filter)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bill is recycled");
 		}
 

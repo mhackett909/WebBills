@@ -1,4 +1,5 @@
 package com.projects.bills.Services;
+import com.projects.bills.Constants.Strings;
 import com.projects.bills.DTOs.EntryDTOList;
 import com.projects.bills.DataHelpers.EntryFilters;
 import com.projects.bills.DataHelpers.StatsHelper;
@@ -114,7 +115,7 @@ public class EntryService {
 	public Optional<EntryDTO> getEntryDtoById(Long id, String filter, String userName) {
 		Optional<Entry> entry;
 		// "bypass" filter allows access to recycled entries for restoration
-		if (!"bypass".equalsIgnoreCase(filter)) {
+		if (!Strings.EDIT_BYPASS.equalsIgnoreCase(filter)) {
 			entry = Optional.ofNullable(entryRepository.findByIdAndRecycleDateIsNull(id));
 		} else {
 			entry = entryRepository.findById(id);
@@ -147,11 +148,11 @@ public class EntryService {
 			}
 
 			// "bypass" filter allows access to recycled entries for restoration
-			if (entry.getRecycleDate() != null && !"bypass".equalsIgnoreCase(filter)) {
+			if (entry.getRecycleDate() != null && !Strings.EDIT_BYPASS.equalsIgnoreCase(filter)) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update a recycled entry");
 			}
 
-			if (!entry.getBill().getStatus() && !"bypass".equalsIgnoreCase(filter)) {
+			if (!entry.getBill().getStatus() && !Strings.EDIT_BYPASS.equalsIgnoreCase(filter)) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update an entry linked to an archived entity");
 			}
 		} else {
