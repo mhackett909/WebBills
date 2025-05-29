@@ -151,7 +151,7 @@ public class EntryService {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update a recycled entry");
 			}
 
-			if (!entry.getBill().getStatus()) {
+			if (!entry.getBill().getStatus() && !"bypass".equalsIgnoreCase(filter)) {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update an entry linked to an archived entity");
 			}
 		} else {

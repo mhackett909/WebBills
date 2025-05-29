@@ -64,7 +64,7 @@ public class PaymentService {
 	public PaymentDTO updatePayment(PaymentDTO paymentDTO, String filter, String userName) {
 		Entry entry = validateUserAccess(paymentDTO.getEntryId(), userName);
 
-		if (!entry.getBill().getStatus()) {
+		if (!entry.getBill().getStatus() && !"bypass".equalsIgnoreCase(filter)) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot update payment for entry linked to an archived entity");
 		}
 
