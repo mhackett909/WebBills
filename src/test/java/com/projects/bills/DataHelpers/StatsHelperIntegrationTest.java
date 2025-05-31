@@ -325,12 +325,12 @@ class StatsHelperIntegrationTest {
     }
 
     @Test
-    void testGetmaxAvgSumQuery() {
+    void testGetMaxAvgSumQuery() {
         EntryFilters filters = new EntryFilters();
         filters.setUserName("alice");
 
         var cb = em.getCriteriaBuilder();
-        var cq = statsHelper.getmaxAvgSumQuery(cb, filters);
+        var cq = statsHelper.getMaxAvgSumQuery(cb, filters);
 
         List<Object[]> results = em.createQuery(cq).getResultList();
 

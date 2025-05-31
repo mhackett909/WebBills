@@ -3,6 +3,8 @@ package com.projects.bills.Services;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ import java.util.Map;
 
 @Service
 public class JwtService {
+    private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
+
     @Value("${jwt.secret}")
     private String secretKey;
 
@@ -26,14 +30,17 @@ public class JwtService {
     private long refreshTokenExpirationMs;
 
     public String generateAccessToken(String username, List<String> roles) {
+        logger.info("Generating access token for user: {}", username);
         return generateJwt(username, roles, accessTokenExpirationMs);
     }
 
     public String generateRefreshToken(String username, List<String> roles) {
+        logger.info("Generating refresh token for user: {}", username);
         return generateJwt(username, roles, refreshTokenExpirationMs);
     }
 
     private String generateJwt(String username, List<String> roles, long expirationMs) {
+        logger.debug("Generating JWT for user: {} with roles: {} and expiration: {}ms", username, roles, expirationMs);
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         Key key = new SecretKeySpec(keyBytes, SignatureAlgorithm.HS512.getJcaName());
 
@@ -50,13 +57,21 @@ public class JwtService {
     }
 
     public Claims validateJwt(String token) {
+        try {
+            logger.info("Validating JWT token");
             byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
             Key key = new SecretKeySpec(keyBytes, SignatureAlgorithm.HS512.getJcaName());
-            return Jwts.parserBuilder()
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-
+            logger.info("JWT validated successfully for user: {}", claims.getSubject());
+            return claims;
+        } catch (Exception e) {
+            logger.warn("JWT validation failed: {}", e.getMessage());
+            throw e;
+        }
     }
 }
+

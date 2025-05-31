@@ -1,5 +1,6 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.Constants.Exceptions;
 import com.projects.bills.DTOs.RecycleDTOList;
 import com.projects.bills.Entities.Bill;
 import com.projects.bills.Entities.Entry;
@@ -9,6 +10,8 @@ import com.projects.bills.Mappers.RecycleMapper;
 import com.projects.bills.Repositories.BillRepository;
 import com.projects.bills.Repositories.EntryRepository;
 import com.projects.bills.Repositories.PaymentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,6 +21,8 @@ import java.util.Optional;
 
 @Service
 public class RecycleService {
+    private static final Logger logger = LoggerFactory.getLogger(RecycleService.class);
+
     private final BillRepository billRepository;
     private final EntryRepository entryRepository;
     private final PaymentRepository paymentRepository;
@@ -33,12 +38,18 @@ public class RecycleService {
     }
 
     public RecycleDTOList getRecycleBin(String userName) {
+        logger.info("Fetching recycle bin for user: {}", userName);
         Optional<User> user = userService.findByUsername(userName);
         if (user.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            logger.warn("User not found: {}", userName);
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    String.format(Exceptions.USER_NOT_FOUND, userName)
+            );
         }
 
         List<Bill> recycledBills = billRepository.findAllByUserAndRecycleDateIsNotNullOrderByNameAsc(user.get());
+        logger.debug("Recycled bills for user '{}': {}", userName, recycledBills);
 
         List<Entry> recycledEntries;
         if (recycledBills == null || recycledBills.isEmpty()) {
@@ -46,6 +57,7 @@ public class RecycleService {
         } else {
             recycledEntries = entryRepository.findAllByUserAndRecycleDateIsNotNullAndBillNotIn(user.get(), recycledBills);
         }
+        logger.debug("Recycled entries for user '{}': {}", userName, recycledEntries);
 
         List<Payment> recycledPayments;
         if (recycledEntries == null || recycledEntries.isEmpty()) {
@@ -61,7 +73,10 @@ public class RecycleService {
                 recycledPayments = paymentRepository.findAllByUserAndRecycleDateIsNotNullAndEntryNotInAndBillNotIn(user.get(), recycledEntries, recycledBills);
             }
         }
+        logger.debug("Recycled payments for user '{}': {}", userName, recycledPayments);
 
-        return recycleMapper.buildRecycleDTOList(recycledBills, recycledEntries, recycledPayments);
+        RecycleDTOList dtoList = recycleMapper.buildRecycleDTOList(recycledBills, recycledEntries, recycledPayments);
+        logger.info("Recycle bin built for user '{}': {}", userName, dtoList);
+        return dtoList;
     }
 }

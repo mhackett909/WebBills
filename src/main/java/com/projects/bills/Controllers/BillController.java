@@ -9,9 +9,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import com.projects.bills.Services.BillService;
 import org.springframework.web.server.ResponseStatusException;
+import com.projects.bills.Constants.Exceptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 public class BillController {
+	private static final Logger logger = LoggerFactory.getLogger(BillController.class);
 	private final BillService billService;
 
 	@Autowired
@@ -32,9 +36,11 @@ public class BillController {
 	public ResponseEntity<BillDTO> getBillsById(@PathVariable("id") Long id,
 												@RequestParam(required = false) String filter,
 												@AuthenticationPrincipal UserDetails user) {
+		logger.info("Fetching bill with id {} for user {} with filter: {}", id, user.getUsername(), filter);
 		BillDTO bill = billService.getBill(id, filter, user.getUsername());
 		if (bill == null) {
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill does not exist by id: " + id);
+			logger.error("Bill with id {} not found for user {}", id, user.getUsername());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(Exceptions.BILL_NOT_FOUND, id));
 		}
 
 		return new ResponseEntity<>(bill, HttpStatus.OK);
@@ -43,11 +49,14 @@ public class BillController {
 	@PostMapping("/api/v1/bills")
 	public ResponseEntity<BillDTO> newBill(@RequestBody BillDTO billTransfer,
 										   @AuthenticationPrincipal UserDetails user) {
-		if (billTransfer.getName() == null || billTransfer.getName().isBlank())
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid bill name");
+		if (billTransfer.getName() == null || billTransfer.getName().isBlank()) {
+			logger.error("Invalid bill name provided by user {}", user.getUsername());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.INVALID_BILL_NAME);
+		}
 
 		if (billTransfer.getStatus() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill status is required");
+			logger.error("Bill status is required but not provided by user {}", user.getUsername());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.BILL_STATUS_REQUIRED);
 		}
 
 		BillDTO savedBill = billService.saveBill(billTransfer, false, user.getUsername());
@@ -58,13 +67,16 @@ public class BillController {
 	public ResponseEntity<BillDTO> editBill(@RequestBody BillDTO billTransfer,
 											@AuthenticationPrincipal UserDetails user) {
 		if (billTransfer.getId() == 0) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill id is required");
+			logger.error("Bill ID is required for update but not provided by user {}", user.getUsername());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.BILL_ID_REQUIRED);
 		}
 		if (billTransfer.getName() == null || billTransfer.getName().isBlank()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid bill name");
+			logger.error("Invalid bill name provided by user {}", user.getUsername());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.INVALID_BILL_NAME);
 		}
 		if (billTransfer.getStatus() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill status is required");
+			logger.error("Bill status is required but not provided by user {}", user.getUsername());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.BILL_STATUS_REQUIRED);
 		}
 
 		BillDTO updatedBill = billService.saveBill(billTransfer, true, user.getUsername());

@@ -117,7 +117,7 @@ class StatsServiceTest {
 
         StatsHelper statsHelper = mock(StatsHelper.class);
         when(statsHelper.getTotalEntryAmountsByFlow(cb, filters)).thenReturn(cq);
-        when(statsHelper.getmaxAvgSumQuery(cb, filters)).thenReturn(cq);
+        when(statsHelper.getMaxAvgSumQuery(cb, filters)).thenReturn(cq);
         when(statsHelper.getOverpaidEntryTotals(cb, filters)).thenReturn(cq);
         when(statsHelper.getOverpaidPaymentTotals(cb, filters)).thenReturn(cq);
         when(statsHelper.getTop5Parties(cb, filters)).thenReturn(cq);

@@ -15,6 +15,8 @@ import java.util.List;
 public interface EntryRepository extends JpaRepository<Entry, Long>, JpaSpecificationExecutor<Entry> {
     Entry findByIdAndRecycleDateIsNull(long id);
 
+    Entry findByInvoiceIdAndUserAndRecycleDateIsNull(long invoiceId, User user);
+
     @Query("SELECT e FROM Entry e WHERE e.bill.user = :user AND e.recycleDate IS NOT NULL " +
             "AND e.bill NOT IN :bills")
     List<Entry> findAllByUserAndRecycleDateIsNotNullAndBillNotIn(
