@@ -1,5 +1,6 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.Constants.Exceptions;
 import com.projects.bills.DTOs.RecycleDTOList;
 import com.projects.bills.Entities.Bill;
 import com.projects.bills.Entities.Entry;
@@ -44,7 +45,8 @@ class RecycleServiceTest {
         when(userService.findByUsername("alice")).thenReturn(Optional.empty());
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 recycleService.getRecycleBin("alice"));
-        assertTrue(ex.getReason().contains("User not found"));
+        assertEquals(org.springframework.http.HttpStatus.NOT_FOUND, ex.getStatusCode());
+        assertEquals(String.format(Exceptions.USER_NOT_FOUND, "alice"), ex.getReason());
     }
 
     @Test
@@ -138,3 +140,4 @@ class RecycleServiceTest {
         assertSame(expected, result);
     }
 }
+

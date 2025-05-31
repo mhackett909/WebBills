@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 public class StatsHelper {
-    public CriteriaQuery<Object[]> getmaxAvgSumQuery(CriteriaBuilder cb,
+    public CriteriaQuery<Object[]> getMaxAvgSumQuery(CriteriaBuilder cb,
                                                      EntryFilters filters) {
         CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         Root<Entry> entryRoot = query.from(Entry.class);

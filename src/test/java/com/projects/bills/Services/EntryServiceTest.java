@@ -1,5 +1,6 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.Constants.Exceptions;
 import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.DTOs.EntryDTOList;
 import com.projects.bills.DataHelpers.EntryFilters;
@@ -339,6 +340,7 @@ class EntryServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 entryService.saveEntry(entryDTO, existing, filter, userName));
         assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
-        assertTrue(Objects.requireNonNull(ex.getReason()).contains("You do not have permission to access this invoice"));
+        assertEquals(Exceptions.NOT_AUTHORIZED_TO_ACCESS_ENTRY, ex.getReason());
     }
 }
+

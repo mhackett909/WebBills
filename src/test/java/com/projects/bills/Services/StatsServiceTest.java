@@ -1,9 +1,9 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.Constants.Exceptions;
 import com.projects.bills.DTOs.StatsDTO;
 import com.projects.bills.DataHelpers.EntryFilters;
 import com.projects.bills.DataHelpers.StatsHelper;
-import com.projects.bills.Entities.Bill;
 import com.projects.bills.Entities.Entry;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Mappers.EntryMapper;
@@ -66,7 +66,7 @@ class StatsServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 statsService.getStats("alice", null, null, 1L, null, null, null, null, null, null));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-        assertTrue(Objects.requireNonNull(ex.getReason()).contains("User not found"));
+        assertEquals(String.format(Exceptions.USER_NOT_FOUND, "alice"), ex.getReason());
     }
 
     @Test
@@ -78,46 +78,33 @@ class StatsServiceTest {
         User user = new User();
         user.setUsername("alice");
         when(userService.findByUsername("alice")).thenReturn(Optional.of(user));
-        when(entryRepository.findByIdAndRecycleDateIsNull(2L)).thenReturn(null);
+        when(entryRepository.findByInvoiceIdAndUserAndRecycleDateIsNull(anyLong(), any())).thenReturn(null);
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 statsService.getStats("alice", null, null, 2L, null, null, null, null, null, null));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-        assertTrue(Objects.requireNonNull(ex.getReason()).contains("Entry not found"));
-    }
-
-    @Test
-    void testGetStats_EntryForbidden_Throws() {
-        EntryFilters filters = new EntryFilters();
-        filters.setInvoiceNum(3L);
-        when(entryMapper.mapToEntryFilters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
-                .thenReturn(filters);
-        User user = new User();
-        user.setUsername("alice");
-        when(userService.findByUsername("alice")).thenReturn(Optional.of(user));
-        Entry entry = new Entry();
-        Bill bill = new Bill();
-        User otherUser = new User();
-        otherUser.setUsername("bob");
-        bill.setUser(otherUser);
-        entry.setBill(bill);
-        when(entryRepository.findByIdAndRecycleDateIsNull(3L)).thenReturn(entry);
-
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
-                statsService.getStats("alice", null, null, 3L, null, null, null, null, null, null));
-        assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
-        assertTrue(Objects.requireNonNull(ex.getReason()).contains("permission"));
+        assertEquals(String.format(Exceptions.ENTRY_NOT_FOUND, 2L), ex.getReason());
     }
 
     @Test
     void testGetStats_Success() {
+        User user = new User();
+        user.setUsername("alice");
+
+        Entry entry = new Entry();
+        entry.setUser(user);
+
         EntryFilters filters = new EntryFilters();
-        when(entryMapper.mapToEntryFilters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        filters.setInvoiceNum(2L);
+
+        when(entryMapper.mapToEntryFilters(any(), any(), any(), anyLong(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(filters);
+        when(userService.findByUsername(any())).thenReturn(Optional.of(user));
+        when(entryRepository.findByInvoiceIdAndUserAndRecycleDateIsNull(anyLong(), any())).thenReturn(entry);
 
         StatsHelper statsHelper = mock(StatsHelper.class);
         when(statsHelper.getTotalEntryAmountsByFlow(cb, filters)).thenReturn(cq);
-        when(statsHelper.getmaxAvgSumQuery(cb, filters)).thenReturn(cq);
+        when(statsHelper.getMaxAvgSumQuery(cb, filters)).thenReturn(cq);
         when(statsHelper.getOverpaidEntryTotals(cb, filters)).thenReturn(cq);
         when(statsHelper.getOverpaidPaymentTotals(cb, filters)).thenReturn(cq);
         when(statsHelper.getTop5Parties(cb, filters)).thenReturn(cq);
@@ -129,8 +116,9 @@ class StatsServiceTest {
         StatsDTO statsDTO = new StatsDTO();
         when(statsMapper.buildStatsDTO(any())).thenReturn(statsDTO);
 
-        StatsDTO result = statsService.getStats("alice", null, null, null, null, null, null, null, null, null);
+        StatsDTO result = statsService.getStats("alice", null, null, 2L, null, null, null, null, null, null);
         assertNotNull(result);
         assertSame(statsDTO, result);
     }
 }
+

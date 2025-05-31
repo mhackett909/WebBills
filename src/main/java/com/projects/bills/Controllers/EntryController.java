@@ -1,5 +1,6 @@
 package com.projects.bills.Controllers;
 
+import com.projects.bills.Constants.Exceptions;
 import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.DTOs.EntryDTOList;
 import com.projects.bills.DTOs.StatsDTO;
@@ -13,6 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,6 +23,8 @@ import java.util.List;
 
 @RestController
 public class EntryController {
+	private static final Logger logger = LoggerFactory.getLogger(EntryController.class);
+
 	private final EntryService entryService;
 	private final StatsService statsService;
 
@@ -67,7 +72,12 @@ public class EntryController {
 	@PostMapping("/api/v1/entries/new")
 	public ResponseEntity<EntryDTO> addEntry(@RequestBody EntryDTO entryDTO,
 											 @AuthenticationPrincipal UserDetails user) {
-		validateDTO(entryDTO, false);
+		try {
+			validateDTO(entryDTO, false);
+		} catch (ResponseStatusException e) {
+			logger.error("Validation failed for entryDTO: {}", entryDTO, e);
+			throw e; // Re-throw the exception to return the error response
+		}
 
 		EntryDTO savedEntry = entryService.saveEntry(entryDTO, false, null, user.getUsername());
 		return new ResponseEntity<>(savedEntry, HttpStatus.CREATED);
@@ -78,7 +88,13 @@ public class EntryController {
 			@RequestBody EntryDTO entryDTO,
 			@RequestParam(required = false) String filter,
 			@AuthenticationPrincipal UserDetails user) {
-		validateDTO(entryDTO, true);
+		try {
+			validateDTO(entryDTO, true);
+		} catch (ResponseStatusException e) {
+			logger.error("Validation failed for entryDTO: {}", entryDTO, e);
+			throw e; // Re-throw the exception to return the error response
+		}
+
 		EntryDTO updatedEntry = entryService.saveEntry(entryDTO, true, filter, user.getUsername());
 		return new ResponseEntity<>(updatedEntry, HttpStatus.OK);
 	}
@@ -108,28 +124,28 @@ public class EntryController {
 
 	private void validateDTO(EntryDTO entryDTO, boolean validateEntryId) {
 		if (validateEntryId && entryDTO.getEntryId() == 0) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Entry id is required");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.ENTRY_ID_REQUIRED);
 		}
 		if (entryDTO.getBillId() == 0) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bill id is required");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.BILL_ID_REQUIRED);
 		}
 		if (entryDTO.getDate() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Date is required");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.ENTRY_DATE_REQUIRED);
 		}
 		if (entryDTO.getAmount() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount is required");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.ENTRY_AMOUNT_REQUIRED);
 		}
 		if (entryDTO.getFlow() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Flow is required");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.FLOW_IS_REQUIRED);
 		}
 		if (entryDTO.getStatus() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is required");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.ENTRY_STATUS_IS_REQUIRED);
 		}
 
 		try {
 			FlowType.fromType(entryDTO.getFlow());
 		} catch (IllegalArgumentException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid flow type: " + entryDTO.getFlow());
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(Exceptions.INVALID_FLOW_TYPE, entryDTO.getFlow()));
 		}
 	}
 }
