@@ -1,9 +1,12 @@
 package com.projects.bills.Constants;
 
 public class Exceptions {
+    public Exceptions() {
+        // Prevent instantiation
+    }
     public static final String BILL_ID_REQUIRED = "Entity id is required";
     public static final String BILL_IS_RECYCLED = "Entity is recycled";
-    public static final String BILL_NOT_FOUND = "Entity does not exist by id: : %s";
+    public static final String BILL_NOT_FOUND = "Entity does not exist by id: %s";
     public static final String BILL_STATUS_REQUIRED = "Entity status is required";
     public static final String CANNOT_ADD_PAYMENT_ARCHIVED = "Cannot add a payment for invoice linked to an archived entity";
     public static final String CANNOT_UPDATE_PAYMENT_ARCHIVED = "Cannot update payment for invoice linked to an archived entity";
@@ -21,7 +24,7 @@ public class Exceptions {
     public static final String FLOW_IS_REQUIRED = "Flow is required";
     public static final String INVALID_BILL_NAME = "Invalid entity name";
     public static final String INVALID_EMAIL_FORMAT = "Invalid email format";
-    public static final String INVALID_FLOW_TYPE = "Invalid flow type: : %s";
+    public static final String INVALID_FLOW_TYPE = "Invalid flow type: %s";
     public static final String INVALID_REFRESH_TOKEN = "Invalid refresh token";
     public static final String LOGIN_FAILED = "Login failed";
     public static final String NEW_EMAIL_REQUIRED = "New email is required";
