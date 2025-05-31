@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum EntityType {
-    PARTY("Party"),
-    ENTRY("Entry"),
+    PARTY("Entity"),
+    ENTRY("Invoice"),
     PAYMENT("Payment");
 
     private final String value;

@@ -41,7 +41,7 @@ public class RecycleMapper {
         recycleDTO.setEntityDate(payment.getDate());
         recycleDTO.setRecycleDate(payment.getRecycleDate());
         recycleDTO.setPartyName(entryBill.getName());
-        recycleDTO.setInvoiceNumber(entryBill.getBillId());
+        recycleDTO.setInvoiceNumber(payment.getEntry().getInvoiceId());
         recycleDTO.setAmount(payment.getAmount());
         recycleDTO.setType(payment.getType()+" / "+payment.getMedium());
         recycleDTO.setDetails(payment.getNotes());
@@ -58,7 +58,7 @@ public class RecycleMapper {
         recycleDTO.setEntityDate(entry.getDate());
         recycleDTO.setRecycleDate(entry.getRecycleDate());
         recycleDTO.setPartyName(entryBill.getName());
-        recycleDTO.setInvoiceNumber(entry.getId());
+        recycleDTO.setInvoiceNumber(entry.getInvoiceId());
         recycleDTO.setAmount(entry.getAmount());
         recycleDTO.setType(FlowType.fromName(entry.getFlow()));
         recycleDTO.setDetails(entry.getServices());
