@@ -1,5 +1,6 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.Constants.Exceptions;
 import com.projects.bills.DTOs.StatsDTO;
 import com.projects.bills.DataHelpers.EntryFilters;
 import com.projects.bills.DataHelpers.StatsHelper;
@@ -65,7 +66,7 @@ class StatsServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 statsService.getStats("alice", null, null, 1L, null, null, null, null, null, null));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-        assertTrue(Objects.requireNonNull(ex.getReason()).contains("User not found"));
+        assertEquals(String.format(Exceptions.USER_NOT_FOUND, "alice"), ex.getReason());
     }
 
     @Test
@@ -82,7 +83,7 @@ class StatsServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 statsService.getStats("alice", null, null, 2L, null, null, null, null, null, null));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-        assertTrue(Objects.requireNonNull(ex.getReason()).contains("not found"));
+        assertEquals(String.format(Exceptions.ENTRY_NOT_FOUND, 2L), ex.getReason());
     }
 
     @Test
@@ -120,3 +121,4 @@ class StatsServiceTest {
         assertSame(statsDTO, result);
     }
 }
+

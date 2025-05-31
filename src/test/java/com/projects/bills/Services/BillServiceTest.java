@@ -1,5 +1,6 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.Constants.Exceptions;
 import com.projects.bills.DTOs.BillDTO;
 import com.projects.bills.DTOs.BillDTOList;
 import com.projects.bills.Entities.Bill;
@@ -13,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,7 +54,7 @@ class BillServiceTest {
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.getBills(userName));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-        assertTrue(Objects.requireNonNull(ex.getReason()).contains("User not found"));
+        assertEquals(String.format(Exceptions.USER_NOT_FOUND, userName), ex.getReason());
     }
 
     @Test
@@ -330,7 +330,7 @@ class BillServiceTest {
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.saveBill(billDTO, existing, userName));
         assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
-        assertTrue(Objects.requireNonNull(ex.getReason()).contains("User not authorized"));
+        assertEquals(Exceptions.NOT_AUTHORIZED_TO_ACCESS_BILL, ex.getReason());
     }
 }
 

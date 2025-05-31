@@ -1,5 +1,6 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.Constants.Exceptions;
 import com.projects.bills.DTOs.AuthDTO;
 import com.projects.bills.DTOs.UserDTO;
 import com.projects.bills.Entities.User;
@@ -13,7 +14,6 @@ import org.junit.jupiter.params.provider.*;
 
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -90,15 +90,14 @@ class UserServiceTest {
     }
 
     static Stream<Arguments> newPasswords() {
-        String passwordException = "Password must be at least 8 characters long and include uppercase, lowercase, digit, and special character";
         return Stream.of(
-                Arguments.of("OldPass1!", "OldPass1!", "New password cannot be the same as the current password"),
-                Arguments.of("OldPass1!", "", "Current and new password are required"),
-                Arguments.of("OldPass1!", "short", passwordException),
-                Arguments.of("OldPass1!", "NoSpecial1", passwordException),
-                Arguments.of("OldPass1!", "NoDigit!", passwordException),
-                Arguments.of("OldPass1!", "nouppercase1!", passwordException),
-                Arguments.of("OldPass1!", "NOLOWERCASE1!", passwordException),
+                Arguments.of("OldPass1!", "OldPass1!", Exceptions.NEW_PASSWORD_SAME_AS_CURRENT),
+                Arguments.of("OldPass1!", "", Exceptions.CURRENT_AND_NEW_PASSWORD_REQUIRED),
+                Arguments.of("OldPass1!", "short", Exceptions.PASSWORD_STRENGTH),
+                Arguments.of("OldPass1!", "NoSpecial1", Exceptions.PASSWORD_STRENGTH),
+                Arguments.of("OldPass1!", "NoDigit!", Exceptions.PASSWORD_STRENGTH),
+                Arguments.of("OldPass1!", "nouppercase1!", Exceptions.PASSWORD_STRENGTH),
+                Arguments.of("OldPass1!", "NOLOWERCASE1!", Exceptions.PASSWORD_STRENGTH),
                 Arguments.of("OldPass1!", "Valid-New1-", null),
                 Arguments.of("OldPass1!", "Password1@", null), // Common pattern, meets requirements
                 Arguments.of("OldPass1!", "Summer2024$", null), // Season+year+special
@@ -138,9 +137,8 @@ class UserServiceTest {
             UserDTO result = userService.updateUser(userDTO, "alice");
             assertNotNull(result);
         } else {
-            ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+            assertThrows(ResponseStatusException.class, () ->
                     userService.updateUser(userDTO, "alice"));
-            assertTrue(Objects.requireNonNull(ex.getReason()).contains(expectedError));
         }
     }
 
@@ -205,7 +203,8 @@ class UserServiceTest {
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.registerUser(userDTO));
-        assertTrue(ex.getReason().contains("Username already exists"));
+        assertEquals(409, ex.getStatusCode().value());
+        assertEquals(Exceptions.USERNAME_ALREADY_EXISTS, ex.getReason());
     }
 
     @Test
@@ -220,7 +219,8 @@ class UserServiceTest {
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.registerUser(userDTO));
-        assertTrue(ex.getReason().contains("Email already registered"));
+        assertEquals(409, ex.getStatusCode().value());
+        assertEquals(Exceptions.EMAIL_ALREADY_REGISTERED, ex.getReason());
     }
 
     @Test
@@ -235,7 +235,8 @@ class UserServiceTest {
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.registerUser(userDTO));
-        assertTrue(ex.getReason().contains("Invalid email format"));
+        assertEquals(400, ex.getStatusCode().value());
+        assertEquals(Exceptions.INVALID_EMAIL_FORMAT, ex.getReason());
     }
 
     @Test
@@ -250,6 +251,7 @@ class UserServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.login(userDTO));
         assertEquals(401, ex.getStatusCode().value());
+        assertEquals(Exceptions.LOGIN_FAILED, ex.getReason());
     }
 
     @Test
@@ -268,6 +270,7 @@ class UserServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.login(userDTO));
         assertEquals(401, ex.getStatusCode().value());
+        assertEquals(Exceptions.LOGIN_FAILED, ex.getReason());
     }
 
     @Test
@@ -280,6 +283,7 @@ class UserServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.updateUser(userDTO, "alice"));
         assertEquals(400, ex.getStatusCode().value());
+        assertEquals(Exceptions.USER_ID_REQUIRED_FOR_UPDATE, ex.getReason());
     }
 
     @Test
@@ -294,6 +298,7 @@ class UserServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.updateUser(userDTO, "alice"));
         assertEquals(404, ex.getStatusCode().value());
+        assertEquals(String.format(Exceptions.USER_NOT_FOUND, 1L), ex.getReason());
     }
 
     @Test
@@ -313,6 +318,7 @@ class UserServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.updateUser(userDTO, "alice"));
         assertEquals(403, ex.getStatusCode().value());
+        assertEquals(Exceptions.NOT_AUTHORIZED_TO_UPDATE_USER, ex.getReason());
     }
 
     @Test
@@ -333,6 +339,7 @@ class UserServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.updateUser(userDTO, "alice"));
         assertEquals(401, ex.getStatusCode().value());
+        assertEquals(Exceptions.LOGIN_FAILED, ex.getReason());
     }
 
     @Test
@@ -353,6 +360,7 @@ class UserServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.updateUser(userDTO, "alice"));
         assertEquals(400, ex.getStatusCode().value());
+        assertEquals(Exceptions.NO_VALID_UPDATE_OPERATION, ex.getReason());
     }
 
     @Test
@@ -375,7 +383,8 @@ class UserServiceTest {
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.updateUser(userDTO, "alice"));
-        assertTrue(ex.getReason().contains("Email already registered"));
+        assertEquals(409, ex.getStatusCode().value());
+        assertEquals(Exceptions.EMAIL_ALREADY_REGISTERED, ex.getReason());
     }
 
     @Test
@@ -397,7 +406,31 @@ class UserServiceTest {
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.updateUser(userDTO, "alice"));
-        assertTrue(ex.getReason().contains("New email cannot be the same as the current email"));
+        assertEquals(400, ex.getStatusCode().value());
+        assertEquals(Exceptions.NEW_EMAIL_SAME_AS_CURRENT, ex.getReason());
+    }
+
+    @Test
+    void testUpdateUser_NewEmailMissing() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1L);
+        userDTO.setUsername("alice");
+        userDTO.setPassword("ValidPass1!");
+        userDTO.setNewEmail("");
+
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("alice");
+        user.setEmail("old@email.com");
+        user.setPassword("hashed");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(passwordService.verifyPassword(any(), any())).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                userService.updateUser(userDTO, "alice"));
+        assertEquals(400, ex.getStatusCode().value());
+        assertEquals(Exceptions.NEW_EMAIL_REQUIRED, ex.getReason());
     }
 
     @Test
@@ -419,6 +452,7 @@ class UserServiceTest {
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 userService.updateUser(userDTO, "alice"));
-        assertTrue(ex.getReason().contains("Invalid email format"));
+        assertEquals(400, ex.getStatusCode().value());
+        assertEquals(Exceptions.INVALID_EMAIL_FORMAT, ex.getReason());
     }
 }

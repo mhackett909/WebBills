@@ -1,5 +1,6 @@
 package com.projects.bills.Services;
 
+import com.projects.bills.Constants.Exceptions;
 import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.DTOs.PaymentDTO;
 import com.projects.bills.DTOs.PaymentDTOList;
@@ -15,7 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -266,6 +266,7 @@ class PaymentServiceTest {
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
                 paymentService.updatePayment(paymentDTO, null, "alice"));
         assertEquals(403, ex.getStatusCode().value());
-        assertTrue(Objects.requireNonNull(ex.getReason()).contains("archived entity"));
+        assertEquals(Exceptions.CANNOT_UPDATE_PAYMENT_ARCHIVED, ex.getReason());
     }
 }
+

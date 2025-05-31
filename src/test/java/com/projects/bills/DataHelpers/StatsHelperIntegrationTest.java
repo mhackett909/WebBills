@@ -235,6 +235,28 @@ class StatsHelperIntegrationTest {
     }
 
     @Test
+    void testGetFilteredPredicate_byPartial() {
+        // Set one entry as unpaid
+        Entry entry = entryRepository.findAll().get(0);
+        entry.setStatus(false);
+        entryRepository.save(entry);
+
+        EntryFilters filters = new EntryFilters();
+        filters.setUserName("alice");
+        filters.setPartial(true);
+
+        var cb = em.getCriteriaBuilder();
+        var cq = cb.createQuery(Entry.class);
+        var root = cq.from(Entry.class);
+
+        var predicate = statsHelper.getFilteredPredicate(cb, filters, root);
+        cq.select(root).where(predicate);
+
+        List<Entry> results = em.createQuery(cq).getResultList();
+        assertThat(results).allMatch(e -> Boolean.FALSE.equals(e.getStatus()));
+    }
+
+    @Test
     void testGetFilteredPredicate_byArchived() {
         // Set bill as archived (status = false)
         Bill bill = billRepository.findAll().get(0);
