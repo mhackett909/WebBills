@@ -36,6 +36,7 @@ class RecycleMapperTest {
 
         // Entry variables
         Long entryId = 200L;
+        Long invoiceId = 123456L;
         Date entryDate = Date.valueOf("2023-10-01");
         LocalDateTime entryRecycleDate = LocalDateTime.now().minusHours(5);
         BigDecimal entryAmount = new BigDecimal("500.00");
@@ -44,6 +45,7 @@ class RecycleMapperTest {
 
         Entry entry = new Entry();
         entry.setId(entryId);
+        entry.setInvoiceId(invoiceId);
         entry.setDate(entryDate);
         entry.setRecycleDate(entryRecycleDate);
         entry.setAmount(entryAmount);
@@ -70,6 +72,7 @@ class RecycleMapperTest {
         payment.setNotes(paymentNotes);
 
         Entry paymentEntry = new Entry();
+        paymentEntry.setInvoiceId(invoiceId);
         paymentEntry.setBill(bill);
         payment.setEntry(paymentEntry);
 
@@ -91,25 +94,25 @@ class RecycleMapperTest {
         assertEquals(paymentDate, dtoList.getRecycleItems().get(0).getEntityDate());
         assertEquals(paymentRecycleDate, dtoList.getRecycleItems().get(0).getRecycleDate());
         assertEquals(billName, dtoList.getRecycleItems().get(0).getPartyName());
-        assertEquals(billId, dtoList.getRecycleItems().get(0).getInvoiceNumber());
+        assertEquals(invoiceId, dtoList.getRecycleItems().get(0).getInvoiceNumber());
         assertEquals(paymentAmount, dtoList.getRecycleItems().get(0).getAmount());
         assertEquals(paymentType + " / " + paymentMedium, dtoList.getRecycleItems().get(0).getType());
         assertEquals(paymentNotes, dtoList.getRecycleItems().get(0).getDetails());
 
         // Entry (should be second)
         assertEquals(entryId, dtoList.getRecycleItems().get(1).getEntityId());
-        assertEquals("Entry", dtoList.getRecycleItems().get(1).getEntityType());
+        assertEquals("Invoice", dtoList.getRecycleItems().get(1).getEntityType());
         assertEquals(entryDate, dtoList.getRecycleItems().get(1).getEntityDate());
         assertEquals(entryRecycleDate, dtoList.getRecycleItems().get(1).getRecycleDate());
         assertEquals(billName, dtoList.getRecycleItems().get(1).getPartyName());
-        assertEquals(entryId, dtoList.getRecycleItems().get(1).getInvoiceNumber());
+        assertEquals(invoiceId, dtoList.getRecycleItems().get(1).getInvoiceNumber());
         assertEquals(entryAmount, dtoList.getRecycleItems().get(1).getAmount());
         assertEquals("Income", dtoList.getRecycleItems().get(1).getType());
         assertEquals(entryServices, dtoList.getRecycleItems().get(1).getDetails());
 
         // Bill (should be last, oldest recycleDate)
         assertEquals(billId, dtoList.getRecycleItems().get(2).getEntityId());
-        assertEquals("Party", dtoList.getRecycleItems().get(2).getEntityType());
+        assertEquals("Entity", dtoList.getRecycleItems().get(2).getEntityType());
         assertNull(dtoList.getRecycleItems().get(2).getEntityDate());
         assertEquals(billRecycleDate, dtoList.getRecycleItems().get(2).getRecycleDate());
         assertEquals(billName, dtoList.getRecycleItems().get(2).getPartyName());
