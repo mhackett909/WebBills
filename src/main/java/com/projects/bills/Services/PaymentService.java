@@ -158,7 +158,7 @@ public class PaymentService {
 		entryDTO.setFlow(FlowType.fromName(entryDTO.getFlow()));
 
 		// The entry is paid if the paid amount is greater than or equal to the entry amount
-        entryDTO.setStatus(entryAmount.compareTo(paidAmount) <= 0);
+		entryDTO.setStatus(entryAmount.compareTo(paidAmount) <= 0);
 
 		// The entry is overpaid if the paid amount is greater than the entry amount
 		entryDTO.setOverpaid(paidAmount.compareTo(entryAmount) > 0);
