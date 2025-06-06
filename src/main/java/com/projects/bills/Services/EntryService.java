@@ -213,14 +213,13 @@ public class EntryService {
 
 		Entry mappedEntry = entryMapper.mapToEntity(entryDTO, entry, bill, type, billUser, invoiceId);
 
-		logger.debug("Saving mapped entry: {}", mappedEntry);
-		Entry savedEntry = entryRepository.save(mappedEntry);
+		Entry savedEntry = calculatePaid(mappedEntry);
+
 		logger.info("Saved entry with ID: {}", savedEntry.getId());
-		calculatePaid(savedEntry);
 		return entryMapper.mapToDTO(savedEntry, isArchived(savedEntry));
 	}
 
-	public void calculatePaid(Entry entry) {
+	public Entry calculatePaid(Entry entry) {
 		logger.info("Calculating paid status for entryId={}", entry.getId());
 		BigDecimal entryAmount = entry.getAmount();
 		BigDecimal paidAmount = paymentRepository.sumAmountByEntryIdAndRecycleDateIsNull(entry.getId());
@@ -231,7 +230,8 @@ public class EntryService {
 		// The entry is overpaid if the paid amount is greater than the entry amount
 		entry.setOverpaid(paidAmount.compareTo(entryAmount) > 0);
 
-		entryRepository.save(entry);
+		logger.debug("Saving entry: {}", entry);
+		return entryRepository.save(entry);
 	}
 
 	private long getInvoiceId(EntryDTO entryDTO, User user) {

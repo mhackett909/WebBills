@@ -166,6 +166,7 @@ class EntryServiceTest {
         mappedEntry.setId(0L);
         mappedEntry.setBill(bill);
         mappedEntry.setUser(user);
+        mappedEntry.setAmount(BigDecimal.TEN);
 
         Entry savedEntry = new Entry();
         savedEntry.setBill(bill);
@@ -215,6 +216,7 @@ class EntryServiceTest {
         mappedEntry.setId(1L);
         mappedEntry.setBill(bill);
         mappedEntry.setUser(user);
+        mappedEntry.setAmount(BigDecimal.TEN);
 
         Entry savedEntry = new Entry();
         savedEntry.setId(1L);
@@ -233,7 +235,6 @@ class EntryServiceTest {
         when(billService.getBillEntityById(10L)).thenReturn(bill);
         when(entryMapper.mapToEntity(any(), any(), any(), any(), any(), anyLong())).thenReturn(mappedEntry);
         when(entryRepository.save(mappedEntry)).thenReturn(savedEntry);
-        when(entryRepository.findByIdAndRecycleDateIsNull(anyLong())).thenReturn(savedEntry);
         when(billService.getBillEntityById(10L)).thenReturn(bill);
         when(entryMapper.mapToDTO(savedEntry, false)).thenReturn(mappedDTO);
 
