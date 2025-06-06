@@ -10,6 +10,7 @@ import com.projects.bills.Entities.Entry;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Mappers.EntryMapper;
 import com.projects.bills.Repositories.EntryRepository;
+import com.projects.bills.Repositories.PaymentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.*;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.*;
 class EntryServiceTest {
 
     private EntryRepository entryRepository;
+    private PaymentRepository paymentRepository;
     private BillService billService;
     private UserService userService;
     private StatsHelper statsHelper;
@@ -41,7 +43,8 @@ class EntryServiceTest {
         userService = mock(UserService.class);
         statsHelper = mock(StatsHelper.class);
         entryMapper = mock(EntryMapper.class);
-        entryService = new EntryService(entryRepository, billService, userService, statsHelper, entryMapper);
+        paymentRepository = mock(PaymentRepository.class);
+        entryService = new EntryService(entryRepository, paymentRepository, billService, userService, statsHelper, entryMapper);
     }
 
     @Test

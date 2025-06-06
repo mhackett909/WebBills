@@ -11,6 +11,7 @@ import com.projects.bills.Entities.User;
 import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Mappers.EntryMapper;
 import com.projects.bills.Repositories.EntryRepository;
+import com.projects.bills.Repositories.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +33,7 @@ import java.util.Optional;
 @Service
 public class EntryService {
 	private final EntryRepository entryRepository;
+	private final PaymentRepository paymentRepository;
 	private final BillService billService;
 	private final UserService userService;
 	private final StatsHelper statsHelper;
@@ -39,12 +41,13 @@ public class EntryService {
 	private static final Logger logger = LoggerFactory.getLogger(EntryService.class);
 
 	@Autowired
-	public EntryService(EntryRepository entryRepository,
+	public EntryService(EntryRepository entryRepository, PaymentRepository paymentRepository,
                         BillService billService,
                         UserService userService,
                         StatsHelper statsHelper,
                         EntryMapper entryMapper) {
-		this.billService = billService;
+        this.paymentRepository = paymentRepository;
+        this.billService = billService;
 		this.entryRepository = entryRepository;
         this.userService = userService;
         this.statsHelper = statsHelper;
@@ -213,7 +216,37 @@ public class EntryService {
 		logger.debug("Saving mapped entry: {}", mappedEntry);
 		Entry savedEntry = entryRepository.save(mappedEntry);
 		logger.info("Saved entry with ID: {}", savedEntry.getId());
+		calculatePaid(savedEntry);
 		return entryMapper.mapToDTO(savedEntry, isArchived(savedEntry));
+	}
+
+	public void calculatePaid(Entry entry) {
+		logger.info("Calculating paid status for entryId={}", entry.getId());
+		BigDecimal entryAmount = entry.getAmount();
+		BigDecimal paidAmount = paymentRepository.sumAmountByEntryIdAndRecycleDateIsNull(entry.getId());
+
+		// Validation for this entry has already occurred
+		String entryUser = entry.getUser().getUsername();
+
+		Optional<EntryDTO> optionalEntryDTO = getEntryDtoById(entry.getId(), null, entryUser);
+		if (optionalEntryDTO.isEmpty()) {
+			logger.error("Entry DTO not found for entryId={}", entry.getId());
+			throw new ResponseStatusException(
+					HttpStatus.NOT_FOUND,
+					String.format(Exceptions.ENTRY_NOT_FOUND, entry.getId())
+			);
+		}
+
+		EntryDTO entryDTO = optionalEntryDTO.get();
+		entryDTO.setFlow(FlowType.fromName(entryDTO.getFlow()));
+
+		// The entry is paid if the paid amount is greater than or equal to the entry amount
+		entryDTO.setStatus(entryAmount.compareTo(paidAmount) <= 0);
+
+		// The entry is overpaid if the paid amount is greater than the entry amount
+		entryDTO.setOverpaid(paidAmount.compareTo(entryAmount) > 0);
+
+		saveEntry(entryDTO, true, null, entryUser);
 	}
 
 	private long getInvoiceId(EntryDTO entryDTO, User user) {
