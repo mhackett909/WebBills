@@ -268,5 +268,47 @@ class PaymentServiceTest {
         assertEquals(403, ex.getStatusCode().value());
         assertEquals(Exceptions.CANNOT_UPDATE_PAYMENT_ARCHIVED, ex.getReason());
     }
-}
 
+    @Test
+    void testValidateUserAccess_EntryNotFound() {
+        when(entryService.getEntryById(99L)).thenReturn(Optional.empty());
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> {
+            // Use reflection to call private method
+            try {
+                java.lang.reflect.Method method = PaymentService.class.getDeclaredMethod("validateUserAccess", long.class, String.class);
+                method.setAccessible(true);
+                method.invoke(paymentService, 99L, "alice");
+            } catch (java.lang.reflect.InvocationTargetException e) {
+                throw e.getCause();
+            } catch (Exception e) {
+                fail("Unexpected exception: " + e);
+            }
+        });
+        assertEquals(404, ex.getStatusCode().value());
+        assertEquals(String.format(Exceptions.ENTRY_NOT_FOUND, 99L), ex.getReason());
+    }
+
+    @Test
+    void testValidateUserAccess_UserNotAuthorized() {
+        Entry entry = new Entry();
+        Bill bill = new Bill();
+        User user = new User();
+        user.setUsername("bob");
+        bill.setUser(user);
+        entry.setBill(bill);
+        when(entryService.getEntryById(1L)).thenReturn(Optional.of(entry));
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> {
+            try {
+                java.lang.reflect.Method method = PaymentService.class.getDeclaredMethod("validateUserAccess", long.class, String.class);
+                method.setAccessible(true);
+                method.invoke(paymentService, 1L, "alice");
+            } catch (java.lang.reflect.InvocationTargetException e) {
+                throw e.getCause();
+            } catch (Exception e) {
+                fail("Unexpected exception: " + e);
+            }
+        });
+        assertEquals(403, ex.getStatusCode().value());
+        assertEquals(Exceptions.NOT_AUTHORIZED_TO_ACCESS_ENTRY, ex.getReason());
+    }
+}

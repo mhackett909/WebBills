@@ -225,28 +225,13 @@ public class EntryService {
 		BigDecimal entryAmount = entry.getAmount();
 		BigDecimal paidAmount = paymentRepository.sumAmountByEntryIdAndRecycleDateIsNull(entry.getId());
 
-		// Validation for this entry has already occurred
-		String entryUser = entry.getUser().getUsername();
-
-		Optional<EntryDTO> optionalEntryDTO = getEntryDtoById(entry.getId(), null, entryUser);
-		if (optionalEntryDTO.isEmpty()) {
-			logger.error("Entry DTO not found for entryId={}", entry.getId());
-			throw new ResponseStatusException(
-					HttpStatus.NOT_FOUND,
-					String.format(Exceptions.ENTRY_NOT_FOUND, entry.getId())
-			);
-		}
-
-		EntryDTO entryDTO = optionalEntryDTO.get();
-		entryDTO.setFlow(FlowType.fromName(entryDTO.getFlow()));
-
 		// The entry is paid if the paid amount is greater than or equal to the entry amount
-		entryDTO.setStatus(entryAmount.compareTo(paidAmount) <= 0);
+		entry.setStatus(entryAmount.compareTo(paidAmount) <= 0);
 
 		// The entry is overpaid if the paid amount is greater than the entry amount
-		entryDTO.setOverpaid(paidAmount.compareTo(entryAmount) > 0);
+		entry.setOverpaid(paidAmount.compareTo(entryAmount) > 0);
 
-		saveEntry(entryDTO, true, null, entryUser);
+		entryRepository.save(entry);
 	}
 
 	private long getInvoiceId(EntryDTO entryDTO, User user) {
