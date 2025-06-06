@@ -46,11 +46,5 @@
   ],
   "requiresCompatibilities": ["EC2"],
   "cpu": "256",
-  "memory": "512",
-  "placementConstraints": [
-    {
-      "type": "memberOf",
-      "expression": "attribute:role == backend"
-    }
-  ]
+  "memory": "512"
 }
