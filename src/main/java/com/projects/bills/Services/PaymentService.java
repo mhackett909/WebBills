@@ -1,13 +1,11 @@
 package com.projects.bills.Services;
 import com.projects.bills.Constants.Strings;
 import com.projects.bills.Constants.Exceptions;
-import com.projects.bills.DTOs.EntryDTO;
 import com.projects.bills.DTOs.PaymentDTOList;
 import com.projects.bills.Entities.Entry;
 import com.projects.bills.Entities.Payment;
 import com.projects.bills.DTOs.PaymentDTO;
 import com.projects.bills.Entities.User;
-import com.projects.bills.Enums.FlowType;
 import com.projects.bills.Mappers.PaymentMapper;
 import com.projects.bills.Repositories.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +15,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -94,7 +91,7 @@ public class PaymentService {
 
 		Payment savedPayment = paymentRepository.save(payment);
 
-		calculatePaid(entry);
+		entryService.calculatePaid(entry);
 
 		logger.info("Payment created successfully with ID {}", savedPayment.getPaymentId());
 		return paymentMapper.mapToPaymentDTO(savedPayment);
@@ -131,39 +128,10 @@ public class PaymentService {
 
 		Payment savedPayment = paymentRepository.save(payment);
 
-		calculatePaid(entry);
+		entryService.calculatePaid(entry);
 
 		logger.info("Payment updated successfully with ID {}", savedPayment.getPaymentId());
 		return paymentMapper.mapToPaymentDTO(savedPayment);
-	}
-
-	private void calculatePaid(Entry entry) {
-		logger.info("Calculating paid status for entryId={}", entry.getId());
-		BigDecimal entryAmount = entry.getAmount();
-		BigDecimal paidAmount = paymentRepository.sumAmountByEntryIdAndRecycleDateIsNull(entry.getId());
-
-		// Validation for this entry has already occurred
-		String entryUser = entry.getUser().getUsername();
-
-		Optional<EntryDTO> optionalEntryDTO = entryService.getEntryDtoById(entry.getId(), null, entryUser);
-		if (optionalEntryDTO.isEmpty()) {
-			logger.error("Entry DTO not found for entryId={}", entry.getId());
-			throw new ResponseStatusException(
-					HttpStatus.NOT_FOUND,
-					String.format(Exceptions.ENTRY_NOT_FOUND, entry.getId())
-			);
-		}
-
-		EntryDTO entryDTO = optionalEntryDTO.get();
-		entryDTO.setFlow(FlowType.fromName(entryDTO.getFlow()));
-
-		// The entry is paid if the paid amount is greater than or equal to the entry amount
-		entryDTO.setStatus(entryAmount.compareTo(paidAmount) <= 0);
-
-		// The entry is overpaid if the paid amount is greater than the entry amount
-		entryDTO.setOverpaid(paidAmount.compareTo(entryAmount) > 0);
-
-		entryService.saveEntry(entryDTO, true, null, entryUser);
 	}
 
 	private Entry validateUserAccess(long entryId, String userName) {

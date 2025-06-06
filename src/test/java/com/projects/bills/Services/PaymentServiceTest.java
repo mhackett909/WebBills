@@ -71,6 +71,30 @@ class PaymentServiceTest {
     }
 
     @Test
+    void testGetPayments_EntryNotFound() {
+        when(entryService.getEntryById(99L)).thenReturn(Optional.empty());
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                paymentService.getPayments(99L, "alice"));
+        assertEquals(404, ex.getStatusCode().value());
+        assertEquals(String.format(Exceptions.ENTRY_NOT_FOUND, 99L), ex.getReason());
+    }
+
+    @Test
+    void testGetPayments_UserNotAuthorized() {
+        Entry entry = new Entry();
+        Bill bill = new Bill();
+        User user = new User();
+        user.setUsername("bob");
+        bill.setUser(user);
+        entry.setBill(bill);
+        when(entryService.getEntryById(1L)).thenReturn(Optional.of(entry));
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
+                paymentService.getPayments(1L, "alice"));
+        assertEquals(403, ex.getStatusCode().value());
+        assertEquals(Exceptions.NOT_AUTHORIZED_TO_ACCESS_ENTRY, ex.getReason());
+    }
+
+    @Test
     void testGetPaymentById_Success() {
         Payment payment = new Payment();
         Entry entry = new Entry();
@@ -269,4 +293,3 @@ class PaymentServiceTest {
         assertEquals(Exceptions.CANNOT_UPDATE_PAYMENT_ARCHIVED, ex.getReason());
     }
 }
-
