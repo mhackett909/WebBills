@@ -56,7 +56,9 @@ jobs:
             --cli-input-json file://task-def-backend.json \
             --query 'taskDefinition.revision' --output text)
           aws ecs update-service \
-            --cluster bills-dev-cluster \
-            --service webbills-svc-service-1f7nbx06 \
-            --task-definition webbills-svc:$NEW_REVISION \
+            --cluster bills-dev-fargate-cluster \
+            --service webbills-dev-fargate \
+            --task-definition webbills-task-fargate:$NEW_REVISION \
             --force-new-deployment
+
+
