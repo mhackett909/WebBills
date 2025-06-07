@@ -34,30 +34,6 @@ class BillServiceTest {
     }
 
     @Test
-    void testGetBills_UserExists_ReturnsBills() {
-        String userName = "alice";
-        User user = new User();
-        user.setUsername(userName);
-        List<Bill> bills = List.of(new Bill());
-        when(userService.findByUsername(userName)).thenReturn(Optional.of(user));
-        when(billRepository.findAllByUserAndRecycleDateIsNullOrderByNameAsc(user)).thenReturn(bills);
-
-        List<Bill> result = billService.getBills(userName);
-
-        assertEquals(bills, result);
-    }
-
-    @Test
-    void testGetBills_UserNotFound_Throws() {
-        String userName = "bob";
-        when(userService.findByUsername(userName)).thenReturn(Optional.empty());
-
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.getBills(userName));
-        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-        assertEquals(String.format(Exceptions.USER_NOT_FOUND, userName), ex.getReason());
-    }
-
-    @Test
     void testGetBillEntityById_Found() {
         Long billId = 1L;
         Bill bill = new Bill();
@@ -137,8 +113,9 @@ class BillServiceTest {
         String userName = "bob";
         when(userService.findByUsername(userName)).thenReturn(Optional.empty());
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> billService.getBillDtoList("active", userName));
-        assertTrue(ex.getMessage().contains("User not found"));
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.getBillDtoList("active", userName));
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        assertEquals(String.format(Exceptions.USER_NOT_FOUND, userName), ex.getReason());
     }
 
     @Test

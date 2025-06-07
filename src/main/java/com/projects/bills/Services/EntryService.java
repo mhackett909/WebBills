@@ -151,11 +151,6 @@ public class EntryService {
 		return entry.map(e -> entryMapper.mapToDTO(e, isArchived(e)));
 	}
 
-	protected Optional<Entry> getEntryById(Long id) {
-		logger.debug("Fetching entry by ID: {}", id);
-		return entryRepository.findById(id);
-	}
-
 	public EntryDTO saveEntry(EntryDTO entryDTO, boolean existing, String filter, String userName) {
 		logger.debug("Saving entry: {}, existing: {}, filter: {}, user: {}", entryDTO, existing, filter, userName);
 		Entry entry;
@@ -219,7 +214,7 @@ public class EntryService {
 		return entryMapper.mapToDTO(savedEntry, isArchived(savedEntry));
 	}
 
-	public Entry calculatePaid(Entry entry) {
+	protected Entry calculatePaid(Entry entry) {
 		logger.info("Calculating paid status for entryId={}", entry.getId());
 		BigDecimal entryAmount = entry.getAmount();
 		BigDecimal paidAmount = paymentRepository.sumAmountByEntryIdAndRecycleDateIsNull(entry.getId());
@@ -232,6 +227,11 @@ public class EntryService {
 
 		logger.debug("Saving entry: {}", entry);
 		return entryRepository.save(entry);
+	}
+
+	protected Optional<Entry> getEntryById(Long id) {
+		logger.debug("Fetching entry by ID: {}", id);
+		return entryRepository.findById(id);
 	}
 
 	private long getInvoiceId(EntryDTO entryDTO, User user) {
