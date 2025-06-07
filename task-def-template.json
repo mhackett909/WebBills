@@ -34,7 +34,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/webbills-svc",
+          "awslogs-group": "/ecs/webbills-task-fargate",
           "awslogs-region": "${AWS_REGION}",
           "awslogs-stream-prefix": "ecs"        
         }
