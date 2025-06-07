@@ -36,7 +36,8 @@
         "options": {
           "awslogs-group": "/ecs/webbills-svc",
           "awslogs-region": "${AWS_REGION}",
-          "awslogs-stream-prefix": "ecs"        }
+          "awslogs-stream-prefix": "ecs"        
+        }
       }
     }
   ],
