@@ -117,7 +117,7 @@ public class StatsHelper {
         return query;
     }
 
-    public CriteriaQuery<Object[]> getTop5Types(CriteriaBuilder cb, EntryFilters filters) {
+    public CriteriaQuery<Object[]> getTop5TypeMediumCombos(CriteriaBuilder cb, EntryFilters filters) {
         CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         Root<Entry> entryRoot = query.from(Entry.class);
         Join<Entry, Payment> paymentJoin = entryRoot.join("payments", JoinType.INNER);
@@ -125,17 +125,22 @@ public class StatsHelper {
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
         predicate = cb.and(predicate, cb.isNull(paymentJoin.get("recycleDate")));
 
-        // Select: flow, payment_type, sum(amount)
+        // Select: flow, payment_type, payment_medium, sum(amount)
         query.multiselect(
                 entryRoot.get("flow"),
                 paymentJoin.get("type"),
+                paymentJoin.get("medium"),
                 cb.sum(paymentJoin.get("amount"))
         );
 
         query.where(predicate);
 
-        // GROUP BY e.flow, p.type
-        query.groupBy(entryRoot.get("flow"), paymentJoin.get("type"));
+        // GROUP BY e.flow, p.type, p.medium
+        query.groupBy(
+                entryRoot.get("flow"),
+                paymentJoin.get("type"),
+                paymentJoin.get("medium")
+        );
 
         // ORDER BY total_amount DESC
         query.orderBy(cb.desc(cb.sum(paymentJoin.get("amount"))));

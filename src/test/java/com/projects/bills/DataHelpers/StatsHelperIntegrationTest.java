@@ -434,12 +434,12 @@ class StatsHelperIntegrationTest {
     }
 
     @Test
-    void testGetTop5Types() {
+    void testGetTop5TypeMediumCombos() {
         EntryFilters filters = new EntryFilters();
         filters.setUserName("alice");
 
         var cb = em.getCriteriaBuilder();
-        var cq = statsHelper.getTop5Types(cb, filters);
+        var cq = statsHelper.getTop5TypeMediumCombos(cb, filters);
 
         List<Object[]> results = em.createQuery(cq).getResultList();
 
