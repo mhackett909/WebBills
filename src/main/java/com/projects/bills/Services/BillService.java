@@ -33,30 +33,12 @@ public class BillService {
         this.billMapper = billMapper;
     }
 
-	protected List<Bill> getBills(String userName) {
-		Optional<User> realUser = userService.findByUsername(userName);
-		if (realUser.isEmpty()) {
-			logger.error("User not found: {}", userName);
-			throw new ResponseStatusException(
-					HttpStatus.NOT_FOUND,
-					String.format(Exceptions.USER_NOT_FOUND, userName)
-			);
-		}
-
-		logger.info("Fetching bills for user: {}", userName);
-		return billRepository.findAllByUserAndRecycleDateIsNullOrderByNameAsc(realUser.get());
-	}
-
-	protected Bill getBillEntityById(Long id) {
-		logger.info("Fetching bill by ID: {}", id);
-		return billRepository.findById(id).orElse(null);
-	}
-
 	public BillDTOList getBillDtoList(String filter, String userName) {
 		Optional<User> user = userService.findByUsername(userName);
 		if (user.isEmpty()) {
 			logger.error("User not found: {}", userName);
-			throw new IllegalArgumentException(
+			throw new ResponseStatusException(
+					HttpStatus.NOT_FOUND,
 					String.format(Exceptions.USER_NOT_FOUND, userName)
 			);
 		}
@@ -138,5 +120,10 @@ public class BillService {
 		Bill updatedBill = billRepository.save(bill);
 		logger.info("Bill saved with ID {} and name {}", updatedBill.getBillId(), updatedBill.getName());
 		return billMapper.mapToDTO(updatedBill);
+	}
+
+	protected Bill getBillEntityById(Long id) {
+		logger.info("Fetching bill by ID: {}", id);
+		return billRepository.findById(id).orElse(null);
 	}
 }

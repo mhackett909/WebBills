@@ -42,14 +42,6 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    public Optional<UserDTO> findDtoByUsername(String username) {
-        return userRepository.findByUsername(username).map(userMapper::mapToDTO);
-    }
-
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-
     public UserDTO registerUser(UserDTO userDTO) {
         logger.info("User registration attempt: {}", userDTO.getUsername());
 
@@ -164,6 +156,14 @@ public class UserService {
         User savedUser = userRepository.save(user);
         logger.info("User updated successfully: {}", userName);
         return userMapper.mapToDTO(savedUser);
+    }
+
+    public Optional<UserDTO> findDtoByUsername(String username) {
+        return userRepository.findByUsername(username).map(userMapper::mapToDTO);
+    }
+
+    protected Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     private void updatePassword(UserDTO userDTO, User user) {
