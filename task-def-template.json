@@ -1,5 +1,5 @@
 {
-  "family": "webbills-svc",
+  "family": "webbills-task-fargate",
   "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
   "containerDefinitions": [
@@ -36,11 +36,7 @@
         "options": {
           "awslogs-group": "/ecs/webbills-svc",
           "awslogs-region": "${AWS_REGION}",
-          "awslogs-stream-prefix": "ecs",
-          "mode": "non-blocking",
-          "awslogs-create-group": "true",
-          "max-buffer-size": "25m"
-        }
+          "awslogs-stream-prefix": "ecs"        }
       }
     }
   ],
