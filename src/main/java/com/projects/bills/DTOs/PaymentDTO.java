@@ -21,4 +21,5 @@ public class PaymentDTO {
 	private String medium;
 	private String notes;
 	private Boolean recycle = false;
+	private Boolean autopay = false;
 }

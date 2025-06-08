@@ -21,6 +21,7 @@ public class Payment {
 	private String type;
 	private String medium;
 	private String notes;
+	private Boolean autopay;
 
 	@Column(name = "recycle_date")
 	private LocalDateTime recycleDate;

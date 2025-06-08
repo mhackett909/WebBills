@@ -24,6 +24,7 @@ public class PaymentMapper {
         dto.setAmount(payment.getAmount());
         dto.setType(payment.getType());
         dto.setMedium(payment.getMedium());
+        dto.setAutopay(payment.getAutopay());
         dto.setNotes(payment.getNotes());
         dto.setRecycle(payment.getRecycleDate() != null);
         if (payment.getEntry() != null) {
@@ -37,6 +38,7 @@ public class PaymentMapper {
         payment.setAmount(paymentDTO.getAmount());
         payment.setType(paymentDTO.getType());
         payment.setMedium(paymentDTO.getMedium());
+        payment.setAutopay(paymentDTO.getAutopay());
         payment.setNotes(paymentDTO.getNotes());
         payment.setEntry(entry);
         payment.setRecycleDate(paymentDTO.getRecycle() ? LocalDateTime.now() : null);
