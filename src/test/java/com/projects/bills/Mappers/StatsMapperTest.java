@@ -37,9 +37,11 @@ class StatsMapperTest {
         BigDecimal expenseRecipientAmount = new BigDecimal("300.00");
         String incomeSource = "Client B";
         BigDecimal incomeSourceAmount = new BigDecimal("400.00");
-        String expenseType = "Utilities";
+        String expenseType = "credit";
+        String expenseMedium = "web";
         BigDecimal expenseTypeAmount = new BigDecimal("150.00");
-        String incomeType = "Consulting";
+        String incomeType = "cash";
+        String incomeMedium = "person";
         BigDecimal incomeTypeAmount = new BigDecimal("250.00");
 
         // Prepare resultMap
@@ -71,17 +73,17 @@ class StatsMapperTest {
         );
         resultMap.put("top5IncomeSources", top5IncomeSources);
 
-        // top5ExpenseTypes
-        List<Object[]> top5ExpenseTypes = Collections.singletonList(
-                new Object[]{FlowType.OUTGOING.toString(), expenseType, expenseTypeAmount}
+        // top5ExpenseTypeMediumCombos
+        List<Object[]> top5ExpenseTypeMediumCombos = Collections.singletonList(
+                new Object[]{FlowType.OUTGOING.toString(), expenseType, expenseMedium, expenseTypeAmount}
         );
-        resultMap.put("top5ExpenseTypes", top5ExpenseTypes);
+        resultMap.put("top5ExpenseTypeMediumCombos", top5ExpenseTypeMediumCombos);
 
-        // top5IncomeTypes
-        List<Object[]> top5IncomeTypes = Collections.singletonList(
-                new Object[]{FlowType.INCOMING.toString(), incomeType, incomeTypeAmount}
+        // top5IncomeTypeMediumCombos
+        List<Object[]> top5IncomeTypeMediumCombos = Collections.singletonList(
+                new Object[]{FlowType.INCOMING.toString(), incomeType, incomeMedium, incomeTypeAmount}
         );
-        resultMap.put("top5IncomeTypes", top5IncomeTypes);
+        resultMap.put("top5IncomeTypeMediumCombos", top5IncomeTypeMediumCombos);
 
         // overpaidEntryTotals
         List<Object[]> overpaidEntryTotals = Arrays.asList(
@@ -126,7 +128,7 @@ class StatsMapperTest {
         // Top recipients/types
         assertEquals(expenseRecipientAmount, dto.getTopExpenseRecipients().get(expenseRecipient));
         assertEquals(incomeSourceAmount, dto.getTopIncomeSources().get(incomeSource));
-        assertEquals(expenseTypeAmount, dto.getTopExpenseTypes().get(expenseType));
-        assertEquals(incomeTypeAmount, dto.getTopIncomeTypes().get(incomeType));
+        assertEquals(expenseTypeAmount, dto.getTopExpenseTypes().get(expenseType+"|"+expenseMedium));
+        assertEquals(incomeTypeAmount, dto.getTopIncomeTypes().get(incomeType+"|"+incomeMedium));
     }
 }

@@ -108,7 +108,7 @@ class StatsServiceTest {
         when(statsHelper.getOverpaidEntryTotals(cb, filters)).thenReturn(cq);
         when(statsHelper.getOverpaidPaymentTotals(cb, filters)).thenReturn(cq);
         when(statsHelper.getTop5Parties(cb, filters)).thenReturn(cq);
-        when(statsHelper.getTop5Types(cb, filters)).thenReturn(cq);
+        when(statsHelper.getTop5TypeMediumCombos(cb, filters)).thenReturn(cq);
 
         // Re-instantiate statsService with the new statsHelper mock
         statsService = new StatsService(userService, entryRepository, statsHelper, statsMapper, entryMapper, entityManager);

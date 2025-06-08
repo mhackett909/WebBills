@@ -136,15 +136,15 @@ public class StatsService {
                     .setMaxResults(5)
                     .getResultList());
 
-            logger.info("Calling statsHelper.getTop5Types for OUTGOING flow");
-            query = statsHelper.getTop5Types(cb, filters);
+            logger.info("Calling statsHelper.getTop5TypeMediumCombos for OUTGOING flow");
+            query = statsHelper.getTop5TypeMediumCombos(cb, filters);
 
-            resultMap.put(StatsResultKeys.TOP5_EXPENSE_TYPES, entityManager.createQuery(query)
+            resultMap.put(StatsResultKeys.TOP5_EXPENSE_TYPE_MEDIUMS, entityManager.createQuery(query)
                     .setMaxResults(5)
                     .getResultList());
         } else {
             resultMap.put(StatsResultKeys.TOP5_EXPENSE_RECEIPTS, new ArrayList<>());
-            resultMap.put(StatsResultKeys.TOP5_EXPENSE_TYPES, new ArrayList<>());
+            resultMap.put(StatsResultKeys.TOP5_EXPENSE_TYPE_MEDIUMS, new ArrayList<>());
         }
 
         if (switchBack) {
@@ -162,15 +162,15 @@ public class StatsService {
                     .setMaxResults(5)
                     .getResultList());
 
-            logger.info("Calling statsHelper.getTop5Types for INCOMING flow");
-            query = statsHelper.getTop5Types(cb, filters);
+            logger.info("Calling statsHelper.getTop5TypeMediumCombos for INCOMING flow");
+            query = statsHelper.getTop5TypeMediumCombos(cb, filters);
 
-            resultMap.put(StatsResultKeys.TOP5_INCOME_TYPES, entityManager.createQuery(query)
+            resultMap.put(StatsResultKeys.TOP5_INCOME_TYPE_MEDIUMS, entityManager.createQuery(query)
                     .setMaxResults(5)
                     .getResultList());
         } else {
             resultMap.put(StatsResultKeys.TOP5_INCOME_SOURCES, new ArrayList<>());
-            resultMap.put(StatsResultKeys.TOP5_INCOME_TYPES, new ArrayList<>());
+            resultMap.put(StatsResultKeys.TOP5_INCOME_TYPE_MEDIUMS, new ArrayList<>());
         }
         return resultMap;
     }
