@@ -444,8 +444,11 @@ class StatsHelperIntegrationTest {
         List<Object[]> results = em.createQuery(cq).getResultList();
 
         assertThat(results).isNotEmpty();
+        // [0]: flow, [1]: type, [2]: medium, [3]: sum(amount)
         assertThat(results.get(0)[0]).isIn("INCOMING", "OUTGOING");
         assertThat(results.get(0)[1]).isIn("DEBIT", "CARD");
-        assertThat(results.get(0)[2]).isInstanceOf(BigDecimal.class);
+        assertThat(results.get(0)[2]).isIn("Bank Transfer", "Online Payment");
+        assertThat(results.get(0)[3]).isInstanceOf(BigDecimal.class);
     }
 }
+
