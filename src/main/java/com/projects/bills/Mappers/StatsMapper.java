@@ -90,7 +90,7 @@ public class StatsMapper {
                 for (Object[] result : resultList) {
                     String typeName = (String) result[1];
                     String mediumName = (String) result[2];
-                    String key = typeName + " (" + mediumName + ")";
+                    String key = typeName + "|" + mediumName;
                     BigDecimal amount = (BigDecimal) result[3];
                     top5IncomeTypes.put(key, amount);
                 }
