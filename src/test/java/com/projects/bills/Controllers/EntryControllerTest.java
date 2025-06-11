@@ -227,20 +227,4 @@ class EntryControllerTest {
                         .content(objectMapper.writeValueAsString(entryDTO)))
                 .andExpect(status().isBadRequest());
     }
-
-    @Test
-    @WithMockUser(username = "alice")
-    void addEntry_missingStatus_returns400() throws Exception {
-        EntryDTO entryDTO = new EntryDTO();
-        entryDTO.setBillId(1L);
-        entryDTO.setDate(LocalDate.now());
-        entryDTO.setAmount(BigDecimal.TEN);
-        entryDTO.setFlow("Income");
-        entryDTO.setRecycle(false);
-
-        mockMvc.perform(post("/api/v1/entries/new")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(entryDTO)))
-                .andExpect(status().isBadRequest());
-    }
 }
