@@ -63,7 +63,6 @@ class StatsHelperIntegrationTest {
         entry1.setAmount(BigDecimal.valueOf(100));
         entry1.setDate(Date.valueOf(LocalDate.now()));
         entry1.setFlow("INCOMING");
-        entry1.setStatus(true);
         entry1.setInvoiceId(1);
         entry1.setStatus(true);
         entry1.setOverpaid(false);
