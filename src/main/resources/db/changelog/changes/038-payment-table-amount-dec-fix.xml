@@ -1,0 +1,16 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="payment-table-amount-dec" author="mph">
+        <modifyDataType tableName="payment" columnName="amount" newDataType="DECIMAL(19,2)"/>
+        <addNotNullConstraint tableName="payment" columnName="amount" columnDataType="DECIMAL(19,2)"/>
+        <rollback>
+            <modifyDataType tableName="payment" columnName="amount" newDataType="DECIMAL(19,4)"/>
+            <dropNotNullConstraint tableName="payment" columnName="amount" columnDataType="DECIMAL(19,4)"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -26,7 +26,7 @@ public class EntryMapper {
                 entry.getId(),
                 entry.getBill().getBillId(),
                 entry.getInvoiceId(), // Local invoice ID
-                entry.getBill().getName(), // Not using entry.getBill().getName() because it is legacy
+                entry.getBill().getName(),
                 entry.getDate() != null ? entry.getDate().toLocalDate() : null,
                 entry.getAmount(),
                 mapBalance(entry.getBalance()),
