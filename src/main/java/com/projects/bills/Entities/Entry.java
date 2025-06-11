@@ -20,7 +20,6 @@ public class Entry {
 	private Date date;
 	private BigDecimal amount;
 	private Boolean status; // isPaid
-	private String name; // obsolete, keeping for now
 	private String services;
 	private String flow;
 
