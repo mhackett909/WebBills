@@ -1,0 +1,19 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="040-bill-table-boolean-change" author="mph">
+        <modifyDataType tableName="bill" columnName="status" newDataType="TINYINT(1)"/>
+        <addNotNullConstraint tableName="bill" columnName="status" columnDataType="TINYINT(1)"/>
+        <addDefaultValue tableName="bill" columnName="status" defaultValueNumeric="1"/>
+        <rollback>
+            <dropDefaultValue tableName="bill" columnName="status"/>
+            <dropNotNullConstraint tableName="bill" columnName="status" columnDataType="TINYINT(1)"/>
+            <modifyDataType tableName="bill" columnName="status" newDataType="BOOLEAN"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+
