@@ -12,6 +12,6 @@ import lombok.Setter;
 public class BillDTO {
 	private long id;
 	private String name;
-	private Boolean status; //isArchived
+	private Boolean status = true; // isArchived = !status
 	private Boolean recycle = false;
 }

@@ -1,0 +1,19 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="042-payment-table-boolean-change" author="copilot">
+        <modifyDataType tableName="payment" columnName="autopay" newDataType="TINYINT(1)"/>
+        <addNotNullConstraint tableName="payment" columnName="autopay" columnDataType="TINYINT(1)"/>
+        <addDefaultValue tableName="payment" columnName="autopay" defaultValueNumeric="0"/>
+        <rollback>
+            <dropDefaultValue tableName="payment" columnName="autopay"/>
+            <dropNotNullConstraint tableName="payment" columnName="autopay" columnDataType="TINYINT(1)"/>
+            <modifyDataType tableName="payment" columnName="autopay" newDataType="BOOLEAN"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

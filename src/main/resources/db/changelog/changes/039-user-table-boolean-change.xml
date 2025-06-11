@@ -1,0 +1,24 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="039-user-table-boolean-change" author="mph">
+        <modifyDataType tableName="users" columnName="enabled" newDataType="TINYINT(1)"/>
+        <modifyDataType tableName="users" columnName="mfa_enabled" newDataType="TINYINT(1)"/>
+        <addNotNullConstraint tableName="users" columnName="enabled" columnDataType="TINYINT(1)"/>
+        <addNotNullConstraint tableName="users" columnName="mfa_enabled" columnDataType="TINYINT(1)"/>
+        <addDefaultValue tableName="users" columnName="enabled" defaultValueNumeric="1"/>
+        <addDefaultValue tableName="users" columnName="mfa_enabled" defaultValueNumeric="0"/>
+        <rollback>
+            <dropDefaultValue tableName="users" columnName="enabled"/>
+            <dropDefaultValue tableName="users" columnName="mfa_enabled"/>
+            <dropNotNullConstraint tableName="users" columnName="enabled" columnDataType="TINYINT(1)"/>
+            <dropNotNullConstraint tableName="users" columnName="mfa_enabled" columnDataType="TINYINT(1)"/>
+            <modifyDataType tableName="users" columnName="enabled" newDataType="BOOLEAN"/>
+            <modifyDataType tableName="users" columnName="mfa_enabled" newDataType="BOOLEAN"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

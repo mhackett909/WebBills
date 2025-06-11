@@ -1,0 +1,25 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="041-entry-table-boolean-change" author="mph">
+        <modifyDataType tableName="entry" columnName="status" newDataType="TINYINT(1)"/>
+        <modifyDataType tableName="entry" columnName="overpaid" newDataType="TINYINT(1)"/>
+        <addNotNullConstraint tableName="entry" columnName="status" columnDataType="TINYINT(1)"/>
+        <addNotNullConstraint tableName="entry" columnName="overpaid" columnDataType="TINYINT(1)"/>
+        <addDefaultValue tableName="entry" columnName="status" defaultValueNumeric="0"/>
+        <addDefaultValue tableName="entry" columnName="overpaid" defaultValueNumeric="0"/>
+        <rollback>
+            <dropDefaultValue tableName="entry" columnName="status"/>
+            <dropDefaultValue tableName="entry" columnName="overpaid"/>
+            <dropNotNullConstraint tableName="entry" columnName="status" columnDataType="TINYINT(1)"/>
+            <dropNotNullConstraint tableName="entry" columnName="overpaid" columnDataType="TINYINT(1)"/>
+            <modifyDataType tableName="entry" columnName="status" newDataType="BOOLEAN"/>
+            <modifyDataType tableName="entry" columnName="overpaid" newDataType="BOOLEAN"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

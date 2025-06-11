@@ -138,9 +138,6 @@ public class EntryController {
 		if (entryDTO.getFlow() == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.FLOW_IS_REQUIRED);
 		}
-		if (entryDTO.getStatus() == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Exceptions.ENTRY_STATUS_IS_REQUIRED);
-		}
 
 		try {
 			FlowType.fromType(entryDTO.getFlow());

@@ -20,10 +20,10 @@ public class EntryDTO {
 	private LocalDate date;
 	private BigDecimal amount;
 	private BalanceDTO balance;
-	private Boolean status;
+	private Boolean status = false; // true = paid, false = unpaid
 	private Boolean recycle = false;
 	private String services;
 	private String flow;
 	private Boolean archived;
-	private Boolean overpaid;
+	private Boolean overpaid = false;
 }
