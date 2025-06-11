@@ -6,6 +6,11 @@
 
     <changeSet id="entry-table-drop-legacy-name" author="mph">
         <dropColumn tableName="entry" columnName="name"/>
+        <rollback>
+            <addColumn tableName="entry">
+                <column name="name" type="varchar(255)"/>
+            </addColumn>
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
