@@ -19,6 +19,7 @@ public class Entry {
 	private Long id;
 	private Date date;
 	private BigDecimal amount;
+	@Column(columnDefinition = "TINYINT")
 	private Boolean status; // isPaid
 	private String services;
 	private String flow;
@@ -33,7 +34,7 @@ public class Entry {
 	@JoinColumn(name = "userID", referencedColumnName = "id")
 	private User user;
 
-	@Column(name = "overpaid")
+	@Column(columnDefinition = "TINYINT", name = "overpaid")
 	private Boolean overpaid;
 
 	@OneToMany(mappedBy="entry")
