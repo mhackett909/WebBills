@@ -31,13 +31,13 @@ public class User {
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TINYINT", nullable = false)
     private boolean enabled = true;
 
     @Column
     private String roles = "ROLE_USER";
 
-    @Column(name = "mfa_enabled", nullable = false)
+    @Column(name = "mfa_enabled", columnDefinition = "TINYINT", nullable = false)
     private boolean mfaEnabled = false;
 
     @Column(name = "mfa_secret")

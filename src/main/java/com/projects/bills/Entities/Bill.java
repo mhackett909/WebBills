@@ -16,7 +16,7 @@ public class Bill {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long billId;
 	private String name;
-	@Column(columnDefinition = "TINYINT(1)")
+	@Column(columnDefinition = "TINYINT")
 	private Boolean status; //isArchived
 
 	@Column(name = "recycle_date")

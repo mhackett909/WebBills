@@ -21,7 +21,7 @@ public class Payment {
 	private String type;
 	private String medium;
 	private String notes;
-	@Column(columnDefinition = "TINYINT(1)")
+	@Column(columnDefinition = "TINYINT")
 	private Boolean autopay;
 
 	@Column(name = "recycle_date")
