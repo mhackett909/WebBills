@@ -19,8 +19,8 @@ public class UserDTO {
     private String newPassword;
     private String newEmail;
     private String roles;
-    private Boolean enabled;
-    private Boolean mfaEnabled;
+    private Boolean enabled = true;
+    private Boolean mfaEnabled = false;
     private Boolean recycle = false;
     private LocalDateTime createdAt;
     private LocalDateTime lastLogin;

@@ -65,6 +65,8 @@ class StatsHelperIntegrationTest {
         entry1.setFlow("INCOMING");
         entry1.setStatus(true);
         entry1.setInvoiceId(1);
+        entry1.setStatus(true);
+        entry1.setOverpaid(false);
         entryRepository.save(entry1);
 
         Entry entry2 = new Entry();
@@ -74,6 +76,7 @@ class StatsHelperIntegrationTest {
         entry2.setDate(Date.valueOf(LocalDate.now().minusDays(1)));
         entry2.setFlow("OUTGOING");
         entry2.setStatus(false);
+        entry2.setOverpaid(false);
         entry2.setInvoiceId(2);
         entryRepository.save(entry2);
 
@@ -85,6 +88,7 @@ class StatsHelperIntegrationTest {
         payment1.setAmount(BigDecimal.valueOf(100));
         payment1.setType("DEBIT");
         payment1.setMedium("Bank Transfer");
+        payment1.setAutopay(false);
         // set other required fields...
         em.persist(payment1);
 
@@ -94,6 +98,7 @@ class StatsHelperIntegrationTest {
         payment2.setAmount(BigDecimal.valueOf(200));
         payment2.setType("CARD");
         payment2.setMedium("Online Payment");
+        payment2.setAutopay(true);
         // set other required fields...
         em.persist(payment2);
 
