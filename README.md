@@ -2,9 +2,9 @@
 
 [![codecov](https://codecov.io/gh/mhackett909/WebBills/branch/main/graph/badge.svg)](https://codecov.io/gh/mhackett909/WebBills)
 
-WebBills is a secure, user-centric web application for managing bills, payments, financial entries, and user accounts. Built with Java (Spring Boot), it features robust authentication, fine-grained access control, and a modern RESTful API. The application is designed for easy deployment and scalability, supporting Docker and cloud-native workflows.
+WebBills is a secure, user-centric web application for managing bills, payments, financial entries, and user accounts. It features robust authentication, fine-grained access control, and a modern RESTful API. The application is designed for easy deployment and scalability, supporting Docker and cloud-native workflows.
 
-## Key Features
+## 🗝️ Key Features
 
 - **User Authentication & Security**: JWT-based authentication, secure password hashing, and refresh token support.
 - **Bill Management**: Create, update, and view bills. Bills can be archived, recycled, and restored.
@@ -15,14 +15,29 @@ WebBills is a secure, user-centric web application for managing bills, payments,
 - **Comprehensive API**: All features are accessible via RESTful endpoints under `/api/v1/`.
 - **Dockerized Deployment**: Easily build and run the app in a containerized environment. Includes a deployment script for streamlined setup.
 
-## Prerequisites
+## 🛠️ SLMR Stack
+
+This application is built using the **SLMR stack**:
+- **Spring Boot** for backend REST APIs
+- **Linux (WSL + Docker)** for containerized deployment
+- **MySQL** as the relational data store
+- **React** as the frontend framework
+
+Deployed on **AWS** using:
+- **GitHub Actions** for CI/CD
+- **ECS Fargate** for container orchestration
+- **Aurora Serverless v2** for database management
+- **CloudFront + S3** for static asset delivery
+
+
+## ✅ Prerequisites
 
 - Java 17+
 - Maven 3.6+
 - Docker (for containerized deployment)
 - Python 3 (for utility scripts, if needed)
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Clone the repository
 
@@ -59,13 +74,13 @@ Edit `src/main/resources/application.properties` or `application-dev.properties`
 
 See the [`bruno/web-bills/`](bruno/web-bills/) folder for example requests and environments.
 
-## Repository
+## 📦 Repository
 
 Find the latest source code and updates at: [WebBills GitHub Repository](https://github.com/mhackett909/WebBills/)
 
 Front end: [WebBills UI GitHub Repository](https://github.com/mhackett909/WebBillsView/)
 
-## Testing
+## 🧪 Testing
 
 Run all tests with:
 
@@ -75,12 +90,12 @@ Run all tests with:
 
 Test reports are available in the `target/surefire-reports/` directory.
 
-## Deployment
+## ☁️ Deployment
 
 - See [`task-def-template.json`](task-def-template.json) for cloud/container orchestration templates.
 - See [`.github/workflows/main.yml`](.github/workflows/main.yml) for auto-deploy workflow.
 
-## License
+## 📄 License
 
 [MIT License](LICENSE)
 
