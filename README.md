@@ -28,7 +28,7 @@ Deployed on AWS using the **CAGE** infrastructure model:
 - **GitHub Actions** for continuous integration and deployment
 - **ECS Fargate** for serverless container hosting
 
-> 🔧 **Built with SLMR** • 🔐 **Deployed with CAGE**
+> 🔧 **Built with SLMR** • ☁️ **Deployed with CAGE**
 
 ## ✅ Prerequisites
 
@@ -90,7 +90,7 @@ Run all tests with:
 
 Test reports are available in the `target/surefire-reports/` directory.
 
-## ☁️ Deployment
+## ⚙️ Deployment Templates
 
 - See [`task-def-template.json`](task-def-template.json) for cloud/container orchestration templates.
 - See [`.github/workflows/main.yml`](.github/workflows/main.yml) for auto-deploy workflow.
