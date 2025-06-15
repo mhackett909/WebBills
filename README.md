@@ -15,7 +15,7 @@ WebBills is a secure, user-centric web application for managing bills, payments,
 - **Comprehensive API**: All features are accessible via RESTful endpoints under `/api/v1/`.
 - **Dockerized Deployment**: Easily build and run the app in a containerized environment. Includes a deployment script for streamlined setup.
 
-## 🔷 SLMR Stack
+## 🛠️ SLMR Stack
 
 This application is built using the **SLMR stack**:
 - **Spring Boot** for backend REST APIs
