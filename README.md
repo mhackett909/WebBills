@@ -7,7 +7,7 @@ WebBills is a secure, user-centric web application for managing bills, payments,
 ## Key Features
 
 - **User Authentication & Security**: JWT-based authentication, secure password hashing, and refresh token support.
-- **Bill Management**: Create, update, and view bills. Bills can be archived (recycled) and restored.
+- **Bill Management**: Create, update, and view bills. Bills can be archived, recycled, and restored.
 - **Entry Management**: Track financial entries with advanced filtering, sorting, and statistics (including top payees/payers, overpaid entries, and more).
 - **Payment Tracking**: Record, update, and view payments linked to entries. Automatic calculation of paid/overpaid status.
 - **Recycle Bin**: Soft-delete (recycle) bills, entries, and payments, with endpoints to view and restore recycled items.
