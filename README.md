@@ -15,20 +15,20 @@ WebBills is a secure, user-centric web application for managing bills, payments,
 - **Comprehensive API**: All features are accessible via RESTful endpoints under `/api/v1/`.
 - **Dockerized Deployment**: Easily build and run the app in a containerized environment. Includes a deployment script for streamlined setup.
 
-## 🛠️ SLMR Stack
-
+## 🛠️ SLMR Stack + CAGE Deployment
 This application is built using the **SLMR stack**:
 - **Spring Boot** for backend REST APIs
 - **Linux (WSL + Docker)** for containerized deployment
 - **MySQL** as the relational data store
 - **React** as the frontend framework
 
-Deployed on **AWS** using:
-- **GitHub Actions** for CI/CD
-- **ECS Fargate** for container orchestration
-- **Aurora Serverless v2** for database management
-- **CloudFront + S3** for static asset delivery
+Deployed on AWS using the **CAGE** infrastructure model:
+- **CloudFront + S3** for global static asset delivery
+- **Aurora Serverless v2** for flexible database scaling
+- **GitHub Actions** for continuous integration and deployment
+- **ECS Fargate** for serverless container hosting
 
+> 🔧 **Built with SLMR** • 🔐 **Deployed with CAGE**
 
 ## ✅ Prerequisites
 
