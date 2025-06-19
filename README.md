@@ -22,15 +22,6 @@ This application is built using the **SLMR stack**:
 - **MySQL** as the relational data store
 - **React** as the frontend framework
 
-## ☁️ CAGE Deployment  
-Deployed on AWS using the **CAGE** infrastructure model:
-- **CloudFront + S3** for global static asset delivery
-- **Aurora Serverless v2** for flexible database scaling
-- **GitHub Actions** for continuous integration and deployment
-- **ECS Fargate** for serverless container hosting
-
-> 🔧 **Built with SLMR** • 🚢 **Deployed with CAGE**
-
 ## ✅ Prerequisites
 
 - Java 17+
@@ -91,7 +82,7 @@ Run all tests with:
 
 Test reports are available in the `target/surefire-reports/` directory.
 
-## ⚙️ Deployment Templates
+## ☁️ Deployment Templates
 
 - See [`task-def-template.json`](task-def-template.json) for cloud/container orchestration templates.
 - See [`.github/workflows/main.yml`](.github/workflows/main.yml) for auto-deploy workflow.
