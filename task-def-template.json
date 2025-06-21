@@ -13,6 +13,7 @@
         }
       ],
       "essential": true,
+      "readonlyRootFilesystem": true,
       "secrets": [
         {
           "name": "DB_USERNAME",
@@ -36,7 +37,7 @@
         "options": {
           "awslogs-group": "/ecs/webbills-task-fargate",
           "awslogs-region": "${AWS_REGION}",
-          "awslogs-stream-prefix": "ecs"        
+          "awslogs-stream-prefix": "ecs"
         }
       }
     }
