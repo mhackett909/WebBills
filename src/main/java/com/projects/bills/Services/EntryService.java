@@ -39,6 +39,7 @@ public class EntryService {
 	private final StatsHelper statsHelper;
 	private final EntryMapper entryMapper;
 	private static final Logger logger = LoggerFactory.getLogger(EntryService.class);
+	private static final int DEFAULT_PAGE_SIZE = 100;
 
 	@Autowired
 	public EntryService(EntryRepository entryRepository, PaymentRepository paymentRepository,
@@ -112,7 +113,7 @@ public class EntryService {
 		}
 
 		if (pageSize == null || pageSize < 1) {
-			pageSize = 100;
+			pageSize = DEFAULT_PAGE_SIZE;
 		}
 
 		Pageable pageable = PageRequest.of(pageNum, pageSize, sortBy);
