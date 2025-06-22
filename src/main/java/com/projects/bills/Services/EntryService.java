@@ -112,7 +112,7 @@ public class EntryService {
 		}
 
 		if (pageSize == null || pageSize < 1) {
-			pageSize = 25;
+			pageSize = 100;
 		}
 
 		Pageable pageable = PageRequest.of(pageNum, pageSize, sortBy);
