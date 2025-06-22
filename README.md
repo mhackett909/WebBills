@@ -84,7 +84,7 @@ Test reports are available in the `target/surefire-reports/` directory.
 
 ## ☁️ Deployment Templates
 
-- See [`task-def-template.json`](task-def-template.json) for cloud/container orchestration templates.
+- See [`task-def-template.json`](task-def-template.json) for cloud/container orchestration template.
 - See [`.github/workflows/main.yml`](.github/workflows/main.yml) for auto-deploy workflow.
 
 ## 📄 License
