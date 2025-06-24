@@ -5,7 +5,7 @@
   "containerDefinitions": [
     {
       "name": "bills-app",
-      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/webbills-service:latest",
+      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/webbills-service:${IMAGE_TAG}",
       "portMappings": [
         {
           "containerPort": 8080,
