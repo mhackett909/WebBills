@@ -38,8 +38,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Set image tag from Git SHA
-        run: echo "IMAGE_TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
+      - name: Set image tag from SHA or fallback
+        run: |
+          IMAGE_TAG=${GITHUB_SHA::8}
+          if [ -z "$IMAGE_TAG" ]; then
+            IMAGE_TAG="manual-$(date +%s)"
+          fi
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Docker Login to ECR
         run: |
