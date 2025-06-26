@@ -54,7 +54,7 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/${{ secrets.ECR_REPO_BACKEND }}:$IMAGE_TAG
-          docker build --no-cache -t $IMAGE_URI .
+          docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
 
       - name: Render ECS task definition

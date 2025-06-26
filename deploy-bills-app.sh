@@ -24,7 +24,7 @@ docker container rm bills-app 2>/dev/null || echo_info "No existing container to
 
 # Step 3: Build the Docker image
 echo_info "Building the Docker image for 'bills-app'..."
-docker build --no-cache -t bills-app .
+docker build -t bills-app .
 if [ $? -ne 0 ]; then
   echo_error "Docker build failed."
   exit 1
