@@ -16,7 +16,7 @@ import java.util.List;
 public class Entry {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long id;
+	private long id;
 	private Date date;
 	private BigDecimal amount;
 	@Column(columnDefinition = "TINYINT")
