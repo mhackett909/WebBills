@@ -78,7 +78,11 @@ public class EntryMapper {
                                           String archives) {
         String flowType = null;
         if (flow != null && !flow.isEmpty()) {
-            flowType = FlowType.fromType(flow).toString();
+            if (flow.equalsIgnoreCase(Strings.INTERNAL_FLOW)) {
+                flowType = Strings.INTERNAL_FLOW;
+            } else {
+                flowType = FlowType.fromType(flow).toString();
+            }
         }
 
         Boolean isPaid = null;

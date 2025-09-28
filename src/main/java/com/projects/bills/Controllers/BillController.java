@@ -25,19 +25,21 @@ public class BillController {
 
 	@GetMapping("/api/v1/bills")
 	public ResponseEntity<BillDTOList> getBills(
-			@RequestParam(required = false) String filter,
+			@RequestParam(required = false) String status,
+			@RequestParam(required = false) String category,
+			@RequestParam(required = false) Boolean internal,
 			@AuthenticationPrincipal UserDetails user) {
 
-		BillDTOList billDTOList = billService.getBillDtoList(filter, user.getUsername());
+		BillDTOList billDTOList = billService.getBillDtoList(status, category, internal, user.getUsername());
 		return new ResponseEntity<>(billDTOList, HttpStatus.OK);
 	}
 
 	@GetMapping("/api/v1/bills/{id}")
 	public ResponseEntity<BillDTO> getBillsById(@PathVariable("id") Long id,
-												@RequestParam(required = false) String filter,
+												@RequestParam(required = false) String bypass,
 												@AuthenticationPrincipal UserDetails user) {
-		logger.info("Fetching bill with id {} for user {} with filter: {}", id, user.getUsername(), filter);
-		BillDTO bill = billService.getBill(id, filter, user.getUsername());
+		logger.info("Fetching bill with id {} for user {} with bypass: {}", id, user.getUsername(), bypass);
+		BillDTO bill = billService.getBill(id, bypass, user.getUsername());
 		if (bill == null) {
 			logger.error("Bill with id {} not found for user {}", id, user.getUsername());
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(Exceptions.BILL_NOT_FOUND, id));

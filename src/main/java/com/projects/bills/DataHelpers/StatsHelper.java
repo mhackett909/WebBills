@@ -1,5 +1,6 @@
 package com.projects.bills.DataHelpers;
 
+import com.projects.bills.Constants.Strings;
 import com.projects.bills.Entities.Bill;
 import com.projects.bills.Entities.Entry;
 import com.projects.bills.Entities.Payment;
@@ -20,6 +21,7 @@ public class StatsHelper {
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
         predicate = cb.and(predicate, cb.isNull(paymentJoin.get("recycleDate")));
+        predicate = cb.and(predicate, cb.equal(entryRoot.get("bill").get("internal"), false));
 
         // Selecting the stats we need
         query.multiselect(
@@ -41,6 +43,7 @@ public class StatsHelper {
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
         predicate = cb.and(predicate, cb.equal(entryRoot.get("overpaid"), true));
+        predicate = cb.and(predicate, cb.equal(entryRoot.get("bill").get("internal"), false));
 
         query.multiselect(
                 entryRoot.get("flow"),
@@ -61,6 +64,7 @@ public class StatsHelper {
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
         predicate = cb.and(predicate, cb.equal(entryRoot.get("overpaid"), true));
         predicate = cb.and(predicate, cb.isNull(paymentJoin.get("recycleDate")));
+        predicate = cb.and(predicate, cb.equal(entryRoot.get("bill").get("internal"), false));
 
         query.multiselect(
                 entryRoot.get("flow"),
@@ -78,6 +82,7 @@ public class StatsHelper {
         Root<Entry> entryRoot = query.from(Entry.class);
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
+        predicate = cb.and(predicate, cb.equal(entryRoot.get("bill").get("internal"), false));
 
         query.multiselect(
                 entryRoot.get("flow"),
@@ -98,6 +103,7 @@ public class StatsHelper {
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
         predicate = cb.and(predicate, cb.isNull(paymentJoin.get("recycleDate")));
+        predicate = cb.and(predicate, cb.equal(entryRoot.get("bill").get("internal"), false));
 
         // Select: bill name, flow, and sum of payment.amount
         query.multiselect(
@@ -117,6 +123,34 @@ public class StatsHelper {
         return query;
     }
 
+    public CriteriaQuery<Object[]> getTop5Categories(CriteriaBuilder cb, EntryFilters filters) {
+        CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
+        Root<Entry> entryRoot = query.from(Entry.class);
+        Join<Entry, Payment> paymentJoin = entryRoot.join("payments", JoinType.INNER);
+        Join<Entry, Bill> billJoin = entryRoot.join("bill", JoinType.INNER);
+
+        Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
+        predicate = cb.and(predicate, cb.isNull(paymentJoin.get("recycleDate")));
+        predicate = cb.and(predicate, cb.equal(entryRoot.get("bill").get("internal"), false));
+
+        // Select: bill category, flow, and sum of payment.amount
+        query.multiselect(
+                billJoin.get("category"),
+                entryRoot.get("flow"),
+                cb.sum(paymentJoin.get("amount"))
+        );
+
+        query.where(predicate);
+
+        // GROUP BY bill category and flow
+        query.groupBy(billJoin.get("category"), entryRoot.get("flow"));
+
+        // ORDER BY total_paid DESC
+        query.orderBy(cb.desc(cb.sum(paymentJoin.get("amount"))));
+
+        return query;
+    }
+
     public CriteriaQuery<Object[]> getTop5TypeMediumCombos(CriteriaBuilder cb, EntryFilters filters) {
         CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         Root<Entry> entryRoot = query.from(Entry.class);
@@ -124,6 +158,7 @@ public class StatsHelper {
 
         Predicate predicate = getFilteredPredicate(cb, filters, entryRoot);
         predicate = cb.and(predicate, cb.isNull(paymentJoin.get("recycleDate")));
+        predicate = cb.and(predicate, cb.equal(entryRoot.get("bill").get("internal"), false));
 
         // Select: flow, payment_type, payment_medium, sum(amount)
         query.multiselect(
@@ -161,7 +196,11 @@ public class StatsHelper {
 
         String flowType = filters.getFlow();
         if (flowType != null && !flowType.isEmpty()) {
-            predicate = cb.and(predicate, cb.equal(entryRoot.get("flow"), flowType));
+            if (!flowType.equalsIgnoreCase(Strings.INTERNAL_FLOW)) {
+                predicate = cb.and(predicate, cb.equal(entryRoot.get("flow"), flowType));
+            } else {
+                predicate = cb.and(predicate, cb.equal(entryRoot.get("bill").get("internal"), true));
+            }
         }
 
         BigDecimal minAmount = filters.getMin();

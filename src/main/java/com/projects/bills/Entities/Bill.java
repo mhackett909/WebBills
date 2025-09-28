@@ -29,4 +29,10 @@ public class Bill {
 	@OneToMany(mappedBy="bill")
 	@OrderBy("date DESC")
 	private List<Entry> entries;
+
+    @Column(columnDefinition = "TINYINT(1)", nullable = false)
+    private Boolean internal = false;
+
+    @Column(length = 100, columnDefinition = "varchar(100) default 'uncategorized'")
+    private String category = "uncategorized";
 }

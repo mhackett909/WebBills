@@ -14,4 +14,6 @@ public class BillDTO {
 	private String name;
 	private Boolean status = true; // isArchived = !status
 	private Boolean recycle = false;
+	private Boolean internal = false;
+	private String category = "uncategorized";
 }

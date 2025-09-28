@@ -7,7 +7,9 @@ import com.projects.bills.DTOs.BillDTO;
 import com.projects.bills.Entities.User;
 import com.projects.bills.Mappers.BillMapper;
 import com.projects.bills.Repositories.BillRepository;
+import com.projects.bills.Specifications.BillSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,7 +35,7 @@ public class BillService {
         this.billMapper = billMapper;
     }
 
-	public BillDTOList getBillDtoList(String filter, String userName) {
+	public BillDTOList getBillDtoList(String status, String category, Boolean internal, String userName) {
 		Optional<User> user = userService.findByUsername(userName);
 		if (user.isEmpty()) {
 			logger.error("User not found: {}", userName);
@@ -43,22 +45,24 @@ public class BillService {
 			);
 		}
 
-		logger.info("Fetching bills for user: {} with filter: {}", userName, filter);
+		logger.info("Fetching bills for user: {} with filters - status: {}, category: {}, internal: {}",
+				userName, status, category, internal);
 
-		List<Bill> bills;
-		if ("active".equalsIgnoreCase(filter)) {
-			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNullOrderByNameAsc(true, user.get());
-		} else if ("inactive".equalsIgnoreCase(filter)) {
-			bills = billRepository.findAllByStatusAndUserAndRecycleDateIsNullOrderByNameAsc(false, user.get());
-		} else {
-			bills = billRepository.findAllByUserAndRecycleDateIsNullOrderByNameAsc(user.get());
+		Boolean statusBool = null;
+		if ("active".equalsIgnoreCase(status)) {
+			statusBool = true;
+		} else if ("inactive".equalsIgnoreCase(status)) {
+			statusBool = false;
 		}
+
+		Specification<Bill> spec = BillSpecification.filterBills(statusBool, category, internal, user.get());
+		List<Bill> bills = billRepository.findAll(spec);
 
 		logger.info("Found {} bills for user: {}", bills.size(), userName);
 		return billMapper.mapToDTOList(bills);
 	}
 
-	public BillDTO getBill(Long id, String filter, String userName) {
+	public BillDTO getBill(Long id, String bypass, String userName) {
 		Bill bill = billRepository.findById(id).orElse(null);
 		if (bill == null) {
 			logger.error("Bill not found with ID: {}", id);
@@ -71,7 +75,7 @@ public class BillService {
 		}
 
 		// "bypass" filter allows access to recycled bills for restoration
-		if (bill.getRecycleDate() != null && !Strings.EDIT_BYPASS.equalsIgnoreCase(filter)) {
+		if (bill.getRecycleDate() != null && !Strings.EDIT_BYPASS.equalsIgnoreCase(bypass)) {
 			logger.error("Bill with ID: {} is recycled and cannot be accessed", id);
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, Exceptions.BILL_IS_RECYCLED);
 		}
@@ -109,6 +113,12 @@ public class BillService {
 		bill.setName(billTransfer.getName());
 		bill.setStatus(billTransfer.getStatus());
 		bill.setUser(user.get());
+		bill.setInternal(billTransfer.getInternal());
+		if (billTransfer.getCategory() != null) {
+			bill.setCategory(billTransfer.getCategory().toLowerCase());
+		} else {
+			bill.setCategory("uncategorized");
+		}
 
 		if (billTransfer.getRecycle()) {
 			bill.setRecycleDate(LocalDateTime.now());

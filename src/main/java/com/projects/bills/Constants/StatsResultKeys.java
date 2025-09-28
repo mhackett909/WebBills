@@ -5,8 +5,10 @@ public class StatsResultKeys {
     public static final String MAX_AVG_SUM = "maxAvgSum";
     public static final String TOP5_EXPENSE_RECEIPTS = "top5ExpenseReceipts";
     public static final String TOP5_EXPENSE_TYPE_MEDIUMS = "top5ExpenseTypeMediumCombos";
+    public static final String TOP5_EXPENSE_CATEGORIES = "top5ExpenseCategories";
     public static final String TOP5_INCOME_SOURCES = "top5IncomeSources";
     public static final String TOP5_INCOME_TYPE_MEDIUMS = "top5IncomeTypeMediumCombos";
+    public static final String TOP5_INCOME_CATEGORIES = "top5IncomeCategories";
     public static final String OVERPAID_ENTRY_TOTALS = "overpaidEntryTotals";
     public static final String OVERPAID_PAYMENT_TOTALS = "overpaidPaymentTotals";
 }
