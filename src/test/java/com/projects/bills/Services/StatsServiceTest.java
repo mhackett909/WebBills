@@ -109,6 +109,8 @@ class StatsServiceTest {
         when(statsHelper.getOverpaidPaymentTotals(cb, filters)).thenReturn(cq);
         when(statsHelper.getTop5Parties(cb, filters)).thenReturn(cq);
         when(statsHelper.getTop5TypeMediumCombos(cb, filters)).thenReturn(cq);
+        when(statsHelper.getTop5Categories(cb, filters)).thenReturn(cq);
+        when(statsHelper.getTop5Categories(cb, filters)).thenReturn(cq);
 
         // Re-instantiate statsService with the new statsHelper mock
         statsService = new StatsService(userService, entryRepository, statsHelper, statsMapper, entryMapper, entityManager);
@@ -119,6 +121,6 @@ class StatsServiceTest {
         StatsDTO result = statsService.getStats("alice", null, null, 2L, null, null, null, null, null, null);
         assertNotNull(result);
         assertSame(statsDTO, result);
+        verify(statsHelper, times(2)).getTop5Categories(cb, filters);
     }
 }
-

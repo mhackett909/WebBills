@@ -46,9 +46,12 @@ class BillControllerTest {
     @WithMockUser(username = "alice", roles = "USER")
     void getBills_success() throws Exception {
         BillDTOList dtoList = new BillDTOList();
-        Mockito.when(billService.getBillDtoList(any(), eq("alice"))).thenReturn(dtoList);
+        Mockito.when(billService.getBillDtoList(any(), any(), any(), eq("alice"))).thenReturn(dtoList);
 
-        mockMvc.perform(get("/api/v1/bills"))
+        mockMvc.perform(get("/api/v1/bills")
+                        .param("status", "ACTIVE")
+                        .param("category", "UTILITIES")
+                        .param("internal", "false"))
                 .andExpect(status().isOk());
     }
 
@@ -57,9 +60,15 @@ class BillControllerTest {
     void getBillsById_success() throws Exception {
         BillDTO billDTO = new BillDTO();
         billDTO.setId(1L);
+        billDTO.setName("Test Bill");
+        billDTO.setStatus(true);
+        billDTO.setRecycle(false);
+        billDTO.setInternal(false);
+        billDTO.setCategory("utilities");
         Mockito.when(billService.getBill(eq(1L), any(), eq("alice"))).thenReturn(billDTO);
 
-        mockMvc.perform(get("/api/v1/bills/1"))
+        mockMvc.perform(get("/api/v1/bills/1")
+                        .param("bypass", "false"))
                 .andExpect(status().isOk());
     }
 
@@ -68,7 +77,8 @@ class BillControllerTest {
     void getBillsById_notFound() throws Exception {
         Mockito.when(billService.getBill(eq(1L), any(), eq("alice"))).thenReturn(null);
 
-        mockMvc.perform(get("/api/v1/bills/1"))
+        mockMvc.perform(get("/api/v1/bills/1")
+                        .param("bypass", "false"))
                 .andExpect(status().isNotFound());
     }
 
@@ -78,6 +88,9 @@ class BillControllerTest {
         BillDTO billDTO = new BillDTO();
         billDTO.setName("Test Bill");
         billDTO.setStatus(true);
+        billDTO.setRecycle(false);
+        billDTO.setInternal(false);
+        billDTO.setCategory("utilities");
 
         Mockito.when(billService.saveBill(any(BillDTO.class), eq(false), eq("alice"))).thenReturn(billDTO);
 
@@ -87,7 +100,6 @@ class BillControllerTest {
                 .andExpect(status().isCreated());
     }
 
-
     @Test
     @WithMockUser(username = "alice", roles = "USER")
     void editBill_success() throws Exception {
@@ -96,6 +108,8 @@ class BillControllerTest {
         billDTO.setName("Edit Bill");
         billDTO.setStatus(true);
         billDTO.setRecycle(false);
+        billDTO.setInternal(true);
+        billDTO.setCategory("groceries");
 
         Mockito.when(billService.saveBill(any(BillDTO.class), eq(true), eq("alice"))).thenReturn(billDTO);
 
@@ -111,7 +125,8 @@ class BillControllerTest {
         Mockito.when(billService.getBill(eq(99L), any(), eq("alice")))
                 .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill does not exist by id: 99"));
 
-        mockMvc.perform(get("/api/v1/bills/99"))
+        mockMvc.perform(get("/api/v1/bills/99")
+                        .param("bypass", "false"))
                 .andExpect(status().isNotFound());
     }
 
@@ -121,7 +136,8 @@ class BillControllerTest {
         Mockito.when(billService.getBill(eq(1L), any(), eq("alice")))
                 .thenThrow(new ResponseStatusException(HttpStatus.FORBIDDEN, "User not authorized"));
 
-        mockMvc.perform(get("/api/v1/bills/1"))
+        mockMvc.perform(get("/api/v1/bills/1")
+                        .param("bypass", "false"))
                 .andExpect(status().isForbidden());
     }
 
@@ -137,8 +153,8 @@ class BillControllerTest {
 
     private static Stream<Arguments> provideInvalidBillDataNew() {
         return Stream.of(
-                Arguments.of(new BillDTO(0, "New Bill", null, false)), // Missing Status
-                Arguments.of(new BillDTO(0, null, true, false)) // Missing Name
+                Arguments.of(new BillDTO(0, "New Bill", null, false, false, "uncategorized")), // Missing Status
+                Arguments.of(new BillDTO(0, null, true, false, false, "uncategorized")) // Missing Name
         );
     }
 
@@ -153,9 +169,9 @@ class BillControllerTest {
     }
     private static Stream<Arguments> provideInvalidBillDataEdit() {
         return Stream.of(
-                Arguments.of(new BillDTO(0, "Edit Bill", true, false)), // Missing ID
-                Arguments.of(new BillDTO(1L, null, true, false)),          // Missing Name
-                Arguments.of(new BillDTO(1L, "Edit Bill", null, false))   // Missing Status
+                Arguments.of(new BillDTO(0, "Edit Bill", true, false, false, "uncategorized")), // Missing ID
+                Arguments.of(new BillDTO(1L, null, true, false, false, "uncategorized")),          // Missing Name
+                Arguments.of(new BillDTO(1L, "Edit Bill", null, false, false, "uncategorized"))   // Missing Status
         );
     }
 
@@ -167,6 +183,8 @@ class BillControllerTest {
         billDTO.setName("Edit Bill");
         billDTO.setStatus(true);
         billDTO.setRecycle(false);
+        billDTO.setInternal(false);
+        billDTO.setCategory("uncategorized");
 
         Mockito.when(billService.saveBill(any(BillDTO.class), eq(true), eq("alice")))
                 .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill not found with id: 99"));

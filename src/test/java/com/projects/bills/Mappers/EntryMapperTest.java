@@ -278,5 +278,36 @@ class EntryMapperTest {
         assertEquals("bill.status", mapper.mapSortField("archived"));
         assertEquals("custom", mapper.mapSortField("custom"));
     }
-}
 
+    @Test
+    void testMapToDTO_InternalFlow() {
+        Long entryId = 10L;
+        Long billId = 20L;
+        String billName = "Internal Bill";
+        LocalDate date = LocalDate.of(2025, 9, 29);
+        BigDecimal amount = new BigDecimal("42.00");
+        String flow = com.projects.bills.Constants.Strings.INTERNAL_FLOW;
+        Boolean archived = false;
+
+        Bill bill = new Bill();
+        bill.setBillId(billId);
+        bill.setName(billName);
+
+        Entry entry = new Entry();
+        entry.setId(entryId);
+        entry.setBill(bill);
+        entry.setDate(Date.valueOf(date));
+        entry.setAmount(amount);
+        entry.setFlow(flow);
+
+        EntryDTO dto = mapper.mapToDTO(entry, archived);
+
+        assertNotNull(dto);
+        assertEquals(entryId, dto.getEntryId());
+        assertEquals(billId, dto.getBillId());
+        assertEquals(billName, dto.getName());
+        assertEquals(date, dto.getDate());
+        assertEquals(amount, dto.getAmount());
+        assertEquals(flow, dto.getFlow());
+    }
+}

@@ -29,7 +29,6 @@ public class BillController {
 			@RequestParam(required = false) String category,
 			@RequestParam(required = false) Boolean internal,
 			@AuthenticationPrincipal UserDetails user) {
-
 		BillDTOList billDTOList = billService.getBillDtoList(status, category, internal, user.getUsername());
 		return new ResponseEntity<>(billDTOList, HttpStatus.OK);
 	}

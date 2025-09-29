@@ -99,6 +99,22 @@ class StatsMapperTest {
         );
         resultMap.put("overpaidPaymentTotals", overpaidPaymentTotals);
 
+        // top5ExpenseCategories
+        String expenseCategory = "utilities";
+        BigDecimal expenseCategoryAmount = new BigDecimal("600.00");
+        List<Object[]> top5ExpenseCategories = Collections.singletonList(
+                new Object[]{expenseCategory, FlowType.OUTGOING.toString(), expenseCategoryAmount}
+        );
+        resultMap.put("top5ExpenseCategories", top5ExpenseCategories);
+
+        // top5IncomeCategories
+        String incomeCategory = "salary";
+        BigDecimal incomeCategoryAmount = new BigDecimal("1200.00");
+        List<Object[]> top5IncomeCategories = Collections.singletonList(
+                new Object[]{incomeCategory, FlowType.INCOMING.toString(), incomeCategoryAmount}
+        );
+        resultMap.put("top5IncomeCategories", top5IncomeCategories);
+
         // Act
         StatsDTO dto = mapper.buildStatsDTO(resultMap);
 
@@ -130,5 +146,9 @@ class StatsMapperTest {
         assertEquals(incomeSourceAmount, dto.getTopIncomeSources().get(incomeSource));
         assertEquals(expenseTypeAmount, dto.getTopExpenseTypes().get(expenseType+"|"+expenseMedium));
         assertEquals(incomeTypeAmount, dto.getTopIncomeTypes().get(incomeType+"|"+incomeMedium));
+
+        // Top categories (use correct field names)
+        assertEquals(expenseCategoryAmount, dto.getTop5ExpenseCategories().get(expenseCategory));
+        assertEquals(incomeCategoryAmount, dto.getTop5IncomeCategories().get(incomeCategory));
     }
 }

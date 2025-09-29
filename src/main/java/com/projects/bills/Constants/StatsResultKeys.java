@@ -11,5 +11,4 @@ public class StatsResultKeys {
     public static final String TOP5_INCOME_CATEGORIES = "top5IncomeCategories";
     public static final String OVERPAID_ENTRY_TOTALS = "overpaidEntryTotals";
     public static final String OVERPAID_PAYMENT_TOTALS = "overpaidPaymentTotals";
-
 }
