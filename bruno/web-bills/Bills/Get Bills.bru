@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: {{BILLS_URL}}/api/v1/bills?filter=active
+  url: {{BILLS_URL}}/api/v1/bills?status=active
   body: none
   auth: bearer
 }
 
 params:query {
-  filter: active
+  status: active
 }
 
 auth:bearer {

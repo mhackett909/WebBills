@@ -110,7 +110,6 @@ class StatsServiceTest {
         when(statsHelper.getTop5Parties(cb, filters)).thenReturn(cq);
         when(statsHelper.getTop5TypeMediumCombos(cb, filters)).thenReturn(cq);
         when(statsHelper.getTop5Categories(cb, filters)).thenReturn(cq);
-        when(statsHelper.getTop5Categories(cb, filters)).thenReturn(cq);
 
         // Re-instantiate statsService with the new statsHelper mock
         statsService = new StatsService(userService, entryRepository, statsHelper, statsMapper, entryMapper, entityManager);
