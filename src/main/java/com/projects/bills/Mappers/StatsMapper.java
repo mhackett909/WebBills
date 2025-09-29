@@ -21,6 +21,8 @@ public class StatsMapper {
         mapToStatsDTO(statsDTO, resultMap.get(StatsResultKeys.TOP5_EXPENSE_TYPE_MEDIUMS), StatsResultKeys.TOP5_EXPENSE_TYPE_MEDIUMS);
         mapToStatsDTO(statsDTO, resultMap.get(StatsResultKeys.TOP5_INCOME_SOURCES), StatsResultKeys.TOP5_INCOME_SOURCES);
         mapToStatsDTO(statsDTO, resultMap.get(StatsResultKeys.TOP5_INCOME_TYPE_MEDIUMS), StatsResultKeys.TOP5_INCOME_TYPE_MEDIUMS);
+        mapToStatsDTO(statsDTO, resultMap.get(StatsResultKeys.TOP5_EXPENSE_CATEGORIES), StatsResultKeys.TOP5_EXPENSE_CATEGORIES);
+        mapToStatsDTO(statsDTO, resultMap.get(StatsResultKeys.TOP5_INCOME_CATEGORIES), StatsResultKeys.TOP5_INCOME_CATEGORIES);
         mapOverPaymentsToStatsDTO(
                 statsDTO,
                 resultMap.get(StatsResultKeys.OVERPAID_ENTRY_TOTALS),
@@ -95,6 +97,24 @@ public class StatsMapper {
                     top5IncomeTypes.put(key, amount);
                 }
                 statsDTO.setTopIncomeTypes(top5IncomeTypes);
+                break;
+            case StatsResultKeys.TOP5_EXPENSE_CATEGORIES:
+                Map<String, BigDecimal> top5ExpenseCategories = new HashMap<>();
+                for (Object[] result : resultList) {
+                    String categoryName = (String) result[0];
+                    BigDecimal amount = (BigDecimal) result[2];
+                    top5ExpenseCategories.put(categoryName, amount);
+                }
+                statsDTO.setTop5ExpenseCategories(top5ExpenseCategories);
+                break;
+            case StatsResultKeys.TOP5_INCOME_CATEGORIES:
+                Map<String, BigDecimal> top5IncomeCategories = new HashMap<>();
+                for (Object[] result : resultList) {
+                    String categoryName = (String) result[0];
+                    BigDecimal amount = (BigDecimal) result[2];
+                    top5IncomeCategories.put(categoryName, amount);
+                }
+                statsDTO.setTop5IncomeCategories(top5IncomeCategories);
                 break;
         }
     }
