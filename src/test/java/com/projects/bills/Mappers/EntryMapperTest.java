@@ -208,17 +208,21 @@ class EntryMapperTest {
         Boolean recycle2 = true;
         String services1 = "A";
         String services2 = "B";
+        String category1 = "Cat1";
+        String category2 = "Cat2";
         String flow1 = FlowType.OUTGOING.toString();
         String flow2 = FlowType.INCOMING.toString();
         Boolean archived1 = false;
         Boolean archived2 = true;
+        boolean internal1 = false;
+        boolean internal2 = true;
         Boolean overpaid1 = false;
         Boolean overpaid2 = true;
 
         EntryDTO dto1 = new EntryDTO(entryId1, billId, invoiceId1, name1, date1, amount1,
-                new BalanceDTO(), status1, recycle1, services1, flow1, archived1, overpaid1);
+                new BalanceDTO(), status1, recycle1, services1, category1, flow1, archived1, internal1, overpaid1);
         EntryDTO dto2 = new EntryDTO(entryId2, billId, invoiceId2, name2, date2, amount2,
-                new BalanceDTO(), status2, recycle2, services2, flow2, archived2, overpaid2);
+                new BalanceDTO(), status2, recycle2, services2, category2, flow2, archived2, internal2, overpaid2);
 
         ArrayList<EntryDTO> list = new ArrayList<>(Arrays.asList(dto1, dto2));
         Long total = 2L;

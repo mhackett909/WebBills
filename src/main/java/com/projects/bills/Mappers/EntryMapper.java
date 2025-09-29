@@ -33,8 +33,10 @@ public class EntryMapper {
                 entry.getStatus(),
                 entry.getRecycleDate() != null,
                 entry.getServices(),
+                entry.getBill().getCategory(),
                 entry.getFlow(),
                 isArchived,
+                entry.getBill().getInternal(),
                 entry.getOverpaid()
         );
     }
