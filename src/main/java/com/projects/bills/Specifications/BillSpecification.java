@@ -16,7 +16,6 @@ public class BillSpecification {
             if (status != null) {
                 predicate = cb.and(predicate, cb.equal(root.get("status"), status));
             }
-            assert query != null;
             query.orderBy(cb.asc(root.get("name")));
             return predicate;
         };
