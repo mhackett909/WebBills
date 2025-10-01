@@ -13,8 +13,6 @@ import com.projects.bills.Constants.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
 @RestController
 public class BillController {
 	private static final Logger logger = LoggerFactory.getLogger(BillController.class);
@@ -28,10 +26,8 @@ public class BillController {
 	@GetMapping("/api/v1/bills")
 	public ResponseEntity<BillDTOList> getBills(
 			@RequestParam(required = false) String status,
-			@RequestParam(required = false) List<String> categories,
-			@RequestParam(required = false) Boolean internal,
 			@AuthenticationPrincipal UserDetails user) {
-		BillDTOList billDTOList = billService.getBillDtoList(status, categories, internal, user.getUsername());
+		BillDTOList billDTOList = billService.getBillDtoList(status, user.getUsername());
 		return new ResponseEntity<>(billDTOList, HttpStatus.OK);
 	}
 

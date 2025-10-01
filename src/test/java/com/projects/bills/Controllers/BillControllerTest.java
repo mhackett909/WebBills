@@ -46,12 +46,10 @@ class BillControllerTest {
     @WithMockUser(username = "alice", roles = "USER")
     void getBills_success() throws Exception {
         BillDTOList dtoList = new BillDTOList();
-        Mockito.when(billService.getBillDtoList(any(), any(), any(), eq("alice"))).thenReturn(dtoList);
+        Mockito.when(billService.getBillDtoList(any(), eq("alice"))).thenReturn(dtoList);
 
         mockMvc.perform(get("/api/v1/bills")
-                        .param("status", "ACTIVE")
-                        .param("categories", "UTILITIES", "GROCERIES")
-                        .param("internal", "false"))
+                        .param("status", "ACTIVE"))
                 .andExpect(status().isOk());
     }
 

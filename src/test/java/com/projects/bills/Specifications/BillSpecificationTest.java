@@ -33,7 +33,7 @@ class BillSpecificationTest {
 
     @Test
     void testFilterBills_AllNullExceptUser() {
-        Specification<Bill> spec = BillSpecification.filterBills(null, null, null, user);
+        Specification<Bill> spec = BillSpecification.filterBills(null, user);
         Predicate conjunction = mock(Predicate.class);
         Predicate userPredicate = mock(Predicate.class);
         Predicate recyclePredicate = mock(Predicate.class);
@@ -58,7 +58,7 @@ class BillSpecificationTest {
 
     @Test
     void testFilterBills_WithStatus() {
-        Specification<Bill> spec = BillSpecification.filterBills(true, null, null, user);
+        Specification<Bill> spec = BillSpecification.filterBills(true, user);
         Predicate conjunction = mock(Predicate.class);
         Predicate userPredicate = mock(Predicate.class);
         Predicate recyclePredicate = mock(Predicate.class);
@@ -76,55 +76,5 @@ class BillSpecificationTest {
         Predicate result = spec.toPredicate(root, query, cb);
         assertNotNull(result);
         verify(cb).equal(root.get("status"), true);
-    }
-
-    @Test
-    void testFilterBills_WithCategoryList() {
-        // Test with a list of categories
-        java.util.List<String> categories = java.util.List.of("utilities", "groceries");
-        Specification<Bill> spec = BillSpecification.filterBills(null, categories, null, user);
-        Predicate conjunction = mock(Predicate.class);
-        Predicate userPredicate = mock(Predicate.class);
-        Predicate recyclePredicate = mock(Predicate.class);
-        Predicate categoryPredicate = mock(Predicate.class);
-        jakarta.persistence.criteria.Path categoryPath = mock(jakarta.persistence.criteria.Path.class);
-        jakarta.persistence.criteria.Expression inExpression = mock(jakarta.persistence.criteria.Expression.class);
-
-        when(cb.conjunction()).thenReturn(conjunction);
-        when(cb.equal(root.get("user"), user)).thenReturn(userPredicate);
-        when(cb.isNull(root.get("recycleDate"))).thenReturn(recyclePredicate);
-        when(root.get("category")).thenReturn(categoryPath);
-        when(categoryPath.in(categories)).thenReturn(categoryPredicate);
-        when(cb.and(conjunction, userPredicate)).thenReturn(conjunction);
-        when(cb.and(conjunction, recyclePredicate)).thenReturn(conjunction);
-        when(cb.and(conjunction, categoryPredicate)).thenReturn(conjunction);
-        when(query.orderBy(anyList())).thenReturn(query);
-
-        Predicate result = spec.toPredicate(root, query, cb);
-        assertNotNull(result);
-        verify(root).get("category");
-        verify(categoryPath).in(categories);
-    }
-
-    @Test
-    void testFilterBills_WithInternal() {
-        Specification<Bill> spec = BillSpecification.filterBills(null, null, true, user);
-        Predicate conjunction = mock(Predicate.class);
-        Predicate userPredicate = mock(Predicate.class);
-        Predicate recyclePredicate = mock(Predicate.class);
-        Predicate internalPredicate = mock(Predicate.class);
-
-        when(cb.conjunction()).thenReturn(conjunction);
-        when(cb.equal(root.get("user"), user)).thenReturn(userPredicate);
-        when(cb.isNull(root.get("recycleDate"))).thenReturn(recyclePredicate);
-        when(cb.equal(root.get("internal"), true)).thenReturn(internalPredicate);
-        when(cb.and(conjunction, userPredicate)).thenReturn(conjunction);
-        when(cb.and(conjunction, recyclePredicate)).thenReturn(conjunction);
-        when(cb.and(conjunction, internalPredicate)).thenReturn(conjunction);
-        when(query.orderBy(anyList())).thenReturn(query);
-
-        Predicate result = spec.toPredicate(root, query, cb);
-        assertNotNull(result);
-        verify(cb).equal(root.get("internal"), true);
     }
 }
