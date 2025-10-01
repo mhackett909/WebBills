@@ -59,7 +59,7 @@ class BillServiceTest {
     void testGetBillDtoList_ActiveFilter() {
         String userName = "alice";
         String status = "active";
-        String category = null;
+        List<String> categories = null;
         Boolean internal = null;
         User user = new User();
         user.setUsername(userName);
@@ -70,7 +70,7 @@ class BillServiceTest {
         when(billRepository.findAll(any(Specification.class))).thenReturn(bills);
         when(billMapper.mapToDTOList(bills)).thenReturn(dtoList);
 
-        BillDTOList result = billService.getBillDtoList(status, category, internal, userName);
+        BillDTOList result = billService.getBillDtoList(status, categories, internal, userName);
 
         assertEquals(dtoList, result);
         verify(billRepository).findAll(any(Specification.class));
@@ -80,7 +80,7 @@ class BillServiceTest {
     void testGetBillDtoList_InactiveFilter() {
         String userName = "alice";
         String status = "inactive";
-        String category = null;
+        List<String> categories = null;
         Boolean internal = null;
         User user = new User();
         user.setUsername(userName);
@@ -91,7 +91,7 @@ class BillServiceTest {
         when(billRepository.findAll(any(Specification.class))).thenReturn(bills);
         when(billMapper.mapToDTOList(bills)).thenReturn(dtoList);
 
-        BillDTOList result = billService.getBillDtoList(status, category, internal, userName);
+        BillDTOList result = billService.getBillDtoList(status, categories, internal, userName);
 
         assertEquals(dtoList, result);
         verify(billRepository).findAll(any(Specification.class));
@@ -101,7 +101,7 @@ class BillServiceTest {
     void testGetBillDtoList_CategoryAndInternalFilter() {
         String userName = "alice";
         String status = null;
-        String category = "utilities";
+        List<String> categories = List.of("utilities");
         Boolean internal = true;
         User user = new User();
         user.setUsername(userName);
@@ -112,7 +112,7 @@ class BillServiceTest {
         when(billRepository.findAll(any(Specification.class))).thenReturn(bills);
         when(billMapper.mapToDTOList(bills)).thenReturn(dtoList);
 
-        BillDTOList result = billService.getBillDtoList(status, category, internal, userName);
+        BillDTOList result = billService.getBillDtoList(status, categories, internal, userName);
 
         assertEquals(dtoList, result);
         verify(billRepository).findAll(any(Specification.class));

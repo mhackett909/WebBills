@@ -79,23 +79,22 @@ class BillSpecificationTest {
     }
 
     @Test
-    void testFilterBills_WithCategory() {
-        Specification<Bill> spec = BillSpecification.filterBills(null, "utilities", null, user);
+    void testFilterBills_WithCategoryList() {
+        // Test with a list of categories
+        java.util.List<String> categories = java.util.List.of("utilities", "groceries");
+        Specification<Bill> spec = BillSpecification.filterBills(null, categories, null, user);
         Predicate conjunction = mock(Predicate.class);
         Predicate userPredicate = mock(Predicate.class);
         Predicate recyclePredicate = mock(Predicate.class);
         Predicate categoryPredicate = mock(Predicate.class);
-        @SuppressWarnings("unchecked")
         jakarta.persistence.criteria.Path categoryPath = mock(jakarta.persistence.criteria.Path.class);
-        @SuppressWarnings("unchecked")
-        jakarta.persistence.criteria.Expression<String> lowerCategoryPath = mock(jakarta.persistence.criteria.Expression.class);
+        jakarta.persistence.criteria.Expression inExpression = mock(jakarta.persistence.criteria.Expression.class);
 
         when(cb.conjunction()).thenReturn(conjunction);
         when(cb.equal(root.get("user"), user)).thenReturn(userPredicate);
         when(cb.isNull(root.get("recycleDate"))).thenReturn(recyclePredicate);
-        when(root.get(eq("category"))).thenReturn(categoryPath);
-        when(cb.lower(categoryPath)).thenReturn(lowerCategoryPath);
-        when(cb.equal(lowerCategoryPath, "utilities")).thenReturn(categoryPredicate);
+        when(root.get("category")).thenReturn(categoryPath);
+        when(categoryPath.in(categories)).thenReturn(categoryPredicate);
         when(cb.and(conjunction, userPredicate)).thenReturn(conjunction);
         when(cb.and(conjunction, recyclePredicate)).thenReturn(conjunction);
         when(cb.and(conjunction, categoryPredicate)).thenReturn(conjunction);
@@ -103,8 +102,8 @@ class BillSpecificationTest {
 
         Predicate result = spec.toPredicate(root, query, cb);
         assertNotNull(result);
-        verify(cb).lower(categoryPath);
-        verify(cb).equal(lowerCategoryPath, "utilities");
+        verify(root).get("category");
+        verify(categoryPath).in(categories);
     }
 
     @Test

@@ -50,7 +50,7 @@ class BillControllerTest {
 
         mockMvc.perform(get("/api/v1/bills")
                         .param("status", "ACTIVE")
-                        .param("category", "UTILITIES")
+                        .param("categories", "UTILITIES", "GROCERIES")
                         .param("internal", "false"))
                 .andExpect(status().isOk());
     }

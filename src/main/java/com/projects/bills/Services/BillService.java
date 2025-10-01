@@ -35,7 +35,7 @@ public class BillService {
         this.billMapper = billMapper;
     }
 
-	public BillDTOList getBillDtoList(String status, String category, Boolean internal, String userName) {
+	public BillDTOList getBillDtoList(String status, List<String> categories, Boolean internal, String userName) {
 		Optional<User> user = userService.findByUsername(userName);
 		if (user.isEmpty()) {
 			logger.error("User not found: {}", userName);
@@ -45,8 +45,8 @@ public class BillService {
 			);
 		}
 
-		logger.info("Fetching bills for user: {} with filters - status: {}, category: {}, internal: {}",
-				userName, status, category, internal);
+		logger.info("Fetching bills for user: {} with filters - status: {}, categories: {}, internal: {}",
+				userName, status, categories, internal);
 
 		Boolean statusBool = null;
 		if ("active".equalsIgnoreCase(status)) {
@@ -55,7 +55,7 @@ public class BillService {
 			statusBool = false;
 		}
 
-		Specification<Bill> spec = BillSpecification.filterBills(statusBool, category, internal, user.get());
+		Specification<Bill> spec = BillSpecification.filterBills(statusBool, categories, internal, user.get());
 		List<Bill> bills = billRepository.findAll(spec);
 
 		logger.info("Found {} bills for user: {}", bills.size(), userName);

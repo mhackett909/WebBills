@@ -5,8 +5,10 @@ import com.projects.bills.Entities.User;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 
+import java.util.List;
+
 public class BillSpecification {
-    public static Specification<Bill> filterBills(Boolean status, String category, Boolean internal, User user) {
+    public static Specification<Bill> filterBills(Boolean status, List<String> categories, Boolean internal, User user) {
         return (root, query, cb) -> {
             Predicate predicate = cb.conjunction();
             predicate = cb.and(predicate, cb.equal(root.get("user"), user));
@@ -14,8 +16,8 @@ public class BillSpecification {
             if (status != null) {
                 predicate = cb.and(predicate, cb.equal(root.get("status"), status));
             }
-            if (category != null && !category.isEmpty()) {
-                predicate = cb.and(predicate, cb.equal(cb.lower(root.get("category")), category.toLowerCase()));
+            if (categories != null && !categories.isEmpty()) {
+                predicate = cb.and(predicate, root.get("category").in(categories));
             }
             if (internal != null) {
                 predicate = cb.and(predicate, cb.equal(root.get("internal"), internal));
