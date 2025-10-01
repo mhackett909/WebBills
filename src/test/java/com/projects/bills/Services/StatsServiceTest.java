@@ -123,5 +123,4 @@ class StatsServiceTest {
         verify(statsHelper, times(2)).getTop5Categories(cb, filters);
     }
 
-    // Add this for any additional tests that use entryMapper.mapToEntryFilters
 }
