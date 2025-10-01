@@ -50,6 +50,7 @@ public class StatsService {
                              LocalDate endDate,
                              Long invoiceNum,
                              List<String> partyList,
+                             List<String> categoryList,
                              BigDecimal min,
                              BigDecimal max,
                              String flow,
@@ -58,7 +59,7 @@ public class StatsService {
 
         EntryFilters filters = entryMapper.mapToEntryFilters(
                 userName, startDate, endDate, invoiceNum, partyList,
-                min, max, flow, paid, archives
+                categoryList, min, max, flow, paid, archives
         );
 
         if (filters.getInvoiceNum() != null) {
@@ -131,20 +132,25 @@ public class StatsService {
             }
             logger.info("Calling statsHelper.getTop5Parties for OUTGOING flow");
             query = statsHelper.getTop5Parties(cb, filters);
-
             resultMap.put(StatsResultKeys.TOP5_EXPENSE_RECEIPTS, entityManager.createQuery(query)
                     .setMaxResults(5)
                     .getResultList());
 
             logger.info("Calling statsHelper.getTop5TypeMediumCombos for OUTGOING flow");
             query = statsHelper.getTop5TypeMediumCombos(cb, filters);
-
             resultMap.put(StatsResultKeys.TOP5_EXPENSE_TYPE_MEDIUMS, entityManager.createQuery(query)
+                    .setMaxResults(5)
+                    .getResultList());
+
+            logger.info("Calling statsHelper.getTop5Categories for OUTGOING flow");
+            query = statsHelper.getTop5Categories(cb, filters);
+            resultMap.put(StatsResultKeys.TOP5_EXPENSE_CATEGORIES, entityManager.createQuery(query)
                     .setMaxResults(5)
                     .getResultList());
         } else {
             resultMap.put(StatsResultKeys.TOP5_EXPENSE_RECEIPTS, new ArrayList<>());
             resultMap.put(StatsResultKeys.TOP5_EXPENSE_TYPE_MEDIUMS, new ArrayList<>());
+            resultMap.put(StatsResultKeys.TOP5_EXPENSE_CATEGORIES, new ArrayList<>());
         }
 
         if (switchBack) {
@@ -157,20 +163,25 @@ public class StatsService {
             }
             logger.info("Calling statsHelper.getTop5Parties for INCOMING flow");
             query = statsHelper.getTop5Parties(cb, filters);
-
             resultMap.put(StatsResultKeys.TOP5_INCOME_SOURCES, entityManager.createQuery(query)
                     .setMaxResults(5)
                     .getResultList());
 
             logger.info("Calling statsHelper.getTop5TypeMediumCombos for INCOMING flow");
             query = statsHelper.getTop5TypeMediumCombos(cb, filters);
-
             resultMap.put(StatsResultKeys.TOP5_INCOME_TYPE_MEDIUMS, entityManager.createQuery(query)
+                    .setMaxResults(5)
+                    .getResultList());
+
+            logger.info("Calling statsHelper.getTop5Categories for INCOMING flow");
+            query = statsHelper.getTop5Categories(cb, filters);
+            resultMap.put(StatsResultKeys.TOP5_INCOME_CATEGORIES, entityManager.createQuery(query)
                     .setMaxResults(5)
                     .getResultList());
         } else {
             resultMap.put(StatsResultKeys.TOP5_INCOME_SOURCES, new ArrayList<>());
             resultMap.put(StatsResultKeys.TOP5_INCOME_TYPE_MEDIUMS, new ArrayList<>());
+            resultMap.put(StatsResultKeys.TOP5_INCOME_CATEGORIES, new ArrayList<>());
         }
         return resultMap;
     }

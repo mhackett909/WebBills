@@ -30,4 +30,6 @@ public class StatsDTO {
     private Map<String, BigDecimal> topIncomeSources;
     private Map<String, BigDecimal> topExpenseTypes;
     private Map<String, BigDecimal> topIncomeTypes;
+    private Map<String, BigDecimal> top5ExpenseCategories;
+    private Map<String, BigDecimal> top5IncomeCategories;
 }

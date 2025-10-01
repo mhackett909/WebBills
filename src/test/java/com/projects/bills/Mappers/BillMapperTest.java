@@ -29,6 +29,8 @@ class BillMapperTest {
         bill.setName(billName);
         bill.setStatus(true);
         bill.setRecycleDate(recycleDate);
+        bill.setInternal(true);
+        bill.setCategory("utilities");
 
         // Act
         BillDTO dto = mapper.mapToDTO(bill);
@@ -39,6 +41,8 @@ class BillMapperTest {
         assertEquals(billName, dto.getName());
         assertEquals(true, dto.getStatus());
         assertTrue(dto.getRecycle());
+        assertTrue(dto.getInternal());
+        assertEquals("utilities", dto.getCategory());
     }
 
     @Test
@@ -50,6 +54,8 @@ class BillMapperTest {
         Bill bill = new Bill();
         bill.setBillId(id);
         bill.setName(billName);
+        bill.setInternal(false);
+        bill.setCategory("utilities");
 
         long id2 = 2L;
         String billName2 = "Water";
@@ -57,6 +63,8 @@ class BillMapperTest {
         Bill bill2 = new Bill();
         bill2.setBillId(id2);
         bill2.setName(billName2);
+        bill2.setInternal(true);
+        bill2.setCategory("groceries");
 
         // Act
         BillDTOList actual = mapper.mapToDTOList(List.of(bill, bill2));
@@ -66,5 +74,9 @@ class BillMapperTest {
         assertEquals(2, actual.getBillDTOList().size());
         assertEquals(billName, actual.getBillDTOList().get(0).getName());
         assertEquals(billName2, actual.getBillDTOList().get(1).getName());
+        assertFalse(actual.getBillDTOList().get(0).getInternal());
+        assertEquals("utilities", actual.getBillDTOList().get(0).getCategory());
+        assertTrue(actual.getBillDTOList().get(1).getInternal());
+        assertEquals("groceries", actual.getBillDTOList().get(1).getCategory());
     }
 }

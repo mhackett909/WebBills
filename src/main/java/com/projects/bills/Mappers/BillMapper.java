@@ -24,6 +24,8 @@ public class BillMapper {
         billDTO.setName(bill.getName());
         billDTO.setStatus(bill.getStatus());
         billDTO.setRecycle(bill.getRecycleDate() != null);
+        billDTO.setInternal(bill.getInternal());
+        billDTO.setCategory(bill.getCategory());
         return billDTO;
     }
 }

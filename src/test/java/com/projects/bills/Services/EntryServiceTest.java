@@ -54,6 +54,7 @@ class EntryServiceTest {
         LocalDate endDate = LocalDate.of(2024, 12, 31);
         Long invoiceNum = 123L;
         List<String> partyList = Arrays.asList("A", "B");
+        List<String> categoryList = Arrays.asList("Cat1", "Cat2");
         BigDecimal min = new BigDecimal("10.00");
         BigDecimal max = new BigDecimal("100.00");
         String flow = "IN";
@@ -76,14 +77,16 @@ class EntryServiceTest {
         EntryDTOList dtoList = new EntryDTOList(List.of(new EntryDTO()), 0L);
 
         when(userService.findByUsername(userName)).thenReturn(Optional.of(user));
-        when(entryMapper.mapToEntryFilters(userName, startDate, endDate, invoiceNum, partyList, min, max, flow, paid, archives)).thenReturn(filters);
+        when(entryMapper.mapToEntryFilters(userName, startDate, endDate, invoiceNum, partyList, categoryList,
+                min, max, flow, paid, archives)).thenReturn(filters);
         when(entryMapper.mapSortField(any())).thenReturn(sortField);
         when(statsHelper.getFilteredPredicate(any(), eq(filters), any())).thenReturn(null);
         when(entryRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(entryPage);
         when(entryMapper.mapToDTO(any(), anyBoolean())).thenReturn(new EntryDTO());
         when(entryMapper.mapEntriesToDTOList(any(), anyLong())).thenReturn(dtoList);
 
-        EntryDTOList result = entryService.getEntries(userName, startDate, endDate, invoiceNum, partyList, min, max, flow, paid, archives, null, null, sortField, sortOrder);
+        EntryDTOList result = entryService.getEntries(userName, startDate, endDate, invoiceNum, partyList, categoryList,
+                min, max, flow, paid, archives, null, null, sortField, sortOrder);
 
         assertEquals(dtoList, result);
     }
@@ -94,7 +97,8 @@ class EntryServiceTest {
         when(userService.findByUsername(userName)).thenReturn(Optional.empty());
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
-                entryService.getEntries(userName, null, null, null, null, null, null, null, null, null, null, null, null, null));
+                entryService.getEntries(userName, null, null, null, null, null,
+                        null, null, null, null, null, null, null, null, null));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
     }
 

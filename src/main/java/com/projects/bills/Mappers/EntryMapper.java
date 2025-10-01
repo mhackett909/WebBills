@@ -33,8 +33,10 @@ public class EntryMapper {
                 entry.getStatus(),
                 entry.getRecycleDate() != null,
                 entry.getServices(),
+                entry.getBill().getCategory(),
                 entry.getFlow(),
                 isArchived,
+                entry.getBill().getInternal(),
                 entry.getOverpaid()
         );
     }
@@ -71,6 +73,7 @@ public class EntryMapper {
                                           LocalDate endDate,
                                           Long invoiceNum,
                                           List<String> partyList,
+                                          List<String> categoryList,
                                           BigDecimal min,
                                           BigDecimal max,
                                           String flow,
@@ -78,7 +81,11 @@ public class EntryMapper {
                                           String archives) {
         String flowType = null;
         if (flow != null && !flow.isEmpty()) {
-            flowType = FlowType.fromType(flow).toString();
+            if (flow.equalsIgnoreCase(Strings.INTERNAL_FLOW)) {
+                flowType = Strings.INTERNAL_FLOW;
+            } else {
+                flowType = FlowType.fromType(flow).toString();
+            }
         }
 
         Boolean isPaid = null;
@@ -114,6 +121,7 @@ public class EntryMapper {
         filters.setEndDate(endDate);
         filters.setInvoiceNum(invoiceNum);
         filters.setPartyList(partyList);
+        filters.setCategoryList(categoryList);
         filters.setMin(min);
         filters.setMax(max);
         filters.setFlow(flowType);

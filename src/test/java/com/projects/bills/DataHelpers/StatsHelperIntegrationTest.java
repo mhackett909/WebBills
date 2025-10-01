@@ -200,6 +200,32 @@ class StatsHelperIntegrationTest {
     }
 
     @Test
+    void testGetFilteredPredicate_byCategoryList() {
+        // Set up: ensure at least two categories exist
+        Entry entry1 = entryRepository.findAll().get(0);
+        entry1.getBill().setCategory("catA");
+        billRepository.save(entry1.getBill());
+
+        Entry entry2 = entryRepository.findAll().get(1);
+        entry2.getBill().setCategory("catB");
+        billRepository.save(entry2.getBill());
+
+        EntryFilters filters = new EntryFilters();
+        filters.setUserName("alice");
+        filters.setCategoryList(List.of("catA"));
+
+        var cb = em.getCriteriaBuilder();
+        var cq = cb.createQuery(Entry.class);
+        var root = cq.from(Entry.class);
+
+        var predicate = statsHelper.getFilteredPredicate(cb, filters, root);
+        cq.select(root).where(predicate);
+
+        List<Entry> results = em.createQuery(cq).getResultList();
+        assertThat(results).allMatch(e -> "catA".equals(e.getBill().getCategory()));
+    }
+
+    @Test
     void testGetFilteredPredicate_byPaid() {
         EntryFilters filters = new EntryFilters();
         filters.setUserName("alice");
@@ -454,5 +480,196 @@ class StatsHelperIntegrationTest {
         assertThat(results.get(0)[2]).isIn("Bank Transfer", "Online Payment");
         assertThat(results.get(0)[3]).isInstanceOf(BigDecimal.class);
     }
-}
 
+    @Test
+    void testGetTop5Categories_returnsTopCategoriesBySum() {
+        // Clear all data
+        entryRepository.deleteAll();
+        billRepository.deleteAll();
+        userRepository.deleteAll();
+
+        // Create user
+        User user = new User();
+        user.setUsername("catuser");
+        user.setPassword("pw");
+        user.setCreatedAt(LocalDateTime.now());
+        user = userRepository.save(user);
+
+        // Create bills with different categories
+        Bill billA = new Bill();
+        billA.setName("A");
+        billA.setUser(user);
+        billA.setStatus(true);
+        billA.setInternal(false);
+        billA.setCategory("groceries");
+        billA = billRepository.save(billA);
+
+        Bill billB = new Bill();
+        billB.setName("B");
+        billB.setUser(user);
+        billB.setStatus(true);
+        billB.setInternal(false);
+        billB.setCategory("utilities");
+        billB = billRepository.save(billB);
+
+        Bill billC = new Bill();
+        billC.setName("C");
+        billC.setUser(user);
+        billC.setStatus(true);
+        billC.setInternal(false);
+        billC.setCategory("entertainment");
+        billC = billRepository.save(billC);
+
+        // Add entries and payments for each bill, with unique invoiceId
+        Entry entryA = new Entry();
+        entryA.setBill(billA);
+        entryA.setUser(user);
+        entryA.setAmount(BigDecimal.valueOf(100));
+        entryA.setDate(Date.valueOf(LocalDate.now()));
+        entryA.setFlow("OUTGOING");
+        entryA.setStatus(true);
+        entryA.setOverpaid(false);
+        entryA.setInvoiceId(1L);
+        entryA = entryRepository.save(entryA);
+
+        Payment paymentA = new Payment();
+        paymentA.setEntry(entryA);
+        paymentA.setDate(Date.valueOf(LocalDate.now()));
+        paymentA.setAmount(BigDecimal.valueOf(100));
+        paymentA.setType("CARD");
+        paymentA.setMedium("Online");
+        paymentA.setAutopay(false);
+        em.persist(paymentA);
+
+        Entry entryB = new Entry();
+        entryB.setBill(billB);
+        entryB.setUser(user);
+        entryB.setAmount(BigDecimal.valueOf(200));
+        entryB.setDate(Date.valueOf(LocalDate.now()));
+        entryB.setFlow("OUTGOING");
+        entryB.setStatus(true);
+        entryB.setOverpaid(false);
+        entryB.setInvoiceId(2L);
+        entryB = entryRepository.save(entryB);
+
+        Payment paymentB = new Payment();
+        paymentB.setEntry(entryB);
+        paymentB.setDate(Date.valueOf(LocalDate.now()));
+        paymentB.setAmount(BigDecimal.valueOf(200));
+        paymentB.setType("CARD");
+        paymentB.setMedium("Online");
+        paymentB.setAutopay(false);
+        em.persist(paymentB);
+
+        Entry entryC = new Entry();
+        entryC.setBill(billC);
+        entryC.setUser(user);
+        entryC.setAmount(BigDecimal.valueOf(50));
+        entryC.setDate(Date.valueOf(LocalDate.now()));
+        entryC.setFlow("OUTGOING");
+        entryC.setStatus(true);
+        entryC.setOverpaid(false);
+        entryC.setInvoiceId(3L);
+        entryC = entryRepository.save(entryC);
+
+        Payment paymentC = new Payment();
+        paymentC.setEntry(entryC);
+        paymentC.setDate(Date.valueOf(LocalDate.now()));
+        paymentC.setAmount(BigDecimal.valueOf(50));
+        paymentC.setType("CARD");
+        paymentC.setMedium("Online");
+        paymentC.setAutopay(false);
+        em.persist(paymentC);
+
+        em.flush();
+        em.clear();
+
+        EntryFilters filters = new EntryFilters();
+        filters.setUserName("catuser");
+        filters.setFlow("OUTGOING");
+
+        var cb = em.getCriteriaBuilder();
+        var cq = new StatsHelper().getTop5Categories(cb, filters);
+        List<Object[]> results = em.createQuery(cq).getResultList();
+
+        // Should be ordered by sum(amount) DESC: utilities (200), groceries (100), entertainment (50)
+        assertThat(results).hasSize(3);
+        assertThat(results.get(0)[0]).isEqualTo("utilities");
+        assertThat((BigDecimal) results.get(0)[2]).isEqualByComparingTo("200");
+        assertThat(results.get(1)[0]).isEqualTo("groceries");
+        assertThat((BigDecimal) results.get(1)[2]).isEqualByComparingTo("100");
+        assertThat(results.get(2)[0]).isEqualTo("entertainment");
+        assertThat((BigDecimal) results.get(2)[2]).isEqualByComparingTo("50");
+    }
+
+    @Test
+    void testGetTop5Categories_emptyResult() {
+        entryRepository.deleteAll();
+        billRepository.deleteAll();
+        userRepository.deleteAll();
+        User user = new User();
+        user.setUsername("emptyuser");
+        user.setPassword("pw");
+        user.setCreatedAt(LocalDateTime.now());
+        user = userRepository.save(user);
+        EntryFilters filters = new EntryFilters();
+        filters.setUserName("emptyuser");
+        var cb = em.getCriteriaBuilder();
+        var cq = new StatsHelper().getTop5Categories(cb, filters);
+        List<Object[]> results = em.createQuery(cq).getResultList();
+        assertThat(results).isEmpty();
+    }
+
+    @Test
+    void testGetTop5Categories_tiesAndLimit() {
+        // Only top 5 categories should be returned, ties included
+        entryRepository.deleteAll();
+        billRepository.deleteAll();
+        userRepository.deleteAll();
+        User user = new User();
+        user.setUsername("tieuser");
+        user.setPassword("pw");
+        user.setCreatedAt(LocalDateTime.now());
+        user = userRepository.save(user);
+        for (int i = 1; i <= 6; i++) {
+            Bill bill = new Bill();
+            bill.setName("Bill" + i);
+            bill.setUser(user);
+            bill.setStatus(true);
+            bill.setInternal(false);
+            bill.setCategory("cat" + i);
+            bill = billRepository.save(bill);
+            Entry entry = new Entry();
+            entry.setBill(bill);
+            entry.setUser(user);
+            entry.setAmount(BigDecimal.valueOf(100));
+            entry.setDate(Date.valueOf(LocalDate.now()));
+            entry.setFlow("OUTGOING");
+            entry.setStatus(true);
+            entry.setOverpaid(false);
+            entry.setInvoiceId((long) i); // Ensure unique invoiceId
+            entry = entryRepository.save(entry);
+            Payment payment = new Payment();
+            payment.setEntry(entry);
+            payment.setDate(Date.valueOf(LocalDate.now()));
+            payment.setAmount(BigDecimal.valueOf(100));
+            payment.setType("CARD");
+            payment.setMedium("Online");
+            payment.setAutopay(false);
+            em.persist(payment);
+        }
+        em.flush();
+        em.clear();
+        EntryFilters filters = new EntryFilters();
+        filters.setUserName("tieuser");
+        filters.setFlow("OUTGOING");
+        var cb = em.getCriteriaBuilder();
+        var cq = new StatsHelper().getTop5Categories(cb, filters);
+        List<Object[]> results = em.createQuery(cq).setMaxResults(5).getResultList();
+        assertThat(results).hasSize(5);
+        for (Object[] row : results) {
+            assertThat((BigDecimal) row[2]).isEqualByComparingTo("100");
+        }
+    }
+
+}

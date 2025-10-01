@@ -9,6 +9,7 @@ import com.projects.bills.Mappers.BillMapper;
 import com.projects.bills.Repositories.BillRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -57,55 +58,58 @@ class BillServiceTest {
     @Test
     void testGetBillDtoList_ActiveFilter() {
         String userName = "alice";
-        String filter = "active";
+        String status = "active";
         User user = new User();
         user.setUsername(userName);
         List<Bill> bills = List.of(new Bill());
         BillDTOList dtoList = new BillDTOList(List.of());
 
         when(userService.findByUsername(userName)).thenReturn(Optional.of(user));
-        when(billRepository.findAllByStatusAndUserAndRecycleDateIsNullOrderByNameAsc(true, user)).thenReturn(bills);
+        when(billRepository.findAll(any(Specification.class))).thenReturn(bills);
         when(billMapper.mapToDTOList(bills)).thenReturn(dtoList);
 
-        BillDTOList result = billService.getBillDtoList(filter, userName);
+        BillDTOList result = billService.getBillDtoList(status, userName);
 
         assertEquals(dtoList, result);
+        verify(billRepository).findAll(any(Specification.class));
     }
 
     @Test
     void testGetBillDtoList_InactiveFilter() {
         String userName = "alice";
-        String filter = "inactive";
+        String status = "inactive";
         User user = new User();
         user.setUsername(userName);
         List<Bill> bills = List.of(new Bill());
         BillDTOList dtoList = new BillDTOList(List.of());
 
         when(userService.findByUsername(userName)).thenReturn(Optional.of(user));
-        when(billRepository.findAllByStatusAndUserAndRecycleDateIsNullOrderByNameAsc(false, user)).thenReturn(bills);
+        when(billRepository.findAll(any(Specification.class))).thenReturn(bills);
         when(billMapper.mapToDTOList(bills)).thenReturn(dtoList);
 
-        BillDTOList result = billService.getBillDtoList(filter, userName);
+        BillDTOList result = billService.getBillDtoList(status, userName);
 
         assertEquals(dtoList, result);
+        verify(billRepository).findAll(any(Specification.class));
     }
 
     @Test
-    void testGetBillDtoList_DefaultFilter() {
+    void testGetBillDtoList_CategoryAndInternalFilter() {
         String userName = "alice";
-        String filter = "other";
+        String status = null;
         User user = new User();
         user.setUsername(userName);
         List<Bill> bills = List.of(new Bill());
         BillDTOList dtoList = new BillDTOList(List.of());
 
         when(userService.findByUsername(userName)).thenReturn(Optional.of(user));
-        when(billRepository.findAllByUserAndRecycleDateIsNullOrderByNameAsc(user)).thenReturn(bills);
+        when(billRepository.findAll(any(Specification.class))).thenReturn(bills);
         when(billMapper.mapToDTOList(bills)).thenReturn(dtoList);
 
-        BillDTOList result = billService.getBillDtoList(filter, userName);
+        BillDTOList result = billService.getBillDtoList(status, userName);
 
         assertEquals(dtoList, result);
+        verify(billRepository).findAll(any(Specification.class));
     }
 
     @Test
@@ -122,7 +126,7 @@ class BillServiceTest {
     void testGetBill_FoundAndAuthorized() {
         Long billId = 1L;
         String userName = "alice";
-        String filter = "any";
+        String bypass = "false";
         Bill bill = new Bill();
         User user = new User();
         user.setUsername(userName);
@@ -132,7 +136,7 @@ class BillServiceTest {
         when(billRepository.findById(billId)).thenReturn(Optional.of(bill));
         when(billMapper.mapToDTO(bill)).thenReturn(billDTO);
 
-        BillDTO result = billService.getBill(billId, filter, userName);
+        BillDTO result = billService.getBill(billId, bypass, userName);
 
         assertEquals(billDTO, result);
     }
@@ -140,9 +144,10 @@ class BillServiceTest {
     @Test
     void testGetBill_NotFound_Throws() {
         Long billId = 2L;
+        String bypass = "false";
         when(billRepository.findById(billId)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.getBill(billId, "any", "alice"));
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.getBill(billId, bypass, "alice"));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
     }
 
@@ -150,6 +155,7 @@ class BillServiceTest {
     void testGetBill_NotAuthorized_Throws() {
         Long billId = 3L;
         String userName = "alice";
+        String bypass = "false";
         Bill bill = new Bill();
         User user = new User();
         user.setUsername("bob");
@@ -157,7 +163,7 @@ class BillServiceTest {
 
         when(billRepository.findById(billId)).thenReturn(Optional.of(bill));
 
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.getBill(billId, "any", userName));
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.getBill(billId, bypass, userName));
         assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
     }
 
@@ -165,7 +171,7 @@ class BillServiceTest {
     void testGetBill_RecycledAndNoBypass_Throws() {
         Long billId = 4L;
         String userName = "alice";
-        String filter = "notbypass";
+        String bypass = "false";
         Bill bill = new Bill();
         User user = new User();
         user.setUsername(userName);
@@ -174,7 +180,7 @@ class BillServiceTest {
 
         when(billRepository.findById(billId)).thenReturn(Optional.of(bill));
 
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.getBill(billId, filter, userName));
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> billService.getBill(billId, bypass, userName));
         assertEquals(HttpStatus.FORBIDDEN, ex.getStatusCode());
     }
 
@@ -310,4 +316,3 @@ class BillServiceTest {
         assertEquals(Exceptions.NOT_AUTHORIZED_TO_ACCESS_BILL, ex.getReason());
     }
 }
-

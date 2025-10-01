@@ -23,7 +23,9 @@ public class EntryDTO {
 	private Boolean status = false; // true = paid, false = unpaid
 	private Boolean recycle = false;
 	private String services;
+	private String category;
 	private String flow;
 	private Boolean archived;
+	private Boolean internal = false;
 	private Boolean overpaid = false;
 }

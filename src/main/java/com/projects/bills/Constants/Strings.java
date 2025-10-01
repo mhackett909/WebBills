@@ -8,6 +8,7 @@ public class Strings {
     public static final String PAID_FALSE = "false";
     public static final String PAID_OVERPAID = "overpaid";
     public static final String PAID_PARTIAL = "partial";
+    public static final String INTERNAL_FLOW = "internal";
     public static final String SORT_FIELD_DATE = "date";
     public static final String SORT_FIELD_INVOICE_ID = "invoiceId";
     public static final String SORT_DIR_ASC = "asc";

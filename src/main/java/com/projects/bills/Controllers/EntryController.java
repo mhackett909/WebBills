@@ -40,6 +40,7 @@ public class EntryController {
 			@RequestParam(required = false) LocalDate endDate,
 			@RequestParam(required = false) Long invoiceNum,
 			@RequestParam(required = false) List<String> partyList,
+			@RequestParam(required = false) List<String> categoryList,
 			@RequestParam(required = false) BigDecimal min,
 			@RequestParam(required = false) BigDecimal max,
 			@RequestParam(required = false) String flow,
@@ -53,7 +54,7 @@ public class EntryController {
 
 		EntryDTOList entryDTOList = entryService.getEntries(
 				user.getUsername(), startDate, endDate, invoiceNum, partyList,
-				min, max, flow, paid, archives, pageNum, pageSize,
+				categoryList, min, max, flow, paid, archives, pageNum, pageSize,
 				sortField, sortOrder
 		);
 
@@ -105,6 +106,7 @@ public class EntryController {
 			@RequestParam(required = false) LocalDate endDate,
 			@RequestParam(required = false) Long invoiceNum,
 			@RequestParam(required = false) List<String> partyList,
+			@RequestParam(required = false) List<String> categoryList,
 			@RequestParam(required = false) BigDecimal min,
 			@RequestParam(required = false) BigDecimal max,
 			@RequestParam(required = false) String flow,
@@ -114,7 +116,8 @@ public class EntryController {
 	) {
 
 		StatsDTO statsDTO = statsService.getStats(
-				user.getUsername(), startDate, endDate, invoiceNum, partyList, min, max, flow, paid, archives
+				user.getUsername(), startDate, endDate, invoiceNum, partyList,
+				categoryList, min, max, flow, paid, archives
 		);
 
 		return new ResponseEntity<>(statsDTO, HttpStatus.OK);

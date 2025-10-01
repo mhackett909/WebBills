@@ -208,17 +208,21 @@ class EntryMapperTest {
         Boolean recycle2 = true;
         String services1 = "A";
         String services2 = "B";
+        String category1 = "Cat1";
+        String category2 = "Cat2";
         String flow1 = FlowType.OUTGOING.toString();
         String flow2 = FlowType.INCOMING.toString();
         Boolean archived1 = false;
         Boolean archived2 = true;
+        boolean internal1 = false;
+        boolean internal2 = true;
         Boolean overpaid1 = false;
         Boolean overpaid2 = true;
 
         EntryDTO dto1 = new EntryDTO(entryId1, billId, invoiceId1, name1, date1, amount1,
-                new BalanceDTO(), status1, recycle1, services1, flow1, archived1, overpaid1);
+                new BalanceDTO(), status1, recycle1, services1, category1, flow1, archived1, internal1, overpaid1);
         EntryDTO dto2 = new EntryDTO(entryId2, billId, invoiceId2, name2, date2, amount2,
-                new BalanceDTO(), status2, recycle2, services2, flow2, archived2, overpaid2);
+                new BalanceDTO(), status2, recycle2, services2, category2, flow2, archived2, internal2, overpaid2);
 
         ArrayList<EntryDTO> list = new ArrayList<>(Arrays.asList(dto1, dto2));
         Long total = 2L;
@@ -240,12 +244,14 @@ class EntryMapperTest {
         LocalDate endDate = LocalDate.of(2024, 12, 31);
         Long invoiceNum = 123L;
         List<String> partyList = Arrays.asList("A", "B");
+        List<String> categoryList = Arrays.asList("Cat1", "Cat2");
         BigDecimal min = new BigDecimal("10.00");
         BigDecimal max = new BigDecimal("100.00");
         String flow = "Income";
         String archives = "true";
 
-        EntryFilters filters = mapper.mapToEntryFilters(userName, startDate, endDate, invoiceNum, partyList, min, max, flow, paid, archives);
+        EntryFilters filters = mapper.mapToEntryFilters(userName, startDate, endDate, invoiceNum, partyList, categoryList,
+                min, max, flow, paid, archives);
 
         assertNotNull(filters);
         assertEquals(userName, filters.getUserName());
@@ -253,6 +259,7 @@ class EntryMapperTest {
         assertEquals(endDate, filters.getEndDate());
         assertEquals(invoiceNum, filters.getInvoiceNum());
         assertEquals(partyList, filters.getPartyList());
+        assertEquals(categoryList, filters.getCategoryList());
         assertEquals(min, filters.getMin());
         assertEquals(max, filters.getMax());
         assertEquals(FlowType.INCOMING.toString(), filters.getFlow());
@@ -278,5 +285,36 @@ class EntryMapperTest {
         assertEquals("bill.status", mapper.mapSortField("archived"));
         assertEquals("custom", mapper.mapSortField("custom"));
     }
-}
 
+    @Test
+    void testMapToDTO_InternalFlow() {
+        Long entryId = 10L;
+        Long billId = 20L;
+        String billName = "Internal Bill";
+        LocalDate date = LocalDate.of(2025, 9, 29);
+        BigDecimal amount = new BigDecimal("42.00");
+        String flow = com.projects.bills.Constants.Strings.INTERNAL_FLOW;
+        Boolean archived = false;
+
+        Bill bill = new Bill();
+        bill.setBillId(billId);
+        bill.setName(billName);
+
+        Entry entry = new Entry();
+        entry.setId(entryId);
+        entry.setBill(bill);
+        entry.setDate(Date.valueOf(date));
+        entry.setAmount(amount);
+        entry.setFlow(flow);
+
+        EntryDTO dto = mapper.mapToDTO(entry, archived);
+
+        assertNotNull(dto);
+        assertEquals(entryId, dto.getEntryId());
+        assertEquals(billId, dto.getBillId());
+        assertEquals(billName, dto.getName());
+        assertEquals(date, dto.getDate());
+        assertEquals(amount, dto.getAmount());
+        assertEquals(flow, dto.getFlow());
+    }
+}
