@@ -198,6 +198,7 @@ public class StatsHelper {
         if (flowType != null && !flowType.isEmpty()) {
             if (!flowType.equalsIgnoreCase(Strings.INTERNAL_FLOW)) {
                 predicate = cb.and(predicate, cb.equal(entryRoot.get("flow"), flowType));
+                predicate = cb.and(predicate, cb.equal(entryRoot.get("bill").get("internal"), false)); // Exclude internal bills
             } else {
                 predicate = cb.and(predicate, cb.equal(entryRoot.get("bill").get("internal"), true));
             }
