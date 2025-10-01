@@ -50,6 +50,7 @@ public class StatsService {
                              LocalDate endDate,
                              Long invoiceNum,
                              List<String> partyList,
+                             List<String> categoryList,
                              BigDecimal min,
                              BigDecimal max,
                              String flow,
@@ -58,7 +59,7 @@ public class StatsService {
 
         EntryFilters filters = entryMapper.mapToEntryFilters(
                 userName, startDate, endDate, invoiceNum, partyList,
-                min, max, flow, paid, archives
+                categoryList, min, max, flow, paid, archives
         );
 
         if (filters.getInvoiceNum() != null) {

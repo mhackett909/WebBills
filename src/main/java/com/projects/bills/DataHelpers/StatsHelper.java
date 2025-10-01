@@ -233,6 +233,11 @@ public class StatsHelper {
             predicate = cb.and(predicate, entryRoot.get("bill").get("name").in(partyList));
         }
 
+        List<String> categoryList = filters.getCategoryList();
+        if (categoryList != null && !categoryList.isEmpty()) {
+            predicate = cb.and(predicate, entryRoot.get("bill").get("category").in(categoryList));
+        }
+
         Boolean paid = filters.getPaid();
         if (paid != null) {
             predicate = cb.and(predicate, cb.equal(entryRoot.get("status"), paid));

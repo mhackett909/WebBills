@@ -60,6 +60,7 @@ public class EntryService {
 								   LocalDate endDate,
 								   Long invoiceNum,
 								   List<String> partyList,
+								   List<String> categoryList,
 								   BigDecimal min,
 								   BigDecimal max,
 								   String flow,
@@ -79,7 +80,7 @@ public class EntryService {
 
 		EntryFilters filters = entryMapper.mapToEntryFilters(
 				userName, startDate, endDate, invoiceNum, partyList,
-				min, max, flow, paid, archives
+				categoryList, min, max, flow, paid, archives
 		);
 
 		logger.debug("Fetching entries with filters: {}", filters);

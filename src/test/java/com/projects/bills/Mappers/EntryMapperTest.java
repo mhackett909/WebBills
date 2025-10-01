@@ -244,12 +244,14 @@ class EntryMapperTest {
         LocalDate endDate = LocalDate.of(2024, 12, 31);
         Long invoiceNum = 123L;
         List<String> partyList = Arrays.asList("A", "B");
+        List<String> categoryList = Arrays.asList("Cat1", "Cat2");
         BigDecimal min = new BigDecimal("10.00");
         BigDecimal max = new BigDecimal("100.00");
         String flow = "Income";
         String archives = "true";
 
-        EntryFilters filters = mapper.mapToEntryFilters(userName, startDate, endDate, invoiceNum, partyList, min, max, flow, paid, archives);
+        EntryFilters filters = mapper.mapToEntryFilters(userName, startDate, endDate, invoiceNum, partyList, categoryList,
+                min, max, flow, paid, archives);
 
         assertNotNull(filters);
         assertEquals(userName, filters.getUserName());
@@ -257,6 +259,7 @@ class EntryMapperTest {
         assertEquals(endDate, filters.getEndDate());
         assertEquals(invoiceNum, filters.getInvoiceNum());
         assertEquals(partyList, filters.getPartyList());
+        assertEquals(categoryList, filters.getCategoryList());
         assertEquals(min, filters.getMin());
         assertEquals(max, filters.getMax());
         assertEquals(FlowType.INCOMING.toString(), filters.getFlow());

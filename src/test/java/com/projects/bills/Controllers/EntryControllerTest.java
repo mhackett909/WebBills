@@ -48,7 +48,8 @@ class EntryControllerTest {
     @WithMockUser(username = "alice")
     void getEntries_success() throws Exception {
         EntryDTOList entryDTOList = new EntryDTOList();
-        Mockito.when(entryService.getEntries(anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        Mockito.when(entryService.getEntries(anyString(), any(), any(), any(), any(), any(),
+                        any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(entryDTOList);
 
         mockMvc.perform(get("/api/v1/entries"))
@@ -173,7 +174,7 @@ class EntryControllerTest {
     @WithMockUser(username = "alice")
     void getStats_success() throws Exception {
         StatsDTO statsDTO = new StatsDTO();
-        Mockito.when(statsService.getStats(anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        Mockito.when(statsService.getStats(anyString(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(statsDTO);
 
         mockMvc.perform(get("/api/v1/entries/stats"))

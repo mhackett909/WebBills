@@ -73,6 +73,7 @@ public class EntryMapper {
                                           LocalDate endDate,
                                           Long invoiceNum,
                                           List<String> partyList,
+                                          List<String> categoryList,
                                           BigDecimal min,
                                           BigDecimal max,
                                           String flow,
@@ -120,6 +121,7 @@ public class EntryMapper {
         filters.setEndDate(endDate);
         filters.setInvoiceNum(invoiceNum);
         filters.setPartyList(partyList);
+        filters.setCategoryList(categoryList);
         filters.setMin(min);
         filters.setMax(max);
         filters.setFlow(flowType);

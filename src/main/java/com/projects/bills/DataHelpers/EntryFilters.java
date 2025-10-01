@@ -19,6 +19,7 @@ public class EntryFilters {
     private LocalDate endDate;
     private Long invoiceNum;
     private List<String> partyList;
+    private List<String> categoryList;
     private BigDecimal min;
     private BigDecimal max;
     private String flow;

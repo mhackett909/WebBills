@@ -57,14 +57,14 @@ class StatsServiceTest {
 
     @Test
     void testGetStats_UserNotFound_Throws() {
-        when(entryMapper.mapToEntryFilters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(entryMapper.mapToEntryFilters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(new EntryFilters() {{
                     setInvoiceNum(1L);
                 }});
         when(userService.findByUsername(anyString())).thenReturn(Optional.empty());
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
-                statsService.getStats("alice", null, null, 1L, null, null, null, null, null, null));
+                statsService.getStats("alice", null, null, 1L, null, null, null, null, null, null, null));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         assertEquals(String.format(Exceptions.USER_NOT_FOUND, "alice"), ex.getReason());
     }
@@ -73,7 +73,7 @@ class StatsServiceTest {
     void testGetStats_EntryNotFound_Throws() {
         EntryFilters filters = new EntryFilters();
         filters.setInvoiceNum(2L);
-        when(entryMapper.mapToEntryFilters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+        when(entryMapper.mapToEntryFilters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(filters);
         User user = new User();
         user.setUsername("alice");
@@ -81,7 +81,7 @@ class StatsServiceTest {
         when(entryRepository.findByInvoiceIdAndUserAndRecycleDateIsNull(anyLong(), any())).thenReturn(null);
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class, () ->
-                statsService.getStats("alice", null, null, 2L, null, null, null, null, null, null));
+                statsService.getStats("alice", null, null, 2L, null, null, null, null, null, null, null));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         assertEquals(String.format(Exceptions.ENTRY_NOT_FOUND, 2L), ex.getReason());
     }
@@ -97,7 +97,7 @@ class StatsServiceTest {
         EntryFilters filters = new EntryFilters();
         filters.setInvoiceNum(2L);
 
-        when(entryMapper.mapToEntryFilters(any(), any(), any(), anyLong(), any(), any(), any(), any(), any(), any()))
+        when(entryMapper.mapToEntryFilters(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(filters);
         when(userService.findByUsername(any())).thenReturn(Optional.of(user));
         when(entryRepository.findByInvoiceIdAndUserAndRecycleDateIsNull(anyLong(), any())).thenReturn(entry);
@@ -117,9 +117,11 @@ class StatsServiceTest {
         StatsDTO statsDTO = new StatsDTO();
         when(statsMapper.buildStatsDTO(any())).thenReturn(statsDTO);
 
-        StatsDTO result = statsService.getStats("alice", null, null, 2L, null, null, null, null, null, null);
+        StatsDTO result = statsService.getStats("alice", null, null, 2L, null, null, null, null, null, null, null);
         assertNotNull(result);
         assertSame(statsDTO, result);
         verify(statsHelper, times(2)).getTop5Categories(cb, filters);
     }
+
+    // Add this for any additional tests that use entryMapper.mapToEntryFilters
 }

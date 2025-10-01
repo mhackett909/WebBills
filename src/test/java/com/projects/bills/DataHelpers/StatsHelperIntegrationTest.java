@@ -200,6 +200,32 @@ class StatsHelperIntegrationTest {
     }
 
     @Test
+    void testGetFilteredPredicate_byCategoryList() {
+        // Set up: ensure at least two categories exist
+        Entry entry1 = entryRepository.findAll().get(0);
+        entry1.getBill().setCategory("catA");
+        billRepository.save(entry1.getBill());
+
+        Entry entry2 = entryRepository.findAll().get(1);
+        entry2.getBill().setCategory("catB");
+        billRepository.save(entry2.getBill());
+
+        EntryFilters filters = new EntryFilters();
+        filters.setUserName("alice");
+        filters.setCategoryList(List.of("catA"));
+
+        var cb = em.getCriteriaBuilder();
+        var cq = cb.createQuery(Entry.class);
+        var root = cq.from(Entry.class);
+
+        var predicate = statsHelper.getFilteredPredicate(cb, filters, root);
+        cq.select(root).where(predicate);
+
+        List<Entry> results = em.createQuery(cq).getResultList();
+        assertThat(results).allMatch(e -> "catA".equals(e.getBill().getCategory()));
+    }
+
+    @Test
     void testGetFilteredPredicate_byPaid() {
         EntryFilters filters = new EntryFilters();
         filters.setUserName("alice");
