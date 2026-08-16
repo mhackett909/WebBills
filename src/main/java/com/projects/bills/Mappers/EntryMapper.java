@@ -153,6 +153,8 @@ public class EntryMapper {
             case "entryId" -> "id";
             case "description" -> "services";
             case "archived" -> "bill.status";
+            case "internal" -> "bill.internal";
+            case "category" -> "bill.category";
             default -> sortField;
         };
     }
